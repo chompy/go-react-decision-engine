@@ -1,0 +1,111 @@
+.node .object form {
+    max-height: 0;
+    transition: max-height 0.26s linear;
+    overflow: hidden;
+    .build-field {
+        margin-top: 15px; 
+    }
+    input[type=text], textarea {
+        width: 99%;
+    }
+    input[type=checkbox] {
+        margin: 0;
+    }
+    textarea {
+        height: 100px;
+    }
+    label {
+        display: block;
+        font-weight: bold;
+        font-size: 14px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    .quill {
+        background: #fff;
+        .ql-editor {
+            min-height: 200px;
+        }
+        .ql-ibexaembed {
+            background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB8AAAAgAgMAAACX7EvSAAAADFBMVEUeHh51dXXHx8f///9JD1tqAAAAaklEQVQY04XPPQ6AIAwG0M84OHAIvAGLq8HEC3ojruBRHGAxQNW0ZXDQTi/pP4gj4wsHYBUDg3KnGINgcoLZCPzKKHZnVIBBm+KpA6VTQEcQRCcohgH0jEXRUhT9qz1VGdhW3MfLdsX/7xd5tNnaL2g0/QAAAABJRU5ErkJggg==");
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: 20px;
+        }
+        input[type="text"] {
+            width: auto;
+        }
+    }
+    .rule-editor {
+        select {
+            width: 50%;
+            margin-bottom: 10px;
+        }
+        .ace_editor {
+            width: auto !important;
+            height: 200px !important;
+            border: 1px solid #acacac;
+        }
+        details summary {
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .rule-tester {
+            background: #e8e8e8;
+            border: 1px solid #acacac;
+            border-top: none;
+            button {
+                border-radius: 0;
+                border: 1px solid #acacac;
+                border-top: none;
+            }
+        }
+        .rule-form-field {
+            margin-bottom: 10px;
+            .typeahead-token {
+                margin-bottom: 5px;
+            }
+            .typeahead-token-close {
+                text-decoration: none;
+                margin-left: 5px;
+                display: inline-block;
+            }
+        }
+    }
+
+    .typeahead {
+        display: inline; 
+        .hover {
+            border-style: dotted;
+            border-width: 1px;
+            background-color: LightGray;
+            margin: -1px;
+        }
+        .typeahead-selector {
+            margin: 0;
+            padding: 4px 0px 4px 0px;
+            position: absolute;
+            border-style: solid;
+            border-width: 1px 2px 2px 1px;
+            background-color: white;
+            z-index: 9;
+        }
+        .typeahead-option {
+            display: block;
+            padding: 4px 6px;
+        }
+        .typeahead-token {
+            font-size: 14px;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input, .typeahead-tokenizer {
+            display: inline;
+        }
+        .typeahead-token-close {
+            text-decoration: none;
+            margin-left: 8px;
+        }
+    }
+}

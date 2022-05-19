@@ -1,0 +1,17 @@
+.node {
+    &.ds-up {
+        border-top: 50px solid #646464;
+    }
+    &.ds-down {
+        border-bottom: 50px solid #646464;
+    }
+    &.ds-child {
+        &::after {
+            content: "";
+            display: block;
+            height: 50px;
+            margin-left: 40px;
+            background: #646464;
+        }
+    }
+}

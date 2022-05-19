@@ -1,0 +1,23 @@
+.node .options {
+
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    vertical-align: middle;
+
+    .pure-button-group {
+        display: inline-block;
+    }
+    .pure-menu {
+        display: inline-block;
+        vertical-align: -8px;
+        margin-left: 2px;
+        .pure-menu-children {
+            left: auto;
+            right: 0;
+            top: 31px;
+        }
+    }
+
+}
+

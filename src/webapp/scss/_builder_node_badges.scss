@@ -1,0 +1,74 @@
+.node {
+
+    .name::before {
+        display: inline-block;
+        color: #fff;
+        background-color: #000;
+        border-radius: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        line-height: 36px;
+        border: 1px solid #fff;
+        margin-right: 8px;
+        vertical-align: middle;
+        font-weight: bold;
+        font-size: 18px;
+        font-family: sans-serif;
+        text-align: center;
+        content: "?";
+    }
+
+    &.root > .object > .name::before {
+        content: "T";
+        background-color: $col-root;
+    }
+    &.group > .object > .name::before {
+        content: "Gr";
+        background-color: $col-group;
+    }
+    &.question > .object > .name::before {
+        content: "Q";
+        background-color: $col-question;
+    }
+    &.answer > .object > .name::before {
+        content: "A";
+        background-color: $col-answer;
+    }
+    &.rule > .object > .name::before {
+        content: "Ru";
+        background-color: $col-rule;
+    }
+    &.matrix > .object > .name::before {
+        content: "Ma";
+        background-color: $col-matrix;
+    }
+    &.show-more > .name::before {
+        display: none;
+        background-color: $col-show-more;
+    }
+
+    &.question > .object > .name::after, &.rule > .object > .name::after {
+        display: inline-block;
+        margin-left: 5px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+    &.question.text > .object > .name::after {
+        content: "[Text Input]";
+    }
+    &.question.choice > .object > .name::after {
+        content: "[Multiple Choice]";
+    }
+    &.question.dropdown > .object > .name::after {
+        content: "[Dropdown]";
+    }
+    &.question.upload > .object > .name::after {
+        content: "[File Upload]";
+    }
+    &.rule > .object > .name::after {
+        content: "[Visibility]";
+    }
+    &.rule.validation > .object > .name::after {
+        content: "[Validation]";
+    }
+}

@@ -1,0 +1,16 @@
+.decision-engine {
+    .page {
+        h1 {
+            margin: 20px;
+        }
+        section {
+            padding: 20px;
+            .section-name {
+                border-bottom: 1px solid $page-section-divide;
+            }
+        }
+        .options {
+            margin-bottom: 15px;
+        }
+    }
+}

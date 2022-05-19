@@ -1,0 +1,82 @@
+
+.decision-engine-builder {
+
+    @import "_builder_node_badges";
+    @import "_builder_node_drop";
+    @import "_builder_node_form";
+    @import "_builder_node_options";
+
+    position: relative;
+    border: 1px solid $page-section-divide;
+
+    .builder.top {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+
+        ul, li {
+            list-style-type: none;
+        }
+
+        .node {
+            position: relative;
+            .object {
+                position: relative;
+                padding: 16px;
+                .name {
+                    color: #fff;
+                    text-decoration: none;
+                }
+            }
+            .object > form.active {
+                max-height: 999px;
+            }
+            &.root {
+                background-color: $col-root;
+                & > .object {
+                    .opt {
+                        display: none;
+                    }
+                    .opt-add {
+                        display: block;
+                    }
+                }
+            }
+            &.group {
+                background-color: $col-group;
+            }
+            &.question {
+                background-color: $col-question;
+            }
+            &.answer {
+                background-color: $col-answer;
+                .name {
+                    color: #000;
+                }
+            }
+            &.rule {
+                background-color: $col-rule;
+                .name {
+                    color: #000;
+                }
+                & > .object {
+                    .opt-add {
+                        display: none;
+                    }
+                }
+            }
+            &.matrix {
+                background-color: $col-matrix;
+            }
+            &.show-more {
+                background-color: $col-show-more;
+                padding: 8px 20px;
+                a {
+                    color: #000;
+                }
+            }
+
+        }
+    }
+}

@@ -1,7 +1,5 @@
 import React from 'react';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileCirclePlus, faBackward } from '@fortawesome/free-solid-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './page_base';
 import TeamPageComponent from './page_team';
 import BuilderComponent from './builder';
@@ -47,9 +45,13 @@ export default class BuilderPageComponent extends BasePageComponent {
      render() {
         return <div className='page builder'>
 
+            <div className='options top'>
+                {this.renderPageButton('Back', TeamPageComponent.getName(), {}, faBackward)}                
+            </div>
+
             <section>
+                
                 <h2 className='section-name'>Form Builder</h2>
-                {this.renderPageButton('Back', TeamPageComponent.getName(), {}, faBackward)}
 
                 <form className='pure-form pure-form-stacked'>
                     {this.renderFormField({

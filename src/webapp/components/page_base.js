@@ -83,6 +83,7 @@ export default class BasePageComponent extends React.Component {
                 key={'pbtn-' + label + '-' + page + paramStr}
                 className='pure-button'
                 onClick={this.onPageButton} data-page={page}
+                title={label}
                 data-params={paramStr}
             >
                 {renderIcon}{label}

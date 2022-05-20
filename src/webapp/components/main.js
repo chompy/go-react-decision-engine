@@ -2,6 +2,7 @@ import React from 'react';
 import Events from '../events';
 import BasePageComponent from './page_base';
 import BuilderPageComponent from './page_builder';
+import FormManagePageComponent from './page_form_manage';
 import TeamPageComponent from './page_team';
 
 export default class DecisionEngineMainComponent extends React.Component {
@@ -11,6 +12,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      */
     static pageComponents = [
         TeamPageComponent,
+        FormManagePageComponent,
         BuilderPageComponent
     ];
 

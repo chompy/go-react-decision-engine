@@ -521,7 +521,7 @@ export default class BuilderNodeComponent extends React.Component {
                     <div className='pure-menu custom-restricted-width'>
                         <ul className='pure-menu-list'>
                             <li className='pure-menu-item pure-menu-has-children pure-menu-allow-hover'>
-                                <a href="#" class="pure-menu-link pure-button">
+                                <a href="#" className="pure-menu-link pure-button">
                                     <FontAwesomeIcon icon={faPlus} />
                                 </a>
                                 <ul className='pure-menu-children'>{addOptions}</ul>

@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './page_base';
 import BuilderPageComponent from './page_builder';
+import FormManagePageComponent from './page_form_manage';
 
 export default class TeamPageComponent extends BasePageComponent {
 
@@ -42,7 +43,7 @@ export default class TeamPageComponent extends BasePageComponent {
             <section>
                 <h2 className='section-name'>Forms</h2>
                 <div className='options pure-button-group' role='group'>
-                    {this.renderPageButton('New Form', BuilderPageComponent.getName(), {mode: 'new'}, faFileCirclePlus)}
+                    {this.renderPageButton('New Form', FormManagePageComponent.getName(), {mode: 'new'}, faFileCirclePlus)}
                 </div>
                 <table className='pure-table'>
                     <thead>
@@ -76,7 +77,7 @@ export default class TeamPageComponent extends BasePageComponent {
                         </tr>
                     </tbody>
                 </table>
-                            </section>
+            </section>
         </div>;
     }
 

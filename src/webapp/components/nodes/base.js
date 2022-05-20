@@ -1,8 +1,8 @@
 import React from 'react';
-import shortcode from '../lib/shortcode-parser';
-import Events from '../events';
-import NodeRule, { RULE_TYPE_VISIBILITY } from '../objects/rule';
-import BaseNode from '../objects/base';
+import shortcode from '../../lib/shortcode-parser';
+import Events from '../../events';
+import NodeRule, { RULE_TYPE_VISIBILITY } from '../../objects/rule';
+import BaseNode from '../../objects/base';
 
 export default class BaseNodeComponent extends React.Component {
 

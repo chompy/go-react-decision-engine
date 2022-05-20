@@ -1,5 +1,4 @@
 import BaseNode, { KEY_DATA } from './base.js';
-import DecisionQuestionComponent from '../components/node_question.js';
 
 export const DECISION_FORM_TYPE_TEXT = 'text';
 export const DECISION_FORM_TYPE_CHOICE = 'choice';

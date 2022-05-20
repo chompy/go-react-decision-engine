@@ -1,6 +1,6 @@
 import React from 'react';
-import Events from '../events';
-import BuilderFormField from './builder_form_field';
+import Events from '../../events';
+import BuilderFormField from './form_field';
 
 export default class BuilderFormComponent extends React.Component {
 

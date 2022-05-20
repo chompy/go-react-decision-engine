@@ -1,11 +1,11 @@
 import React from 'react';
-import Events from '../events';
+import Events from '../../events';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
-import RuleEditorComponent, { RULE_MODE_BUILDER } from '../components/rule_editor';
-import TypeaheadComponent from './typeahead';
-import RuleNode from '../objects/rule';
+import RuleEditorComponent, { RULE_MODE_BUILDER } from '../rule_editor';
+import TypeaheadComponent from '../typeahead';
+import RuleNode from '../../objects/rule';
 
 const UPDATE_TIMEOUT = 250; 
 export default class BuilderFormFieldComponent extends React.Component {

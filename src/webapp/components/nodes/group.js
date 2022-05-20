@@ -1,6 +1,6 @@
 import React from 'react';
-import Renderer from '../renderer.js';
-import BaseNodeComponent from './node_base.js';
+import Renderer from '../../renderer';
+import BaseNodeComponent from './base';
 
 export default class GroupNodeComponent extends BaseNodeComponent {
 

@@ -5,11 +5,11 @@ import 'ace-builds/src-noconflict/theme-github';
 import md5 from 'blueimp-md5';
 import Events from '../events';
 import RuleEngine from '../rule_engine';
-import RuleTemplateSelectComponent from './rule_editor_template_select';
-import RuleTesterComponent from './rule_editor_tester';
+import RuleTemplateSelectComponent from './rule_editor/template_select';
+import RuleTesterComponent from './rule_editor/tester';
 import DecisionUserData from '../user_data';
 import RuleFormField from '../rule_field';
-import RuleFormFieldComponent from './rule_editor_form_field';
+import RuleFormFieldComponent from './rule_editor/form_field';
 import RuleNode from '../objects/rule';
 
 export const RULE_MODE_NONE = '';

@@ -1,14 +1,14 @@
 import React from 'react';
-import Events from '../events';
-import AnswerNode from '../objects/answer';
-import BaseNode from '../objects/base';
-import GroupNode from '../objects/group';
-import MatrixNode from '../objects/matrix';
-import QuestionNode, { DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_UPLOAD } from '../objects/question';
-import RootNode from '../objects/root';
-import RuleNode, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../objects/rule';
-import BuilderFormComponent from './builder_form';
-import BuilderNodeTitleComponent from './builder_node_title';
+import Events from '../../events';
+import AnswerNode from '../../objects/answer';
+import BaseNode from '../../objects/base';
+import GroupNode from '../../objects/group';
+import MatrixNode from '../../objects/matrix';
+import QuestionNode, { DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_UPLOAD } from '../../objects/question';
+import RootNode from '../../objects/root';
+import RuleNode, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../../objects/rule';
+import BuilderFormComponent from './form';
+import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
 

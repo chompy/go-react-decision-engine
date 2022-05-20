@@ -1,12 +1,14 @@
 import React from 'react';
-import DecisionQuestion, { DECISION_FORM_TYPE_TEXT } from '../../core/decision_objects/question';
-import DecisionRoot from '../../core/decision_objects/root';
-import DecisionRule, { RULE_TYPE_VISIBILITY } from '../../core/decision_objects/rule';
-import DecisionUserData from '../../core/decision_user_data';
-import RuleEngine from '../../core/rule_engine';
+
+import DecisionUserData from '../../user_data';
+import RuleEngine from '../../rule_engine';
+import RootNode from '../../objects/root';
+import QuestionNode, { DECISION_FORM_TYPE_TEXT } from '../../objects/question';
+import RuleNode, { RULE_TYPE_VISIBILITY } from '../../objects/rule';
 
 const TEST_QUESTION_UID = 'TEST_QUESTION';
 const TEST_RULE_UID = 'TEST_RULE';
+
 export default class RuleTesterComponent extends React.Component {
 
     constructor(props) {
@@ -39,17 +41,17 @@ export default class RuleTesterComponent extends React.Component {
     }
 
     /**
-     * Get test decision object.
-     * @returns {DecisionRoot}
+     * Get test decision node.
+     * @returns {RootNode}
      */
-    getTestObject() {
-        let root = new DecisionRoot;
-        root.uid = DecisionRoot.generateUid();
-        let question = new DecisionQuestion;
+    getTestNode() {
+        let root = new RootNode;
+        root.uid = RootNode.generateUid();
+        let question = new QuestionNode;
         question.uid = TEST_QUESTION_UID;
         question.type = DECISION_FORM_TYPE_TEXT;
         root.addChild(question);
-        let rule = new DecisionRule;
+        let rule = new RuleNode;
         rule.uid = TEST_RULE_UID;
         rule.type = RULE_TYPE_VISIBILITY;
         if (this.fetchScript) {
@@ -72,8 +74,8 @@ export default class RuleTesterComponent extends React.Component {
             this.displayResults('Rule script fetch callback not set.');
             return;
         }
-        let object = this.getTestObject();
-        this.ruleEngine.setRootObject(object);
+        let node = this.getTestNode();
+        this.ruleEngine.setRootNode(node);
         let userData = new DecisionUserData;
         for (let i in answers) {
             userData.addAnswer(this.ruleEngine.root.getChild(TEST_QUESTION_UID), answers[i]);
@@ -82,7 +84,7 @@ export default class RuleTesterComponent extends React.Component {
         console.log('RULE EVAL', this.ruleEngine.root, this.ruleEngine.root.getChild(TEST_RULE_UID));
         let res = null;
         try {
-            this.ruleEngine.setRuleObject(this.ruleEngine.root.getChild(TEST_RULE_UID));
+            this.ruleEngine.setRuleNode(this.ruleEngine.root.getChild(TEST_RULE_UID));
             res = this.ruleEngine.evaluate();
         } catch (e) {
             this.displayResults(e);

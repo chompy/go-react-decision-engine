@@ -1,7 +1,7 @@
 import React from 'react';
-import Events from '../../core/events';
+import Events from '../../events';
 
-export default class RuleTemplateSelectComponent extends React.Component {
+export default class RuleEditorTemplateSelectComponent extends React.Component {
 
     constructor(props) {
         super(props);

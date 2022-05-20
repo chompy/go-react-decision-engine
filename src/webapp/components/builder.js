@@ -3,7 +3,7 @@ import Events from '../events';
 import JsonConverter from '../converters/json';
 import BaseNode from '../objects/base';
 import RootNode, {DECISION_TYPE_DOCUMENT} from '../objects/root';
-import BuilderNodeComponent from './builder_node';
+import BuilderNodeComponent from './builder/node';
 
 export default class BuilderComponent extends React.Component {
 

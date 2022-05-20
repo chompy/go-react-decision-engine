@@ -1,12 +1,12 @@
 import React from 'react';
 import md5 from 'blueimp-md5';
-import Renderer from '../renderer.js';
-import Events from '../events';
-import {DECISION_TYPE_FORM, DECISION_TYPE_DOCUMENT} from '../objects/root.js';
-//import {DECISION_STATE_NO_CHANGE, DECISION_STATE_NEXT, DECISION_STATE_PREVIOUS} from '../decision_manager.js';
-import BaseNodeComponent from './node_base';
-import GroupNode from '../objects/group.js';
-import SectionNavigationComponent from './section_navigation.js';
+import Renderer from '../../renderer';
+import Events from '../../events';
+import {DECISION_TYPE_FORM, DECISION_TYPE_DOCUMENT} from '../../objects/root';
+//import {DECISION_STATE_NO_CHANGE, DECISION_STATE_NEXT, DECISION_STATE_PREVIOUS} from '../decision_manager';
+import BaseNodeComponent from './base';
+import GroupNode from '../../objects/group';
+import SectionNavigationComponent from '../section_navigation';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 

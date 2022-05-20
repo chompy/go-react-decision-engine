@@ -1,5 +1,5 @@
 import BaseNode, { KEY_DATA } from './base';
-import MatrixNodeComponent from '../components/node_matrix';
+import MatrixNodeComponent from '../components/nodes/matrix';
 
 export default class MatrixNode extends BaseNode {
 

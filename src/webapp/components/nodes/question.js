@@ -1,12 +1,12 @@
 import React from 'react';
-import DecisionUserData from '../user_data.js';
-import Events from '../events'
-import AnswerNode from '../objects/answer.js';
-import BaseNode from '../objects/base.js';
-import RuleNode, { RULE_TYPE_VALIDATION } from '../objects/rule.js';
-import QuestionNode, {DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_UPLOAD} from '../objects/question.js';
-import QuestionFileComponent from './question_file.js';
-import BaseNodeComponent from './node_base.js';
+import DecisionUserData from '../../user_data';
+import Events from '../../events'
+import AnswerNode from '../../objects/answer';
+import BaseNode from '../../objects/base';
+import RuleNode, { RULE_TYPE_VALIDATION } from '../../objects/rule';
+import QuestionNode, {DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_UPLOAD} from '../../objects/question';
+import QuestionFileComponent from '../question_file';
+import BaseNodeComponent from './base';
 
 export default class QuestionNodeComponent extends BaseNodeComponent {
 

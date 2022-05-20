@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileCirclePlus } from '@fortawesome/free-solid-svg-icons'
-import BasePageComponent from './page_base';
-import BuilderPageComponent from './page_builder';
-import FormManagePageComponent from './page_form_manage';
+import { faFileCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
+import BasePageComponent from './base';
+import FormManagePageComponent from './form_manage';
 
 export default class TeamPageComponent extends BasePageComponent {
 
@@ -43,7 +41,7 @@ export default class TeamPageComponent extends BasePageComponent {
             <section>
                 <h2 className='section-name'>Forms</h2>
                 <div className='options pure-button-group' role='group'>
-                    {this.renderPageButton('New Form', FormManagePageComponent.getName(), {mode: 'new'}, faFileCirclePlus)}
+                    {this.renderPageButton('New Form', FormManagePageComponent.getName(), {}, faFileCirclePlus)}
                 </div>
                 <table className='pure-table'>
                     <thead>
@@ -60,20 +58,16 @@ export default class TeamPageComponent extends BasePageComponent {
                             <td>Sample Alpha</td>
                             <td>1/1/2020 5:00 PM</td>
                             <td>
-
+                                {this.renderPageButton('Go', FormManagePageComponent.getName(), {id: 1}, faForward)}
                             </td>
                         </tr>
                         <tr>
                             <td>2</td>
-                            <td>Toyota</td>
-                            <td>Camry</td>
-                            <td>2012</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Hyundai</td>
-                            <td>Elantra</td>
-                            <td>2010</td>
+                            <td>Form 'abc123efg'</td>
+                            <td>1/1/2020 5:00 PM</td>
+                            <td>
+                                {this.renderPageButton('Go', FormManagePageComponent.getName(), {id: 2}, faForward)}
+                            </td>
                         </tr>
                     </tbody>
                 </table>

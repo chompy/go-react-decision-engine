@@ -1,5 +1,5 @@
 import BaseNode, { KEY_DATA } from './base';
-import GroupNodeComponent from '../components/node_group';
+import GroupNodeComponent from '../components/nodes/group';
 
 export default class GroupNode extends BaseNode {
 

@@ -1,5 +1,5 @@
-import DecisionRootComponent from '../components/node_root.js';
-import BaseNode, { KEY_DATA } from './base.js';
+import DecisionRootComponent from '../components/nodes/root';
+import BaseNode, { KEY_DATA } from './base';
 
 export const DECISION_TYPE_FORM = 'form';
 export const DECISION_TYPE_DOCUMENT = 'document';

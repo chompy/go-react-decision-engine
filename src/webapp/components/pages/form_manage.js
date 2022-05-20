@@ -1,8 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy } from '@fortawesome/free-solid-svg-icons'
-import BasePageComponent from './page_base';
-import TeamPageComponent from './page_team';
-import BuilderComponent from './builder';
+import BasePageComponent from './base';
+import TeamPageComponent from './team';
 
 export default class FormManagePageComponent extends BasePageComponent {
 

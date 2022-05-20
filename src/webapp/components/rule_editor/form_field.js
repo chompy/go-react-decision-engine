@@ -1,9 +1,9 @@
 
 import React from 'react';
-import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_OBJECT } from '../rule_field';
-import BaseNode from '../objects/base';
-import { RULE_MODE_BUILDER } from './rule_editor';
-import TypeaheadComponent from './typeahead';
+import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_OBJECT } from '../../rule_field';
+import BaseNode from '../../objects/base';
+import { RULE_MODE_BUILDER } from '../rule_editor';
+import TypeaheadComponent from '../typeahead';
 
 export default class RuleEditorFormFieldComponent extends React.Component {
 

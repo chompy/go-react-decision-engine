@@ -1,9 +1,8 @@
 import React from 'react';
-import Events from '../events';
-import BasePageComponent from './page_base';
-import BuilderPageComponent from './page_builder';
-import FormManagePageComponent from './page_form_manage';
-import TeamPageComponent from './page_team';
+import BasePageComponent from './pages/base';
+import BuilderPageComponent from './pages/builder';
+import FormManagePageComponent from './pages/form_manage';
+import TeamPageComponent from './pages/team';
 
 export default class DecisionEngineMainComponent extends React.Component {
 

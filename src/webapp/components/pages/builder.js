@@ -1,8 +1,8 @@
 import React from 'react';
 import { faBackward } from '@fortawesome/free-solid-svg-icons'
-import BasePageComponent from './page_base';
-import TeamPageComponent from './page_team';
-import BuilderComponent from './builder';
+import BasePageComponent from './base';
+import TeamPageComponent from './team';
+import BuilderComponent from '../builder';
 
 export default class BuilderPageComponent extends BasePageComponent {
 

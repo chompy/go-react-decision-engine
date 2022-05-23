@@ -27,6 +27,20 @@ func usernameHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	// load config
+	log.Println("Load config.")
+	config, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+	// open database
+	log.Println("Open database.")
+	if err := OpenDatabase(&config); err != nil {
+		panic(err)
+	}
+	defer CloseDatabase()
+
 	log.Println("Starting Backend")
 
 	r := mux.NewRouter()

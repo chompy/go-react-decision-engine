@@ -1,5 +1,5 @@
 import React from 'react';
-import { faBackward } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faStar, faDeleteLeft } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import TeamPageComponent from './team';
 import BuilderComponent from '../builder';
@@ -53,17 +53,13 @@ export default class BuilderPageComponent extends BasePageComponent {
                 
                 <h2 className='section-name'>Form Builder</h2>
 
-                <form className='pure-form pure-form-stacked'>
-                    {this.renderFormField({
-                            id: 'name',
-                            label: 'Form Name',
-                            value: this.state.name,
-                            callback: this.onName
-                    })}
-                </form>
-
                 <div className='options pure-button-group' role='group'>
-                    
+                    {this.renderCallbackButton(
+                        'Delete', null, faDeleteLeft
+                    )}
+                    {this.renderCallbackButton(
+                        'Publish', null, faStar
+                    )}
                 </div>
 
             </section>

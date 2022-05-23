@@ -7,14 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dbUri = "mongodb://localhost:27017"
-const dbName = "decision-engine"
-
 var dbClient *mongo.Client
 
-func OpenDatabase() error {
+func OpenDatabase(config *Config) error {
 	ctx := context.Background()
-	opts := options.Client().ApplyURI(dbUri)
+	opts := options.Client().ApplyURI(config.DatabaseURI)
 	var err error
 	dbClient, err = mongo.Connect(ctx, opts)
 	return err

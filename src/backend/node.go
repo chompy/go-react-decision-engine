@@ -32,15 +32,3 @@ export const KEY_LANGUAGE = '_lan';
 export const KEY_PRIORITY = '_pri';
 export const KEY_TAGS = '_tag';
 */
-
-type Team struct {
-	UID     string    `json:"uid"`
-	Name    string    `json:"name"`
-	Created time.Time `json:"created"`
-}
-
-type TeamUser struct {
-	User        string `json:"user"`
-	Team        string `json:"team"`
-	Permissions int    `json:"permissions"`
-}

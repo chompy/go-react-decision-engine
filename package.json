@@ -6,9 +6,9 @@
   "main": "src/backend/backend.go",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "npm run build && cd src/backend && go build -o backend.exe && ./backend.exe",
+    "start": "npm run build && cd src/backend && go build -o backend.exe && backend.exe",
     "webapp": "webpack serve --mode development --devtool inline-source-map --hot",
-    "backend": "nodemon --ext go --exec \"cd src/backend && go build -o backend.exe && ./backend.exe || exit 1\"",
+    "backend": "nodemon --ext go --exec \"cd src/backend && go build -o backend.exe && backend.exe || exit 1\"",
     "dev": "concurrently \"npm run backend\" \"npm run webapp\""
   },
   "author": "Neal Andrews",

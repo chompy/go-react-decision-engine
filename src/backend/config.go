@@ -9,8 +9,10 @@ import (
 const configPath = "../../config.yaml"
 
 type Config struct {
-	DatabaseURI  string `yaml:"database_uri"`
-	DatabaseName string `yaml:"database_name"`
+	DatabaseURI    string `yaml:"database_uri"`
+	DatabaseName   string `yaml:"database_name"`
+	HTTPPort       int    `yaml:"http_port"`
+	HTTPSessionKey string `yaml:"http_session_key"`
 }
 
 func LoadConfig() (Config, error) {

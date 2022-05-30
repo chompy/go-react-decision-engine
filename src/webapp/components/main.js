@@ -2,6 +2,7 @@ import React from 'react';
 import BasePageComponent from './pages/base';
 import BuilderPageComponent from './pages/builder';
 import FormManagePageComponent from './pages/form_manage';
+import LoginPageComponent from './pages/login';
 import TeamPageComponent from './pages/team';
 
 export default class DecisionEngineMainComponent extends React.Component {
@@ -10,6 +11,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      * List of available page components.
      */
     static pageComponents = [
+        LoginPageComponent,
         TeamPageComponent,
         FormManagePageComponent,
         BuilderPageComponent
@@ -19,7 +21,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         super(props);
         this.state = {
             team: 'abc123',
-            page: TeamPageComponent.getName(),
+            page: LoginPageComponent.getName(),
             params: {}
         };
         this.onHashChange = this.onHashChange.bind(this);

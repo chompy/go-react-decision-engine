@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 )
 
 type HTTPMessage struct {
@@ -17,19 +16,14 @@ type HTTPMessage struct {
 	Data    interface{} `json:"data"`
 }
 
-type HTTPUserLoginPayload struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-var sessionStore *sessions.CookieStore
-
 func HTTPStart(config *Config) error {
-	// init sessions
-	sessionStore = sessions.NewCookieStore([]byte(config.HTTPSessionKey))
 	// init routes
 	r := mux.NewRouter()
 	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
+	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
+	r.HandleFunc("/api/user/teams", HTTPUserTeams).Methods("GET")
+	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")
+	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")
 	log.Println("HTTP listening.")
 	// start server
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.HTTPPort), r)

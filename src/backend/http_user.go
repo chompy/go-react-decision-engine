@@ -4,6 +4,11 @@ import (
 	"net/http"
 )
 
+type HTTPUserLoginPayload struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 func HTTPUserLogin(w http.ResponseWriter, r *http.Request) {
 	// read payload
 	payload := HTTPUserLoginPayload{}
@@ -14,6 +19,7 @@ func HTTPUserLogin(w http.ResponseWriter, r *http.Request) {
 	// validate payload
 	if payload.Email == "" || payload.Password == "" {
 		HTTPSendError(w, ErrInvalidCredientials)
+		return
 	}
 	// fetch user
 	user, err := FetchUserByEmail(payload.Email)
@@ -45,5 +51,42 @@ func HTTPUserMe(w http.ResponseWriter, r *http.Request) {
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 		Data:    user,
+	}, http.StatusOK)
+}
+
+func HTTPUserTeams(w http.ResponseWriter, r *http.Request) {
+	// fetch session + user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	if user == nil {
+		HTTPSendError(w, ErrHTTPInvalidSession)
+		return
+	}
+	// fetch teams
+	teamUsers, err := user.FetchTeams()
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// merge TeamUser in to Team struct
+	teams := make([]map[string]interface{}, 0)
+	for _, teamUser := range teamUsers {
+		team, err := FetchTeamByUID(teamUser.Team)
+		if err != nil {
+			HTTPSendError(w, err)
+			return
+		}
+		teams = append(teams, map[string]interface{}{
+			"uid":         team.UID,
+			"name":        team.Name,
+			"created":     team.Created,
+			"perm_invite": teamUser.PermInvite,
+			"perm_admin":  teamUser.PermAdmin,
+		})
+	}
+	// send success response
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    teams,
 	}, http.StatusOK)
 }

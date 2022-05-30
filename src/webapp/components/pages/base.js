@@ -1,7 +1,8 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-const FIELD_TYPE_TEXT = 'text';
+export const FIELD_TYPE_TEXT = 'text';
+export const FIELD_TYPE_PASSWORD = 'password';
 
 export default class BasePageComponent extends React.Component {
 

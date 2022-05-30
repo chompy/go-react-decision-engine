@@ -3,7 +3,7 @@ table {
     width: 100%;
 }
 .pure-form {
-    input[type=text] { min-width: 300px; }
+    input[type=text], input[type=password] { min-width: 300px; }
 }
 
 @import 'colors';

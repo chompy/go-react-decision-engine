@@ -122,10 +122,11 @@ export default class BasePageComponent extends React.Component {
         let label = typeof field.label == 'undefined' ? field.id : field.label;
         let value = typeof field.value == 'undefined' ? '' : field.value;
         let callback = typeof field.label == 'undefined' ? null : field.callback;
+        let disabled = typeof field.disabled == 'undefined' ? false : field.disabled;
         let fieldRender = null;
         switch (type) {
             default: {
-                fieldRender = <input type={type} id={field.id} onChange={callback} value={value} />;
+                fieldRender = <input type={type} id={field.id} onChange={callback} value={value} disabled={disabled} />;
                 break;
             }
         }

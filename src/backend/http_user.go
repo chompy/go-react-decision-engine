@@ -18,23 +18,30 @@ func HTTPUserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	// validate payload
 	if payload.Email == "" || payload.Password == "" {
-		HTTPSendError(w, ErrInvalidCredientials)
+		HTTPSendError(w, ErrInvalidCredentials)
 		return
 	}
 	// fetch user
 	user, err := FetchUserByEmail(payload.Email)
 	if err != nil {
-		HTTPSendError(w, ErrInvalidCredientials)
+		HTTPSendError(w, ErrInvalidCredentials)
 		return
 	}
 	// check password
 	if err := user.CheckPassword(payload.Password); err != nil {
-		HTTPSendError(w, ErrInvalidCredientials)
+		HTTPSendError(w, ErrInvalidCredentials)
 		return
 	}
 	// set session
 	HTTPNewSession(w, user)
 	// send success response
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+	}, http.StatusOK)
+}
+
+func HTTPUserLogout(w http.ResponseWriter, r *http.Request) {
+	HTTPExpireSession(w)
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 	}, http.StatusOK)

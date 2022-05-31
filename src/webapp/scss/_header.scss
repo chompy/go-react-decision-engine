@@ -1,0 +1,29 @@
+.header {
+    background-color: $header-bg;
+    color: $header-fg;
+    padding: 10px;
+    border-bottom: 1px solid $page-section-divide;
+
+    .app-name {
+        display: inline-block;
+        font-size: 18px;
+        font-style: italic;
+    }
+    .user {
+        float: right;
+        .name {
+            display: inline-block;
+        }
+        .options {
+            display: inline-block;
+            margin-left: 5px;
+            vertical-align: middle;
+            a {
+                color: $header-fg;
+                font-size: 21px;
+                display: inline-block;
+                margin-left: 5px;
+            }
+        }
+    }
+}

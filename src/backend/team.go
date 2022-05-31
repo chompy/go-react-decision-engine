@@ -18,8 +18,8 @@ type TeamUser struct {
 func FetchTeamByUID(uid string) (*Team, error) {
 	// stubbed out team
 	return &Team{
-		UID:     "TEAM1",
-		Name:    "Test Team A",
+		UID:     uid,
+		Name:    "Test Team {" + uid + "}",
 		Created: time.Now(),
 	}, nil
 }

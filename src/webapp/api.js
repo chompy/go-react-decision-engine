@@ -2,10 +2,6 @@ const URL_PREFIX = '/api/';
 
 export default class BackendAPI {
 
-    constructor() {
-        this.userData = null;
-    }
-
     static request(endpoint, method, query, data, callback) {
         let url = URL_PREFIX + endpoint + (query && query.length > 0 ? '?' : '');
         if (query) {
@@ -36,6 +32,5 @@ export default class BackendAPI {
     static post(endpoint, query, data, callback) {
         return BackendAPI.request(endpoint, 'POST', query, data, callback);
     }
-
 
 }

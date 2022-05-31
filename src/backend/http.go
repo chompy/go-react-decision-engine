@@ -20,6 +20,7 @@ func HTTPStart(config *Config) error {
 	// init routes
 	r := mux.NewRouter()
 	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
+	r.HandleFunc("/api/user/logout", HTTPUserLogout).Methods("GET", "POST")
 	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
 	r.HandleFunc("/api/user/teams", HTTPUserTeams).Methods("GET")
 	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")

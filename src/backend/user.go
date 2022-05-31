@@ -55,12 +55,25 @@ func HashPassword(password string) ([]byte, error) {
 
 func (u *User) CheckPassword(password string) error {
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(password)); err != nil {
-		return ErrInvalidCredientials
+		return ErrInvalidCredentials
 	}
 	return nil
 }
 
 func (u *User) FetchTeams() ([]*TeamUser, error) {
 	t, _ := FetchTeamByUID("TEAM1")
-	return t.FetchUsers()
+	t2, _ := FetchTeamByUID("TEAM2")
+
+	out := make([]*TeamUser, 0)
+	tu, err := t.FetchUsers()
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, tu...)
+	tu, err = t2.FetchUsers()
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, tu...)
+	return out, nil
 }

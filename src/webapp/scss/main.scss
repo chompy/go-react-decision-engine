@@ -5,7 +5,12 @@ table {
 .pure-form {
     input[type=text], input[type=password] { min-width: 300px; }
 }
+.hidden {
+    display: none;
+}
 
 @import 'colors';
 @import 'page';
 @import 'builder';
+@import 'alerts';
+@import 'header';

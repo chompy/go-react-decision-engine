@@ -3,19 +3,26 @@ import React from 'react';
 import { faFileCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import FormManagePageComponent from './form_manage';
+import Events from '../../events';
+import BackendAPI from '../../api';
 
 export default class TeamPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-
+        this.state = {
+            currentTeam: props.team,
+            teams: []
+        };
+        this.onAPITeams = this.onAPITeams.bind(this);
+        this.onSelectTeam = this.onSelectTeam.bind(this);
     }
 
     /**
      * {@inheritdoc}
      */
     componentDidMount() {
-
+        BackendAPI.get('user/teams', null, this.onAPITeams);
     }
 
     /**
@@ -33,12 +40,41 @@ export default class TeamPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Object} res 
+     */
+    onAPITeams(res) {
+        if (!res.success) {
+            throw res;
+        }
+        this.setState({ teams: res.data, currentTeam: (this.props.currentTeam ? this.props.currentTeam : res.data[0].uid) });
+    }
+
+    onSelectTeam(e) {
+        Events.dispatch('team', { team: e.target.value });
+        this.setState({ currentTeam: e.target.value });
+    }
+
+    renderTeamSelect() {
+        if (this.state.teams && this.state.teams.length > 1) {
+            let choices = [];
+            for (let i in this.state.teams) {
+                let team = this.state.teams[i];
+                choices.push(<option key={'team-select-' + team.uid} value={team.uid}>{team.name}</option>);
+            }
+            return <div className='team-name'><select value={this.state.currentTeam} onChange={this.onSelectTeam}>{choices}</select></div>;
+        } else if (this.state.teams && this.state.teams.length == 1) {
+            return <div className='team-name'>{this.state.teams[0].name}</div>
+        }
+        return <div className='team-name'>...</div>;
+    }
+
+    /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         return <div className='page team'>
-            <h1 className='team-name'>Team Alpha</h1>
             <section>
+                {this.renderTeamSelect()}
                 <h2 className='section-name'>Forms</h2>
                 <div className='options pure-button-group' role='group'>
                     {this.renderPageButton('New Form', FormManagePageComponent.getName(), {}, faFileCirclePlus)}

@@ -29,9 +29,21 @@ func HTTPNewSession(w http.ResponseWriter, user *User) {
 	}
 	// set session cookie
 	http.SetCookie(w, &http.Cookie{
-		Name:    httpSessionCookieName,
-		Value:   sessionToken,
-		Expires: time.Now().Add(time.Second * httpSessionExpire),
+		Name:     httpSessionCookieName,
+		Value:    sessionToken,
+		Expires:  time.Now().Add(time.Second * httpSessionExpire),
+		Path:     "/api",
+		SameSite: http.SameSiteStrictMode,
+	})
+}
+
+func HTTPExpireSession(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     httpSessionCookieName,
+		Value:    "",
+		Expires:  time.Now(),
+		Path:     "/api",
+		SameSite: http.SameSiteStrictMode,
 	})
 }
 

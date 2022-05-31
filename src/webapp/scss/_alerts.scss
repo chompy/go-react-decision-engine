@@ -1,0 +1,16 @@
+.alert {
+    background-color: $alert-bg;
+    color: $alert-fg;
+    font-size: 18px;
+    text-align: center;
+    margin: 10px 0;
+    padding: 8px 5px;
+    &.message {
+        background-color: $alert-msg-bg;
+        color: $alert-msg-fg;
+    }
+    &.error {
+        background-color: $alert-err-bg;
+        color: $alert-err-fg;
+    }
+}

@@ -17,7 +17,7 @@ const (
 type User struct {
 	UID      string    `json:"uid"`
 	Email    string    `json:"email"`
-	Password []byte    `json:"password"`
+	Password []byte    `json:"-"`
 	Created  time.Time `json:"created"`
 	Type     UserType  `json:"type"`
 }

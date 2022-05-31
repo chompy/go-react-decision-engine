@@ -6,7 +6,7 @@ import BasePageComponent from './pages/base';
 import BuilderPageComponent from './pages/builder';
 import FormManagePageComponent from './pages/form_manage';
 import LoginPageComponent from './pages/login';
-import TeamPageComponent from './pages/team';
+import DashboardPageComponent from './pages/dashboard';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -14,7 +14,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      * List of available page components.
      */
     static pageComponents = [
-        TeamPageComponent,
+        DashboardPageComponent,
         FormManagePageComponent,
         BuilderPageComponent,
         LoginPageComponent
@@ -23,7 +23,6 @@ export default class DecisionEngineMainComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            team: '',
             page: LoginPageComponent.getName(),
             params: {},
             user: null,
@@ -77,7 +76,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogin(e) {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
-        window.location.hash = '#team';
+        window.location.hash = '#' + DashboardPageComponent.getName();
     }
 
     /**
@@ -86,14 +85,6 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogout(e) {
         console.log('> Log out successful.');
         this.setState({user: null, page: LoginPageComponent.getName(), message: 'You have logged out.'});
-    }
-
-    /**
-     * @param {Event} e 
-     */
-    onTeam(e) {
-        console.log('> Switch team to "' + e.detail.team + '."');
-        this.setState({ team: e.detail.team });
     }
 
     /**

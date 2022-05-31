@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faStar, faDeleteLeft } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import TeamPageComponent from './team';
+import DashboardPageComponent from './dashboard';
 import BuilderComponent from '../builder';
 
 export default class BuilderPageComponent extends BasePageComponent {
@@ -46,7 +46,7 @@ export default class BuilderPageComponent extends BasePageComponent {
         return <div className='page builder'>
 
             <div className='options top'>
-                {this.renderPageButton('Back', TeamPageComponent.getName(), {}, faBackward)}                
+                {this.renderPageButton('Back', DashboardPageComponent.getName(), {}, faBackward)}                
             </div>
 
             <section>

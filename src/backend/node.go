@@ -20,6 +20,7 @@ type Node struct {
 	Parent  string                 `json:"par"`
 	Type    string                 `json:"typ"`
 	Tags    []string               `json:"tag"`
+	Label   string                 `json:"lab"`
 	Data    map[string]interface{} `json:"dat"`
 }
 

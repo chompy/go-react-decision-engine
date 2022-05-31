@@ -6,12 +6,11 @@ import FormManagePageComponent from './form_manage';
 import Events from '../../events';
 import BackendAPI from '../../api';
 
-export default class TeamPageComponent extends BasePageComponent {
+export default class DashboardPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
         this.state = {
-            currentTeam: props.team,
             teams: []
         };
         this.onAPITeams = this.onAPITeams.bind(this);
@@ -29,14 +28,14 @@ export default class TeamPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     static getName() {
-        return 'team';
+        return 'dashboard';
     }
 
     /**
      * {@inheritdoc}
      */
     getTitle() {
-        return 'Team Dashboard';
+        return 'Dashboard';
     }
 
     /**
@@ -46,12 +45,19 @@ export default class TeamPageComponent extends BasePageComponent {
         if (!res.success) {
             throw res;
         }
-        this.setState({ teams: res.data, currentTeam: (this.props.currentTeam ? this.props.currentTeam : res.data[0].uid) });
+        this.setState({ teams: res.data });
     }
 
+    /**
+     * @param {Event} e 
+     */
     onSelectTeam(e) {
-        Events.dispatch('team', { team: e.target.value });
-        this.setState({ currentTeam: e.target.value });
+        this.gotoPage(
+            this.constructor.getName(),
+            {
+                team: e.target.value
+            }
+        );
     }
 
     renderTeamSelect() {
@@ -61,7 +67,7 @@ export default class TeamPageComponent extends BasePageComponent {
                 let team = this.state.teams[i];
                 choices.push(<option key={'team-select-' + team.uid} value={team.uid}>{team.name}</option>);
             }
-            return <div className='team-name'><select value={this.state.currentTeam} onChange={this.onSelectTeam}>{choices}</select></div>;
+            return <div className='team-name'><select value={this.props.params.team} onChange={this.onSelectTeam}>{choices}</select></div>;
         } else if (this.state.teams && this.state.teams.length == 1) {
             return <div className='team-name'>{this.state.teams[0].name}</div>
         }

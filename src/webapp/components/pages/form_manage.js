@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import TeamPageComponent from './team';
+import DashboardPageComponent from './dashboard';
 
 export default class FormManagePageComponent extends BasePageComponent {
 
@@ -43,14 +43,11 @@ export default class FormManagePageComponent extends BasePageComponent {
      */
      render() {
         return <div className='page form'>
-
             <div className='options top'>
-                {this.renderPageButton('Back', TeamPageComponent.getName(), {}, faBackward)}                
+                {this.renderPageButton('Back', DashboardPageComponent.getName(), {}, faBackward)}                
             </div>
-
             <section>
                 <h2 className='section-name'>{this.getTitle()}</h2>
-
                 <form className='pure-form pure-form-stacked'>
                     {this.renderFormField({
                             id: 'name',

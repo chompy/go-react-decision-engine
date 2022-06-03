@@ -7,17 +7,17 @@ import (
 func main() {
 	// load config
 	log.Println("Load config.")
-	config, err := LoadConfig()
+	config, err := ConfigLoad()
 	if err != nil {
 		panic(err)
 	}
 	// open database
 	log.Println("Open database.")
-	if err := OpenDatabase(&config); err != nil {
+	if err := DatabaseOpen(&config); err != nil {
 		panic(err)
 	}
-	defer CloseDatabase()
-	log.Println("Starting Backend")
+	defer DatabaseClose()
+	log.Println("Starting backend.")
 	// start http
 	if err := HTTPStart(&config); err != nil {
 		panic(err)

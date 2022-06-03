@@ -15,7 +15,7 @@ type Config struct {
 	HTTPSessionKey string `yaml:"http_session_key"`
 }
 
-func LoadConfig() (Config, error) {
+func ConfigLoad() (Config, error) {
 	rawData, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return Config{}, err

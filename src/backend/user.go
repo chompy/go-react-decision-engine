@@ -77,3 +77,7 @@ func (u *User) FetchTeams() ([]*TeamUser, error) {
 	out = append(out, tu...)
 	return out, nil
 }
+
+func (u *User) IsOnTeam(uid string) bool {
+	return true
+}

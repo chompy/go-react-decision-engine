@@ -10,6 +10,7 @@ import (
 )
 
 func generateUID() string {
+	rand.Seed(time.Now().UnixMicro())
 	ut := time.Now().Unix()
 	return strings.ToLower(base36.Encode(uint64(ut)) + base36.Encode(uint64(rand.Intn(35))))
 }
@@ -31,11 +32,11 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 	switch data.(type) {
 	case NodeType, NodeTop, *NodeTop:
 		{
-			return "node-top"
+			return "node_top"
 		}
 	case NodeVersion, *NodeVersion:
 		{
-			return "node-version"
+			return "node_version"
 		}
 	case Node, *Node:
 		{
@@ -51,7 +52,7 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 		}
 	case TeamUser, *TeamUser:
 		{
-			return "team-user"
+			return "team_user"
 		}
 	}
 	return ""

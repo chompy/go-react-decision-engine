@@ -1,15 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"errors"
-	"net/http"
-	"strconv"
-	"time"
-
-	"go.mongodb.org/mongo-driver/mongo"
-)
-
 type HTTPNodeTopPayload struct {
 	Team string
 	Form string
@@ -23,7 +13,7 @@ type HTTPNodePayload struct {
 	Nodes []interface{} `json:"nodes"`
 }
 
-func httpPayloadToNode(payload interface{}) (Node, NodeData) {
+/*func httpPayloadToNode(payload interface{}) (Node, NodeData) {
 	node := Node{}
 	nodeData := NodeData{}
 	payloadRaw, err := json.Marshal(payload)
@@ -177,3 +167,4 @@ func HTTPNodeNew(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+*/

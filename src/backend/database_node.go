@@ -51,75 +51,69 @@ func getDatabaseNodeResults(cur *mongo.Cursor, dataType interface{}) ([]interfac
 	return out, nil
 }
 
-func databaseNodeRawQuery(nodeType interface{}, filters bson.M, offset int) ([]interface{}, error) {
+func databaseNodeRawQuery(nodeType interface{}, filters interface{}, offset int) ([]interface{}, int, error) {
 	// get collection
 	col, err := DatabaseCollectionFromData(nodeType)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	// set fetch options
 	opts := options.Find()
-	opts.SetSort(bson.M{"version": -1, "modified": -1})
-	opts.SetLimit(dbFetchLimit)
-	opts.SetSkip(int64(offset))
+	opts.SetSort(bson.D{{Key: "version", Value: -1}, {Key: "modified", Value: -1}})
+	if offset >= 0 {
+		opts.SetLimit(dbFetchLimit)
+		opts.SetSkip(int64(offset))
+	}
+	// do count
+	count := int64(0)
+	if offset >= 0 {
+		count, err = col.CountDocuments(context.Background(), filters)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
 	// do fetch
 	cur, err := col.Find(context.Background(), filters, opts)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer cur.Close(context.Background())
 	// convert back to go structs
-	return getDatabaseNodeResults(cur, nodeType)
+	res, err := getDatabaseNodeResults(cur, nodeType)
+	if count == 0 {
+		count = int64(len(res))
+	}
+	return res, int(count), err
 }
 
-func databaseNodeTopList(value string, nodeType NodeType, offset int) ([]*NodeTop, error) {
+func DatabaseNodeTopList(parent string, nodeType NodeType, offset int) ([]*NodeTop, int, error) {
 	// filters
-	filters := bson.M{"type": string(nodeType)}
-	switch nodeType {
-	case NodeForm:
-		{
-			filters["team"] = value
-			break
-		}
-	default:
-		{
-			filters["parent"] = value
-			break
-		}
-	}
+	filters := bson.M{"type": string(nodeType), "parent": parent}
 	// fetch
-	res, err := databaseNodeRawQuery(NodeTop{}, filters, offset)
+	res, count, err := databaseNodeRawQuery(NodeTop{}, filters, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	// convert interface{} to NodeTop
 	out := make([]*NodeTop, 0)
 	for _, n := range res {
 		out = append(out, n.(*NodeTop))
 	}
-	return out, nil
+	return out, count, nil
 }
 
-func DatabaseFormList(team string, offset int) ([]*NodeTop, error) {
-	return databaseNodeTopList(team, NodeForm, offset)
-}
-
-func DatabaseDocumentList(parent string, offset int) ([]*NodeTop, error) {
-	return databaseNodeTopList(parent, NodeDocument, offset)
-}
-
-func DatabaseNodeVersionList(uid string, offset int) ([]*NodeVersion, error) {
+func DatabaseNodeVersionList(uid string, offset int) ([]*NodeVersion, int, error) {
 	// fetch
-	res, err := databaseNodeRawQuery(NodeVersion{}, bson.M{"uid": uid}, offset)
+	res, count, err := databaseNodeRawQuery(NodeVersion{}, bson.M{"uid": uid}, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	// convert interface{} to NodeVersion
 	out := make([]*NodeVersion, 0)
 	for _, n := range res {
 		out = append(out, n.(*NodeVersion))
 	}
-	return out, nil
+	return out, count, nil
 }
 
 func DatabaseNodeLatestVersion(uid string) (int, error) {
@@ -143,9 +137,35 @@ func DatabaseNodeLatestVersion(uid string) (int, error) {
 	return n.Version, nil
 }
 
-func DatabaseNodeList(rootUid string, version int, offset int) ([]*Node, error) {
+func DatabaseNodeVersionExists(uid string, version int) (bool, error) {
+	// get collection
+	col, err := DatabaseCollectionFromData(NodeVersion{})
+	if err != nil {
+		return false, err
+	}
 	// fetch
-	res, err := databaseNodeRawQuery(NodeVersion{}, bson.M{"root": rootUid, "version": version}, offset)
+	res := col.FindOne(context.Background(), bson.M{"uid": uid, "version": version})
+	if err := res.Err(); err != nil {
+		if errors.Is(err, mongo.ErrNilDocument) {
+			return false, nil
+		}
+		return false, err
+	}
+	n := &NodeVersion{}
+	if err := res.Decode(n); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func DatabaseNodeList(rootUid string, version int, parent string) ([]*Node, error) {
+	// filters
+	filters := bson.M{"path": rootUid, "version": version}
+	if parent != "" {
+		filters["path"] = bson.A{rootUid, parent}
+	}
+	// fetch
+	res, _, err := databaseNodeRawQuery(Node{}, filters, -1)
 	if err != nil {
 		return nil, err
 	}
@@ -157,40 +177,36 @@ func DatabaseNodeList(rootUid string, version int, offset int) ([]*Node, error) 
 	return out, nil
 }
 
-func databaseNodeStore(data interface{}) error {
+func DatabaseNodeTopStore(nodeTop *NodeTop) error {
+	if nodeTop == nil || nodeTop.UID == "" {
+		return ErrNodeMissingUID
+	}
 	// get collection
-	col, err := DatabaseCollectionFromData(data)
+	col, err := DatabaseCollectionFromData(nodeTop)
 	if err != nil {
 		return err
+	}
+	// update created/modified
+	nodeTop.Modified = time.Now()
+	if (nodeTop.Created == time.Time{}) {
+		nodeTop.Created = nodeTop.Modified
 	}
 	// generate bson document
-	doc, err := toBSONDoc(data)
+	doc, err := toBSONDoc(nodeTop)
 	if err != nil {
 		return err
-	}
-	// uid required
-	uid, ver := getNodeUidVersion(data)
-	if uid == "" {
-		return ErrNodeMissingUID
 	}
 	// options
 	opts := options.Update()
 	opts.SetUpsert(true)
 	// build filters
-	filter := bson.M{"uid": uid}
-	if ver > 0 {
-		filter["version"] = ver
-	}
+	filter := bson.M{"uid": nodeTop.UID, "parent": nodeTop.Parent}
 	// store
-	_, err = col.UpdateOne(context.Background(), filter, doc, opts)
+	_, err = col.UpdateOne(context.Background(), filter, bson.D{{Key: "$set", Value: doc}}, opts)
 	return err
 }
 
-func DatabaseFormStore(data *NodeTop) error {
-	return databaseNodeStore(data)
-}
-
-func DatabaseNodeNewVersion(data *NodeVersion) (int, error) {
+func DatabaseNodeVersionNew(data *NodeVersion) (int, error) {
 	if data == nil || data.UID == "" {
 		return 0, ErrNodeMissingUID
 	}
@@ -219,7 +235,7 @@ func DatabaseNodeNewVersion(data *NodeVersion) (int, error) {
 	return data.Version, err
 }
 
-func DatabaseNodeUpdateVersion(data *NodeVersion) error {
+func DatabaseNodeVersionUpdate(data *NodeVersion) error {
 	if data == nil || data.UID == "" {
 		return ErrNodeMissingUID
 	}
@@ -239,5 +255,45 @@ func DatabaseNodeUpdateVersion(data *NodeVersion) error {
 	}
 	// update
 	_, err = col.UpdateOne(context.Background(), bson.M{"uid": data.UID, "version": data.Version}, doc)
+	return err
+}
+
+func DatabaseNodeStore(nodes []*Node) error {
+	// check and adjust node list
+	if nodes == nil {
+		return ErrNoData
+	}
+	NodeListResolvePathes(nodes)
+	if err := NodeListCheck(nodes); err != nil {
+		return err
+	}
+	// check version
+	hasVersion, err := DatabaseNodeVersionExists(nodes[0].Root(), nodes[0].Version)
+	if err != nil {
+		return err
+	}
+	if !hasVersion {
+		return ErrNodeVersionNotFound
+	}
+	// get collection
+	col, err := DatabaseCollectionFromData(nodes[0])
+	if err != nil {
+		return err
+	}
+	writeModels := make([]mongo.WriteModel, 0)
+	for _, node := range nodes {
+		// generate bson document
+		doc, err := toBSONDoc(node)
+		if err != nil {
+			return err
+		}
+		// make model
+		model := mongo.NewUpdateOneModel()
+		model.SetUpsert(true)
+		model.SetFilter(bson.M{"path": node.Root(), "version": node.Version, "uid": node.UID})
+		model.SetUpdate(doc)
+		writeModels = append(writeModels, model)
+	}
+	_, err = col.BulkWrite(context.Background(), writeModels)
 	return err
 }

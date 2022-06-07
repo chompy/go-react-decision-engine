@@ -17,6 +17,8 @@ type NodeTop struct {
 	UID      string    `bson:"uid" json:"uid"`
 	Created  time.Time `bson:"created" json:"created"`
 	Modified time.Time `bson:"modified" json:"modified"`
+	Creator  string    `bson:"creator" json:"creator"`
+	Modifier string    `bson:"modifier" json:"modifier"`
 	Type     NodeType  `bson:"type" json:"type"`
 	Parent   string    `bson:"parent" json:"parent"`
 	Label    string    `bson:"label" json:"label"`
@@ -36,22 +38,22 @@ type NodeVersion struct {
 	UID      string    `bson:"uid" json:"uid"`
 	Created  time.Time `bson:"created" json:"created"`
 	Modified time.Time `bson:"modified" json:"modified"`
+	Creator  string    `bson:"creator" json:"creator"`
+	Modifier string    `bson:"modifier" json:"modifier"`
 	Version  int       `bson:"version" json:"version"`
 	State    NodeState `bson:"state" json:"state"`
 }
 
 // Node is a node in a form or document.
 type Node struct {
-	UID      string                 `bson:"uid" json:"uid"`
-	Created  time.Time              `bson:"created" json:"created"`
-	Modified time.Time              `bson:"modified" json:"modified"`
-	Version  int                    `bson:"version" json:"version"`
-	ERoot    string                 `bson:"-" json:"root,omitempty"`
-	EParent  string                 `bson:"-" json:"parent,omitempty"`
-	Path     []string               `bson:"path" json:"path"`
-	Type     string                 `bson:"type" json:"type"`
-	Tags     []string               `bson:"tags" json:"tags"`
-	Data     map[string]interface{} `bson:"data" json:"data"`
+	UID     string                 `bson:"uid" json:"uid"`
+	Version int                    `bson:"version" json:"version"`
+	ERoot   string                 `bson:"-" json:"root,omitempty"`
+	EParent string                 `bson:"-" json:"parent,omitempty"`
+	Path    []string               `bson:"path" json:"path"`
+	Type    string                 `bson:"type" json:"type"`
+	Tags    []string               `bson:"tags" json:"tags"`
+	Data    map[string]interface{} `bson:"data" json:"data"`
 }
 
 func (n Node) Root() string {
@@ -85,14 +87,12 @@ func NodeListResolvePathes(nodes []*Node) {
 		return out
 	}
 	for _, node := range nodes {
-		if node.ERoot == "" || node.ERoot == node.UID {
+		if node.ERoot == "" || node.ERoot == node.UID || node.EParent == "" {
 			continue
 		}
 		node.Path = make([]string, 0)
+		node.Path = append(node.Path, crawlParents(node)...)
 		node.Path = append(node.Path, node.ERoot)
-		if node.EParent != "" {
-			node.Path = append(node.Path, crawlParents(node)...)
-		}
 	}
 }
 

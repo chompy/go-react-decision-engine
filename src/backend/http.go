@@ -13,6 +13,7 @@ import (
 type HTTPMessage struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
+	Count   int         `json:"count,omitempty"`
 	Data    interface{} `json:"data"`
 }
 

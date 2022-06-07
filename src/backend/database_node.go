@@ -86,6 +86,26 @@ func databaseNodeRawQuery(nodeType interface{}, filters interface{}, offset int)
 	return res, int(count), err
 }
 
+func DatabaseNodeTopFetch(uid string) (*NodeTop, error) {
+	// get collection
+	col, err := DatabaseCollectionFromData(NodeTop{})
+	if err != nil {
+		return nil, err
+	}
+	// fetch
+	res := col.FindOne(context.Background(), bson.M{"uid": uid})
+	err = res.Err()
+	if err != nil {
+		return nil, err
+	}
+	// decode
+	n := &NodeTop{}
+	if err := res.Decode(n); err != nil {
+		return nil, err
+	}
+	return n, err
+}
+
 func DatabaseNodeTopList(parent string, nodeType NodeType, offset int) ([]*NodeTop, int, error) {
 	// filters
 	filters := bson.M{"type": string(nodeType), "parent": parent}
@@ -116,7 +136,7 @@ func DatabaseNodeVersionList(uid string, offset int) ([]*NodeVersion, int, error
 	return out, count, nil
 }
 
-func DatabaseNodeLatestVersion(uid string) (int, error) {
+func DatabaseNodeVersionLatest(uid string) (int, error) {
 	// get collection
 	col, err := DatabaseCollectionFromData(NodeVersion{})
 	if err != nil {
@@ -162,7 +182,7 @@ func DatabaseNodeList(rootUid string, version int, parent string) ([]*Node, erro
 	// filters
 	filters := bson.M{"path": rootUid, "version": version}
 	if parent != "" {
-		filters["path"] = bson.A{rootUid, parent}
+		filters["path"] = bson.M{"$all": bson.A{parent, rootUid}}
 	}
 	// fetch
 	res, _, err := databaseNodeRawQuery(Node{}, filters, -1)
@@ -211,7 +231,7 @@ func DatabaseNodeVersionNew(data *NodeVersion) (int, error) {
 		return 0, ErrNodeMissingUID
 	}
 	// fetch last version
-	version, err := DatabaseNodeLatestVersion(data.UID)
+	version, err := DatabaseNodeVersionLatest(data.UID)
 	if err != nil && errors.Is(err, mongo.ErrNilDocument) {
 		return 0, err
 	}
@@ -254,7 +274,11 @@ func DatabaseNodeVersionUpdate(data *NodeVersion) error {
 		return err
 	}
 	// update
-	_, err = col.UpdateOne(context.Background(), bson.M{"uid": data.UID, "version": data.Version}, doc)
+	_, err = col.UpdateOne(
+		context.Background(),
+		bson.M{"uid": data.UID, "version": data.Version},
+		bson.D{{Key: "$set", Value: doc}},
+	)
 	return err
 }
 
@@ -291,7 +315,7 @@ func DatabaseNodeStore(nodes []*Node) error {
 		model := mongo.NewUpdateOneModel()
 		model.SetUpsert(true)
 		model.SetFilter(bson.M{"path": node.Root(), "version": node.Version, "uid": node.UID})
-		model.SetUpdate(doc)
+		model.SetUpdate(bson.D{{Key: "$set", Value: doc}})
 		writeModels = append(writeModels, model)
 	}
 	_, err = col.BulkWrite(context.Background(), writeModels)

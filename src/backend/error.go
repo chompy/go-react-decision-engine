@@ -8,6 +8,7 @@ var (
 	ErrUserNotFound        = errors.New("user not found")
 	ErrUserNotOnTeam       = errors.New("user does not belong to team")
 	ErrInvalidCredentials  = errors.New("invalid login credentials")
+	ErrInvalidPermission   = errors.New("user does not have permission")
 	ErrHTTPInvalidPayload  = errors.New("http invalid payload")
 	ErrHTTPInvalidSession  = errors.New("http invalid session")
 	ErrHTTPMissingParam    = errors.New("http missing query parameter")

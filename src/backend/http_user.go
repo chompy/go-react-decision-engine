@@ -84,11 +84,12 @@ func HTTPUserTeams(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		teams = append(teams, map[string]interface{}{
-			"uid":         team.UID,
-			"name":        team.Name,
-			"created":     team.Created,
-			"perm_invite": teamUser.PermInvite,
-			"perm_admin":  teamUser.PermAdmin,
+			"uid":                     team.UID,
+			"name":                    team.Name,
+			"created":                 team.Created,
+			PermTeamAdmin.Name():      teamUser.Permission.Has(PermTeamAdmin),
+			PermTeamInvite.Name():     teamUser.Permission.Has(PermTeamInvite),
+			PermTeamCreateForm.Name(): teamUser.Permission.Has(PermTeamCreateForm),
 		})
 	}
 	// send success response
@@ -96,4 +97,40 @@ func HTTPUserTeams(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Data:    teams,
 	}, http.StatusOK)
+}
+
+func httpUserCheckPermission(r *http.Request, perm UserPermission) bool {
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	if user == nil {
+		return false
+	}
+	if user.Permission.Has(PermGlobalAdmin) {
+		return true
+	}
+	return user.Permission.Has(perm)
+}
+
+func httpUserCheckTeamPermission(r *http.Request, teamUid string, perm UserPermission) bool {
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	if user == nil {
+		return false
+	}
+	if user.Permission.Has(PermGlobalAdmin) {
+		return true
+	}
+	userTeams, err := user.FetchTeams()
+	if err != nil {
+		return false
+	}
+	for _, userTeam := range userTeams {
+		if userTeam.Team == teamUid {
+			if userTeam.Permission.Has(PermTeamAdmin) {
+				return true
+			}
+			return userTeam.Permission.Has(perm)
+		}
+	}
+	return false
 }

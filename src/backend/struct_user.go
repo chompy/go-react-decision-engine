@@ -6,20 +6,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserType int
-
-const (
-	UserTypeNone   UserType = 0 // UserTypeNone is a non user.
-	UserTypeNormal UserType = 1 // UserTypeNormal is a standard user.
-	UserTypeAdmin  UserType = 2 // UserTypeAdmin is an admin user.
-)
-
 type User struct {
-	UID      string    `json:"uid"`
-	Email    string    `json:"email"`
-	Password []byte    `json:"-"`
-	Created  time.Time `json:"created"`
-	Type     UserType  `json:"type"`
+	UID        string         `json:"uid"`
+	Created    time.Time      `json:"created"`
+	Modified   time.Time      `json:"modified"`
+	Email      string         `json:"email"`
+	Password   []byte         `json:"-"`
+	Permission UserPermission `json:"permission"`
 }
 
 func FetchUserByUID(uid string) (*User, error) {
@@ -29,11 +22,11 @@ func FetchUserByUID(uid string) (*User, error) {
 		return nil, err
 	}
 	return &User{
-		UID:      "USER1",
-		Email:    "admin@example.com",
-		Password: hashedPw,
-		Created:  time.Now(),
-		Type:     UserTypeAdmin,
+		UID:        "USER1",
+		Email:      "admin@example.com",
+		Password:   hashedPw,
+		Created:    time.Now(),
+		Permission: PermGlobalAdmin,
 	}, nil
 }
 
@@ -63,7 +56,6 @@ func (u *User) CheckPassword(password string) error {
 func (u *User) FetchTeams() ([]*TeamUser, error) {
 	t, _ := FetchTeamByUID("TEAM1")
 	t2, _ := FetchTeamByUID("TEAM2")
-
 	out := make([]*TeamUser, 0)
 	tu, err := t.FetchUsers()
 	if err != nil {

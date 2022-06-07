@@ -6,13 +6,13 @@ type Team struct {
 	UID     string    `json:"uid"`
 	Name    string    `json:"name"`
 	Created time.Time `json:"created"`
+	Creator string    `json:"creator"`
 }
 
 type TeamUser struct {
-	User       string `json:"user"`
-	Team       string `json:"team"`
-	PermInvite bool   `json:"perm_invite"`
-	PermAdmin  bool   `json:"perm_admin"`
+	User       string         `json:"user"`
+	Team       string         `json:"team"`
+	Permission UserPermission `json:"permission"`
 }
 
 func FetchTeamByUID(uid string) (*Team, error) {
@@ -21,6 +21,7 @@ func FetchTeamByUID(uid string) (*Team, error) {
 		UID:     uid,
 		Name:    "Test Team {" + uid + "}",
 		Created: time.Now(),
+		Creator: "USER1",
 	}, nil
 }
 
@@ -30,8 +31,7 @@ func (t *Team) FetchUsers() ([]*TeamUser, error) {
 		&TeamUser{
 			User:       "USER1",
 			Team:       t.UID,
-			PermInvite: true,
-			PermAdmin:  true,
+			Permission: PermTeamAdmin,
 		},
 	}, nil
 }

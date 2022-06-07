@@ -1,9 +1,17 @@
 package main
 
+import (
+	"net/http"
+	"strconv"
+	"time"
+)
+
 type HTTPNodeTopPayload struct {
-	Team string
-	Form string
-	Type string
+	UID   string `json:"uid"`
+	Team  string `json:"team"`
+	Form  string `json:"form"`
+	Type  string `json:"type"`
+	Label string `json:"label"`
 }
 
 type HTTPNodePayload struct {
@@ -11,6 +19,123 @@ type HTTPNodePayload struct {
 	Type  string        `json:"type"`
 	Form  string        `json:"form"`
 	Nodes []interface{} `json:"nodes"`
+}
+
+func HTTPNodeTopNew(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPNodeTopPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// payload must include type
+	if payload.Type == "" {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	// params
+	now := time.Now()
+	nodeType := NodeForm
+	team := payload.Team
+	parent := payload.Team
+	perm := PermTeamCreateForm
+	switch payload.Type {
+	case string(NodeForm):
+		{
+			// payload must include team
+			if payload.Team == "" {
+				HTTPSendError(w, ErrHTTPInvalidPayload)
+				return
+			}
+			break
+		}
+	case string(NodeDocument):
+		{
+			// payload must include form
+			if payload.Form == "" {
+				HTTPSendError(w, ErrHTTPInvalidPayload)
+				return
+			}
+			nodeType = NodeDocument
+			parent = payload.Form
+			// fetch related form to ensure doc has form and to get team
+			nodeForm, err := DatabaseNodeTopFetch(payload.Form)
+			if err != nil {
+				HTTPSendError(w, err)
+				return
+			}
+			team = nodeForm.Parent
+			break
+		}
+	}
+	// check permission
+	if team == "" || !httpUserCheckTeamPermission(r, team, perm) {
+		HTTPSendError(w, ErrInvalidPermission)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	if user == nil {
+		HTTPSendError(w, ErrInvalidPermission)
+		return
+	}
+	// create
+	nodeTop := NodeTop{
+		UID:      generateUID(),
+		Created:  now,
+		Modified: now,
+		Creator:  user.UID,
+		Modifier: user.UID,
+		Type:     nodeType,
+		Parent:   parent,
+		Label:    payload.Label,
+	}
+	if err := DatabaseNodeTopStore(&nodeTop); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// success
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    nodeTop,
+	}, http.StatusOK)
+}
+
+func HTTPNodeTopList(w http.ResponseWriter, r *http.Request) {
+	nodeType := r.URL.Query().Get("type")
+	parent := ""
+	switch nodeType {
+	case string(NodeForm):
+		{
+			parent = r.URL.Query().Get("team")
+			break
+		}
+	case string(NodeDocument):
+		{
+			parent = r.URL.Query().Get("form")
+			break
+		}
+	default:
+		{
+			HTTPSendError(w, ErrHTTPMissingParam)
+			return
+		}
+	}
+	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	if offset < 0 {
+		offset = 0
+	}
+	res, total, err := DatabaseNodeTopList(parent, NodeType(nodeType), offset)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Count:   total,
+		Data:    res,
+	}, http.StatusOK)
 }
 
 /*func httpPayloadToNode(payload interface{}) (Node, NodeData) {

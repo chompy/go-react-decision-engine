@@ -64,6 +64,21 @@ func TestStoreFetchNodeTop(t *testing.T) {
 		t.Errorf("unexpected doc uid, expected %s, got %s", topDoc.UID, docRes[0].UID)
 		return
 	}
+	// delete
+	if err := DatabaseNodeTopDelete(topForm.UID); err != nil {
+		t.Error(err)
+		return
+	}
+	// check
+	_, docCount, err = DatabaseNodeTopList(topForm.UID, NodeDocument, 0)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if docCount != 1 {
+		t.Errorf("expected one top node")
+		return
+	}
 }
 
 func TestStoreFetchNodeVersion(t *testing.T) {
@@ -148,6 +163,21 @@ func TestStoreFetchNodeVersion(t *testing.T) {
 		t.Errorf("expected node version list to contain 2 items, got %d", count)
 		return
 	}
+	// delete ver 2
+	if err := DatabaseNodeVersionDelete(topForm.UID, ver); err != nil {
+		t.Error(err)
+		return
+	}
+	// check latest version
+	ver, err = DatabaseNodeVersionLatest(topForm.UID)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if ver != 1 {
+		t.Errorf("unexpected version, expected 1, got %d", ver)
+		return
+	}
 }
 
 func TestStoreFetchNode(t *testing.T) {
@@ -157,7 +187,6 @@ func TestStoreFetchNode(t *testing.T) {
 	}
 	defer DatabaseClose()
 	testCleanDatabase()
-
 	// create form top
 	team := "TESTTEAMA"
 	topForm := NodeTop{
@@ -214,5 +243,50 @@ func TestStoreFetchNode(t *testing.T) {
 		t.Errorf("unexpected UID value from 3rd item in data node list, expected 'node-a-1-2', got %s", dbNodeList[2].UID)
 		return
 	}
-
+	// overwrite existing
+	nodeList[1].Data["label"] = "Testing 123"
+	if err := DatabaseNodeStore([]*Node{nodeList[1]}); err != nil {
+		t.Error(err)
+		return
+	}
+	// refetch test nodes from database
+	dbNodeList, err = DatabaseNodeList(topForm.UID, ver, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if dbNodeList[1].Data["label"] != nodeList[1].Data["label"] {
+		t.Errorf("unexpected node label, expected %s, got %s", nodeList[1].Data["label"], dbNodeList[1].Data["label"])
+		return
+	}
+	// delete existing
+	if err := DatabaseNodeDelete(topForm.UID, ver, []string{nodeList[2].UID}); err != nil {
+		t.Error(err)
+		return
+	}
+	// refetch test nodes from database
+	dbNodeList, err = DatabaseNodeList(topForm.UID, ver, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(dbNodeList) != len(nodeList)-1 {
+		t.Errorf("expected length of database node list to decrease by one")
+		return
+	}
+	// delete version
+	if err := DatabaseNodeVersionDelete(topForm.UID, ver); err != nil {
+		t.Error(err)
+		return
+	}
+	// refetch test nodes from database
+	dbNodeList, err = DatabaseNodeList(topForm.UID, ver, "")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(dbNodeList) != 0 {
+		t.Errorf("expected length of database node list to be be zero")
+		return
+	}
 }

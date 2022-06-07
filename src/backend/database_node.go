@@ -226,6 +226,40 @@ func DatabaseNodeTopStore(nodeTop *NodeTop) error {
 	return err
 }
 
+func DatabaseNodeTopDelete(uid string) error {
+	if uid == "" {
+		return ErrNoData
+	}
+	// delete node top
+	col, err := DatabaseCollectionFromData(NodeTop{})
+	if err != nil {
+		return err
+	}
+	_, err = col.DeleteOne(context.Background(), bson.M{"uid": uid})
+	if err != nil {
+		return err
+	}
+	// delete node version
+	col, err = DatabaseCollectionFromData(NodeVersion{})
+	if err != nil {
+		return err
+	}
+	_, err = col.DeleteOne(context.Background(), bson.M{"uid": uid})
+	if err != nil {
+		return err
+	}
+	// delete nodes
+	col, err = DatabaseCollectionFromData(Node{})
+	if err != nil {
+		return err
+	}
+	_, err = col.DeleteOne(context.Background(), bson.M{"path": uid})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func DatabaseNodeVersionNew(data *NodeVersion) (int, error) {
 	if data == nil || data.UID == "" {
 		return 0, ErrNodeMissingUID
@@ -282,6 +316,29 @@ func DatabaseNodeVersionUpdate(data *NodeVersion) error {
 	return err
 }
 
+func DatabaseNodeVersionDelete(uid string, version int) error {
+	if uid == "" || version <= 0 {
+		return ErrNoData
+	}
+	// get node version collection
+	col, err := DatabaseCollectionFromData(NodeVersion{})
+	if err != nil {
+		return err
+	}
+	// delete version node
+	_, err = col.DeleteOne(context.Background(), bson.M{"uid": uid, "version": version})
+	if err != nil {
+		return err
+	}
+	// delete nodes
+	col, err = DatabaseCollectionFromData(Node{})
+	if err != nil {
+		return err
+	}
+	_, err = col.DeleteMany(context.Background(), bson.M{"path": uid, "version": version})
+	return err
+}
+
 func DatabaseNodeStore(nodes []*Node) error {
 	// check and adjust node list
 	if nodes == nil {
@@ -304,6 +361,7 @@ func DatabaseNodeStore(nodes []*Node) error {
 	if err != nil {
 		return err
 	}
+	// bulk write
 	writeModels := make([]mongo.WriteModel, 0)
 	for _, node := range nodes {
 		// generate bson document
@@ -319,5 +377,25 @@ func DatabaseNodeStore(nodes []*Node) error {
 		writeModels = append(writeModels, model)
 	}
 	_, err = col.BulkWrite(context.Background(), writeModels)
+	return err
+}
+
+func DatabaseNodeDelete(root string, version int, uids []string) error {
+	if root == "" || version <= 0 || uids == nil {
+		return ErrNoData
+	}
+	// get collection
+	col, err := DatabaseCollectionFromData(Node{})
+	if err != nil {
+		return err
+	}
+	// bulk delete
+	deleteModels := make([]mongo.WriteModel, 0)
+	for _, uid := range uids {
+		model := mongo.NewDeleteOneModel()
+		model.SetFilter(bson.M{"path": root, "uid": uid, "version": version})
+		deleteModels = append(deleteModels, model)
+	}
+	_, err = col.BulkWrite(context.Background(), deleteModels)
 	return err
 }

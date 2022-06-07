@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type HTTPNodeTopPayload struct {
@@ -14,14 +17,19 @@ type HTTPNodeTopPayload struct {
 	Label string `json:"label"`
 }
 
-type HTTPNodePayload struct {
-	Team  string        `json:"team"`
-	Type  string        `json:"type"`
-	Form  string        `json:"form"`
-	Nodes []interface{} `json:"nodes"`
+type HTTPNodeVersionPayload struct {
+	UID     string `json:"uid"`
+	Version int    `json:"version"`
+	State   string `json:"state"`
 }
 
-func HTTPNodeTopNew(w http.ResponseWriter, r *http.Request) {
+type HTTPNodePayload struct {
+	UID     string        `json:"uid"`
+	Version int           `json:"version"`
+	Nodes   []interface{} `json:"nodes"`
+}
+
+func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 	// parse payload
 	payload := HTTPNodeTopPayload{}
 	if err := HTTPReadPayload(r, &payload); err != nil {
@@ -34,6 +42,10 @@ func HTTPNodeTopNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// params
+	uid := payload.UID
+	if uid == "" {
+		uid = generateUID()
+	}
 	now := time.Now()
 	nodeType := NodeForm
 	team := payload.Team
@@ -46,6 +58,9 @@ func HTTPNodeTopNew(w http.ResponseWriter, r *http.Request) {
 			if payload.Team == "" {
 				HTTPSendError(w, ErrHTTPInvalidPayload)
 				return
+			}
+			if payload.UID != "" {
+				perm = PermTeamEditForm
 			}
 			break
 		}
@@ -80,9 +95,21 @@ func HTTPNodeTopNew(w http.ResponseWriter, r *http.Request) {
 		HTTPSendError(w, ErrInvalidPermission)
 		return
 	}
+	// if uid provided then expect top node to already exist
+	if payload.UID != "" {
+		_, err := DatabaseNodeTopFetch(payload.UID)
+		if err != nil {
+			if errors.Is(err, mongo.ErrNilDocument) {
+				HTTPSendError(w, ErrNodeTopNotFound)
+				return
+			}
+			HTTPSendError(w, err)
+			return
+		}
+	}
 	// create
 	nodeTop := NodeTop{
-		UID:      generateUID(),
+		UID:      uid,
 		Created:  now,
 		Modified: now,
 		Creator:  user.UID,

@@ -19,6 +19,7 @@ var (
 	ErrNodeMissingType     = errors.New("node missing type")
 	ErrNodeNotRoot         = errors.New("expected root node")
 	ErrNodeMissingRoot     = errors.New("root node not defined in node list")
+	ErrNodeTopNotFound     = errors.New("top node not found")
 	ErrNodeVersionMismatch = errors.New("version mismatch in node list")
 	ErrNodeVersionNotFound = errors.New("node version not found")
 )

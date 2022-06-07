@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"testing"
 )
@@ -38,7 +37,6 @@ func testHTTPRequest(payload interface{}) (MockResponseWriter, *http.Request) {
 }
 
 func TestHTTPNodeTopNew(t *testing.T) {
-
 	// init database
 	if err := DatabaseOpen(testGetConfig()); err != nil {
 		t.Error(err)
@@ -55,7 +53,7 @@ func TestHTTPNodeTopNew(t *testing.T) {
 		Label: "Test Form A",
 	}
 	w, r := testHTTPRequest(&payload)
-	HTTPNodeTopNew(w, r)
+	HTTPNodeTopStore(w, r)
 	// check response
 	if !w.Response.Success {
 		t.Errorf("expected success")
@@ -66,7 +64,6 @@ func TestHTTPNodeTopNew(t *testing.T) {
 	r.URL.Query().Add("type", string(NodeForm))
 	r.URL.Query().Add("team", team)
 	r.URL, _ = r.URL.Parse(fmt.Sprintf("/?type=%s&team=%s", string(NodeForm), team))
-	log.Println(r.URL.Query())
 	HTTPNodeTopList(w, r)
 	// check response
 	if !w.Response.Success {
@@ -76,5 +73,28 @@ func TestHTTPNodeTopNew(t *testing.T) {
 	if w.Response.Count != 1 {
 		t.Errorf("expected response count to be 1, got %d", w.Response.Count)
 		return
+	}
+	// get uid
+	uid := w.Response.Data.([]interface{})[0].(map[string]interface{})["uid"].(string)
+	if uid == "" {
+		t.Errorf("expected uid in response")
+		return
+	}
+	// update
+	payload.UID = uid
+	payload.Label = "Test Form A1"
+	w, r = testHTTPRequest(&payload)
+	HTTPNodeTopStore(w, r)
+	nodeList, _, err := DatabaseNodeTopList(team, NodeForm, 0)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if len(nodeList) != 1 {
+		t.Errorf("expected one item in top node list")
+		return
+	}
+	if nodeList[0].Label != payload.Label {
+		t.Errorf("unexpected label for top node expected %s, got %s", payload.Label, nodeList[0].Label)
 	}
 }

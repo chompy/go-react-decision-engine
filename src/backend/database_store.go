@@ -28,10 +28,6 @@ func databaseFilter(data interface{}) interface{} {
 		{
 			return bson.M{"uid": d.UID}
 		}
-	case *TeamUser:
-		{
-			return bson.M{"team": d.Team, "user": d.User}
-		}
 	}
 	return nil
 }

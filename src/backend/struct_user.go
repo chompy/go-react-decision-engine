@@ -7,12 +7,13 @@ import (
 )
 
 type User struct {
-	UID        string         `json:"uid"`
-	Created    time.Time      `json:"created"`
-	Modified   time.Time      `json:"modified"`
-	Email      string         `json:"email"`
-	Password   []byte         `json:"-"`
-	Permission UserPermission `json:"permission"`
+	UID        string         `bson:"uid" json:"uid"`
+	Created    time.Time      `bson:"created" json:"created"`
+	Modified   time.Time      `bson:"modified" json:"modified"`
+	Email      string         `bson:"email" json:"email"`
+	Password   []byte         `bson:"password" json:"-"`
+	Team       string         `bson:"team" json:"team"`
+	Permission UserPermission `bson:"permission" json:"permission"`
 }
 
 func FetchUserByUID(uid string) (*User, error) {
@@ -53,43 +54,8 @@ func (u *User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u *User) FetchTeams() ([]*TeamUser, error) {
-	t, _ := FetchTeamByUID("TEAM1")
-	t2, _ := FetchTeamByUID("TEAM2")
-	out := make([]*TeamUser, 0)
-	tu, err := t.FetchUsers()
-	if err != nil {
-		return nil, err
-	}
-	out = append(out, tu...)
-	tu, err = t2.FetchUsers()
-	if err != nil {
-		return nil, err
-	}
-	out = append(out, tu...)
-	return out, nil
-}
-
-func (u *User) IsOnTeam(team *Team) bool {
-	return true
-}
-
-func (u *User) FetchTeamPermissions(team *Team) UserPermission {
-	return PermTeamAdmin
-}
-
-func (u *User) HasPermission(perm UserPermission, team *Team) bool {
-	if u.Permission.Has(PermGlobalAdmin) || u.Permission.Has(perm) {
-		return true
-	}
-	if team == nil {
-		return false
-	}
-	if team.Creator == u.UID {
-		return true
-	}
-	// TODO
-	return true
+func (u *User) HasPermission(perm UserPermission) bool {
+	return u.Permission.Has(PermAdmin) || u.Permission.Has(perm)
 }
 
 func (u *User) HasEditPermission(o interface{}) bool {

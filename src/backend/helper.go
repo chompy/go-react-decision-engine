@@ -37,10 +37,6 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 		{
 			return "team"
 		}
-	case TeamUser, *TeamUser:
-		{
-			return "team_user"
-		}
 	}
 	return ""
 }
@@ -83,10 +79,6 @@ func getEmptyStruct(dataType interface{}) interface{} {
 	case Team, *Team:
 		{
 			return &Team{}
-		}
-	case TeamUser, *TeamUser:
-		{
-			return &TeamUser{}
 		}
 	}
 	return nil

@@ -3,15 +3,19 @@ package main
 type UserPermission int
 
 const (
-	PermGlobalAdmin        UserPermission = 1 << iota // Global admin, full access to everything, all teams.
-	PermTeamAdmin                                     // Team admin, full access to single team.
-	PermTeamInvite                                    // Ability to invite others to a team.
-	PermTeamCreateForm                                // Ability to create forms for a team, creator can edit/delete their own forms.
-	PermTeamEditForm                                  // Ability to edit all existing forms for a team.
-	PermTeamDeleteForm                                // Ability to delete all existing forms for a team.
-	PermTeamCreateDocument                            // Ability to create documents for a team.
-	PermTeamEditDocument                              // Ability to edit all existing documents for a team.
-	PermTeamDeleteDocument                            // Abiltiy to delete all existing documents for a team.
+	PermAdmin            UserPermission = 1 << iota // Full access to everything in team.
+	PermCreateUser                                  // Create new user for team.
+	PermEditUser                                    // Edit user on team.
+	PermDeleteUser                                  // Delete user.
+	PermCreateForm                                  // Create form.
+	PermEditForm                                    // Edit existing form.
+	PermDeleteForm                                  // Delete existing form.
+	PermCreateDocument                              // Create document.
+	PermEditDocument                                // Edit existing document.
+	PermDeleteDocument                              // Delete existing document.
+	PermCreateSubmission                            // Create a form submission.
+	PermEditSubmission                              // Edit existing submission.
+	PermDeleteSubmission                            // Delete existing submission.
 )
 
 func (p UserPermission) Add(flag UserPermission) UserPermission {
@@ -28,41 +32,57 @@ func (p UserPermission) Has(flag UserPermission) bool {
 
 func (p UserPermission) Name() string {
 	switch p {
-	case PermGlobalAdmin:
+	case PermAdmin:
 		{
-			return "global_admin"
+			return "admin"
 		}
-	case PermTeamAdmin:
+	case PermCreateUser:
 		{
-			return "team_admin"
+			return "create_user"
 		}
-	case PermTeamInvite:
+	case PermEditUser:
 		{
-			return "team_invite"
+			return "edit_user"
 		}
-	case PermTeamCreateForm:
+	case PermDeleteUser:
 		{
-			return "team_create_form"
+			return "delete_user"
 		}
-	case PermTeamEditForm:
+	case PermCreateForm:
 		{
-			return "team_edit_form"
+			return "create_form"
 		}
-	case PermTeamDeleteForm:
+	case PermEditForm:
 		{
-			return "team_delete_form"
+			return "edit_form"
 		}
-	case PermTeamCreateDocument:
+	case PermDeleteForm:
 		{
-			return "team_create_document"
+			return "delete_form"
 		}
-	case PermTeamEditDocument:
+	case PermCreateDocument:
 		{
-			return "team_edit_document"
+			return "create_document"
 		}
-	case PermTeamDeleteDocument:
+	case PermEditDocument:
 		{
-			return "team_delete_document"
+			return "edit_document"
+		}
+	case PermDeleteDocument:
+		{
+			return "delete_document"
+		}
+	case PermCreateSubmission:
+		{
+			return "create_submission"
+		}
+	case PermEditSubmission:
+		{
+			return "edit_submission"
+		}
+	case PermDeleteSubmission:
+		{
+			return "delete_suibmission"
 		}
 	}
 	return ""
@@ -70,41 +90,57 @@ func (p UserPermission) Name() string {
 
 func UserPermissionFromName(name string) UserPermission {
 	switch name {
-	case PermGlobalAdmin.Name():
+	case PermAdmin.Name():
 		{
-			return PermGlobalAdmin
+			return PermAdmin
 		}
-	case PermTeamAdmin.Name():
+	case PermCreateUser.Name():
 		{
-			return PermTeamAdmin
+			return PermCreateUser
 		}
-	case PermTeamInvite.Name():
+	case PermEditUser.Name():
 		{
-			return PermTeamInvite
+			return PermEditUser
 		}
-	case PermTeamCreateForm.Name():
+	case PermDeleteUser.Name():
 		{
-			return PermTeamCreateForm
+			return PermDeleteUser
 		}
-	case PermTeamEditForm.Name():
+	case PermCreateForm.Name():
 		{
-			return PermTeamEditForm
+			return PermCreateForm
 		}
-	case PermTeamDeleteForm.Name():
+	case PermEditForm.Name():
 		{
-			return PermTeamDeleteForm
+			return PermEditForm
 		}
-	case PermTeamCreateDocument.Name():
+	case PermDeleteForm.Name():
 		{
-			return PermTeamCreateDocument
+			return PermDeleteForm
 		}
-	case PermTeamEditDocument.Name():
+	case PermCreateDocument.Name():
 		{
-			return PermTeamEditDocument
+			return PermCreateDocument
 		}
-	case PermTeamDeleteDocument.Name():
+	case PermEditDocument.Name():
 		{
-			return PermTeamDeleteDocument
+			return PermEditDocument
+		}
+	case PermDeleteDocument.Name():
+		{
+			return PermDeleteDocument
+		}
+	case PermCreateSubmission.Name():
+		{
+			return PermCreateSubmission
+		}
+	case PermEditSubmission.Name():
+		{
+			return PermEditSubmission
+		}
+	case PermDeleteSubmission.Name():
+		{
+			return PermDeleteSubmission
 		}
 	}
 	return 0

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/md5"
+	"fmt"
 	"time"
 )
 
@@ -42,73 +44,47 @@ type NodeVersion struct {
 	Modifier string    `bson:"modifier" json:"modifier"`
 	Version  int       `bson:"version" json:"version"`
 	State    NodeState `bson:"state" json:"state"`
+	Tree     Node      `bson:"tree" json:"tree"`
 }
 
 // Node is a node in a form or document.
 type Node struct {
-	UID     string                 `bson:"uid" json:"uid"`
-	Version int                    `bson:"version" json:"version"`
-	ERoot   string                 `bson:"-" json:"root,omitempty"`
-	EParent string                 `bson:"-" json:"parent,omitempty"`
-	Path    []string               `bson:"path" json:"path"`
-	Type    string                 `bson:"type" json:"type"`
-	Tags    []string               `bson:"tags" json:"tags"`
-	Data    map[string]interface{} `bson:"data" json:"data"`
+	UID      string   `bson:"uid" json:"uid"`
+	Type     string   `bson:"type" json:"type"`
+	Tags     []string `bson:"tags" json:"tags"`
+	Children []Node   `bson:"children" json:"children"`
+	Data     NodeData `bson:"data" json:"data"`
 }
 
-func (n Node) Root() string {
-	if len(n.Path) > 0 {
-		return n.Path[len(n.Path)-1]
+// Count returns the number of nodes under the given node.
+func (n Node) Count() int {
+	out := 1
+	for _, c := range n.Children {
+		out += c.Count()
 	}
-	return n.ERoot
+	return out
 }
 
-func (n Node) Parent() string {
-	if len(n.Path) > 0 {
-		return n.Path[0]
+// Hash returns a hash unique to node and its children. Used to test equally of two trees.
+func (n Node) Hash() string {
+	out := n.UID + n.Type
+	for _, tag := range n.Tags {
+		out += tag
 	}
-	return n.EParent
-}
-
-func NodeListResolvePathes(nodes []*Node) {
-	var crawlParents func(currentNode *Node) []string
-	crawlParents = func(currentNode *Node) []string {
-		out := make([]string, 0)
-		if currentNode.EParent == "" {
-			return out
-		}
-		for _, node := range nodes {
-			if node.UID == currentNode.EParent {
-				out = append(out, node.UID)
-				out = append(out, crawlParents(node)...)
+	for k, v := range n.Data {
+		switch v := v.(type) {
+		case string:
+			{
+				out += k + v
 				break
 			}
 		}
-		return out
 	}
-	for _, node := range nodes {
-		if node.ERoot == "" || node.ERoot == node.UID || node.EParent == "" {
-			continue
-		}
-		node.Path = make([]string, 0)
-		node.Path = append(node.Path, crawlParents(node)...)
-		node.Path = append(node.Path, node.ERoot)
+	for _, c := range n.Children {
+		out += c.Hash()
 	}
+	return fmt.Sprintf("%x", md5.Sum([]byte(out)))
 }
 
-func NodeListCheck(nodes []*Node) error {
-	ver := nodes[0].Version
-	root := nodes[0].Root()
-	if root == "" {
-		return ErrNodeMissingRoot
-	}
-	for _, node := range nodes {
-		if node.UID == "" {
-			return ErrNodeMissingUID
-		}
-		if ver != node.Version {
-			return ErrNodeVersionMismatch
-		}
-	}
-	return nil
-}
+// NodeData is data related to a node.
+type NodeData map[string]interface{}

@@ -38,11 +38,11 @@ func testHTTPRequest(payload interface{}) (MockResponseWriter, *http.Request) {
 
 func TestHTTPNodeTopNew(t *testing.T) {
 	// init database
-	if err := DatabaseOpen(testGetConfig()); err != nil {
+	if err := databaseOpen(testGetConfig()); err != nil {
 		t.Error(err)
 		return
 	}
-	defer DatabaseClose()
+	defer databaseClose()
 	testCleanDatabase()
 	httpCleanUpSessions()
 	team := "TESTTEAMA"

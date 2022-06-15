@@ -23,12 +23,6 @@ type HTTPNodeVersionPayload struct {
 	State   string `json:"state"`
 }
 
-type HTTPNodePayload struct {
-	UID     string        `json:"uid"`
-	Version int           `json:"version"`
-	Nodes   []interface{} `json:"nodes"`
-}
-
 func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 	// parse payload
 	payload := HTTPNodeTopPayload{}
@@ -83,11 +77,6 @@ func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	// check permission
-	if team == "" || !httpUserCheckTeamPermission(r, team, perm) {
-		HTTPSendError(w, ErrInvalidPermission)
-		return
-	}
 	// get user
 	s := HTTPGetSession(r)
 	user := s.getUser()
@@ -96,8 +85,10 @@ func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// if uid provided then expect top node to already exist
+	var nodeTopExisting *NodeTop
 	if payload.UID != "" {
-		_, err := DatabaseNodeTopFetch(payload.UID)
+		var err error
+		nodeTopExisting, err = DatabaseNodeTopFetch(payload.UID)
 		if err != nil {
 			if errors.Is(err, mongo.ErrNilDocument) {
 				HTTPSendError(w, ErrNodeTopNotFound)
@@ -107,12 +98,24 @@ func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	// create
+	// check permission, bypass if user is creator of the existing
+	if (nodeTopExisting != nil && nodeTopExisting.Creator != user.UID) && !httpUserCheckTeamPermission(r, team, perm) {
+		HTTPSendError(w, ErrInvalidPermission)
+		return
+	}
+	// creation time / creator
+	creator := user.UID
+	created := now
+	if nodeTopExisting != nil {
+		creator = nodeTopExisting.Creator
+		created = nodeTopExisting.Created
+	}
+	// create/update
 	nodeTop := NodeTop{
 		UID:      uid,
-		Created:  now,
+		Created:  created,
 		Modified: now,
-		Creator:  user.UID,
+		Creator:  creator,
 		Modifier: user.UID,
 		Type:     nodeType,
 		Parent:   parent,
@@ -127,6 +130,9 @@ func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 		Data:    nodeTop,
 	}, http.StatusOK)
+}
+
+func HTTPNodeTopDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func HTTPNodeTopList(w http.ResponseWriter, r *http.Request) {
@@ -165,158 +171,94 @@ func HTTPNodeTopList(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
-/*func httpPayloadToNode(payload interface{}) (Node, NodeData) {
-	node := Node{}
-	nodeData := NodeData{}
-	payloadRaw, err := json.Marshal(payload)
-	if err != nil {
-		return node, nodeData
-	}
-	json.Unmarshal(payloadRaw, &node)
-	json.Unmarshal(payloadRaw, &nodeData)
-	return node, nodeData
-}
-
-func HTTPNodeList(w http.ResponseWriter, r *http.Request) {
-	// query params
-	team := r.URL.Query().Get("team")
-	typeName := r.URL.Query().Get("type")
-	offsetStr := r.URL.Query().Get("offset")
-	if team == "" || typeName == "" {
-		HTTPSendError(w, ErrHTTPMissingParam)
-		return
-	}
-	// get offset
-	offset := 0
-	if offsetStr != "" {
-		offset, _ = strconv.Atoi(offsetStr)
-	}
-	// check session
-	s := HTTPGetSession(r)
-	if s.uid == "" {
-		HTTPSendError(w, ErrHTTPLoginRequired)
-		return
-	}
-	// check team
-	user := s.getUser()
-	if !user.IsOnTeam(team) {
-		HTTPSendError(w, ErrUserNotOnTeam)
-		return
-	}
-	// perform fetch
-	res, err := DatabaseNodeList(team, getNodeTypeFromName(typeName), offset)
-	if err != nil {
-		HTTPSendError(w, err)
-		return
-	}
-	HTTPSendMessage(w, &HTTPMessage{
-		Success: true,
-		Data:    res,
-	}, http.StatusOK)
-}
-
-func HTTPNodeNew(w http.ResponseWriter, r *http.Request) {
-	// read payload
-	payload := HTTPNodePayload{}
+func HTTPNodeVersionStore(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPNodeVersionPayload{}
 	if err := HTTPReadPayload(r, &payload); err != nil {
 		HTTPSendError(w, err)
 		return
 	}
-	// validate payload
-	if payload.Team == "" || payload.Type == "" {
-		HTTPSendError(w, ErrHTTPMissingParam)
+	// payload must include uid
+	if payload.UID == "" {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
 		return
 	}
-	// check session
+	// get user
 	s := HTTPGetSession(r)
-	if s.uid == "" {
-		HTTPSendError(w, ErrHTTPLoginRequired)
-		return
-	}
-	// check team
 	user := s.getUser()
-	if !user.IsOnTeam(payload.Team) {
-		HTTPSendError(w, ErrUserNotOnTeam)
+	if user == nil {
+		HTTPSendError(w, ErrInvalidPermission)
 		return
 	}
-	// must contain at least one node
-	if payload.Nodes == nil {
-		HTTPSendError(w, ErrHTTPMissingParam)
-		return
-	}
-	// read first node, make sure it is a root node
-	rootNode, _ := httpPayloadToNode(payload.Nodes[0])
-	if rootNode.Type != "root" {
-		HTTPSendError(w, ErrNodeNotRoot)
-		return
-	}
-	// get top node type
-	topNode := getNodeTypeFromName(payload.Type)
-	// check if top node is in database
-	var dbRes interface{} = nil
-	if rootNode.UID != "" {
-		var err error
-		dbRes, err = DatabaseNodeFetch(rootNode.UID, topNode)
-		if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
-			HTTPSendError(w, err)
-			return
-		}
-	}
-	// build top node
-	switch t := topNode.(type) {
-	case *NodeTopForm:
-		{
-			if dbRes == nil {
-				t.UID = generateUID()
-			}
-			t.Created = rootNode.Created
-			t.Modified = time.Now()
-			t.Team = payload.Team
-			t.Label = rootNode.Label
-			if dbRes != nil {
-				t.UID = dbRes.(*NodeTopForm).UID
-				t.Created = dbRes.(*NodeTopForm).Created
-			}
-			break
-		}
-	case *NodeTopDocument:
-		{
-			if dbRes == nil {
-				t.UID = generateUID()
-			}
-			t.Created = rootNode.Created
-			t.Modified = time.Now()
-			t.Form = payload.Form
-			t.Label = rootNode.Label
-			if dbRes != nil {
-				t.UID = dbRes.(*NodeTopForm).UID
-				t.Created = dbRes.(*NodeTopForm).Created
-			}
-			break
-		}
-	}
-
-	// update top level node
-	if err := DatabaseNodeStore(topNode); err != nil {
+	// fetch node top, make sure it exists
+	nodeTop, err := DatabaseNodeTopFetch(payload.UID)
+	if err != nil {
 		HTTPSendError(w, err)
 		return
 	}
-	// update children
-
-	uid, ver := getNodeUidVersion(topNode)
-
-	for _, rawNode := range payload.Nodes[1:] {
-		node, nodeData := httpPayloadToNode(rawNode)
-
-		if err := DatabaseNodeStore(node); err != nil {
+	if nodeTop == nil {
+		HTTPSendError(w, ErrNodeTopNotFound)
+		return
+	}
+	// fetch existing version + check permission
+	var existingNodeVersion *NodeVersion
+	perm := PermTeamCreateDocument
+	if payload.Version > 0 {
+		perm = PermTeamEditDocument
+		existingNodeVersion, err = DatabaseNodeVersionFetch(payload.UID, payload.Version)
+		if err != nil {
 			HTTPSendError(w, err)
 			return
 		}
-		if err := DatabaseNodeStore(nodeData); err != nil {
-			HTTPSendError(w, err)
+		if existingNodeVersion == nil {
+			HTTPSendError(w, ErrNodeVersionNotFound)
 			return
 		}
 	}
+	if nodeTop.Creator != user.UID && (existingNodeVersion == nil || existingNodeVersion.Creator != user.UID) && !httpUserCheckTeamPermission(r, nodeTop.Parent, perm) {
+		HTTPSendError(w, ErrInvalidPermission)
+		return
+	}
+	// params
+	state := payload.State
+	if state == "" {
+		state = string(NodeDraft)
+	}
+	now := time.Now()
+	created := now
+	creator := user.UID
+	if existingNodeVersion != nil {
+		created = existingNodeVersion.Created
+		creator = existingNodeVersion.Creator
+	}
+	nodeVersion := &NodeVersion{
+		UID:      payload.UID,
+		Created:  created,
+		Modified: now,
+		Creator:  creator,
+		Modifier: user.UID,
+		Version:  payload.Version,
+		State:    NodeState(state),
+	}
+	// new version
+	if payload.Version <= 0 {
+		_, err = DatabaseNodeVersionNew(nodeVersion)
+		if err != nil {
+			HTTPSendError(w, err)
+			return
+		}
+		return
+	}
+	// update version
+	if err := DatabaseNodeVersionUpdate(nodeVersion); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+}
+
+func HTTPNodeVersionDelete(w http.ResponseWriter, r *http.Request) {
 
 }
-*/
+
+func HTTPNodeVersionList(w http.ResponseWriter, r *http.Request) {
+}

@@ -12,24 +12,22 @@ const dbFetchLimit = 25
 var dbClient *mongo.Client
 var dbName string
 
-func DatabaseOpen(config *Config) error {
-	ctx := context.Background()
+func databaseOpen(config *Config) error {
 	opts := options.Client().ApplyURI(config.DatabaseURI)
 	var err error
-	dbClient, err = mongo.Connect(ctx, opts)
+	dbClient, err = mongo.Connect(databaseContext(), opts)
 	dbName = config.DatabaseName
 	return err
 }
 
-func DatabaseClose() error {
+func databaseClose() error {
 	if dbClient != nil {
-		ctx := context.Background()
-		return dbClient.Disconnect(ctx)
+		return dbClient.Disconnect(databaseContext())
 	}
 	return nil
 }
 
-func DatabaseCollectionFromData(data interface{}) (*mongo.Collection, error) {
+func databaseCollectionFromData(data interface{}) (*mongo.Collection, error) {
 	if data == nil {
 		return nil, ErrNoData
 	}
@@ -41,4 +39,8 @@ func DatabaseCollectionFromData(data interface{}) (*mongo.Collection, error) {
 		return nil, ErrDBInvalidObjectType
 	}
 	return dbClient.Database(dbName).Collection(collectionName), nil
+}
+
+func databaseContext() context.Context {
+	return context.Background()
 }

@@ -15,19 +15,6 @@ func generateUID() string {
 	return strings.ToLower(base36.Encode(uint64(ut)) + base36.Encode(uint64(rand.Intn(35))))
 }
 
-func getNodeTypeFromName(name string) interface{} {
-	switch name {
-	case "form", "document", "top":
-		{
-			return &NodeTop{}
-		}
-	default:
-		{
-			return &Node{}
-		}
-	}
-}
-
 func getDatabaseCollectionNameFromData(data interface{}) string {
 	switch data.(type) {
 	case NodeType, NodeTop, *NodeTop:
@@ -38,9 +25,9 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 		{
 			return "node_version"
 		}
-	case Node, *Node:
+	case UserData, *UserData:
 		{
-			return "node"
+			return "user_data"
 		}
 	case User, *User:
 		{
@@ -58,36 +45,6 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 	return ""
 }
 
-func getNodeUidVersion(data interface{}) (string, int) {
-	switch o := data.(type) {
-	case NodeTop:
-		{
-			return o.UID, 0
-		}
-	case *NodeTop:
-		{
-			return o.UID, 0
-		}
-	case NodeVersion:
-		{
-			return o.UID, o.Version
-		}
-	case *NodeVersion:
-		{
-			return o.UID, o.Version
-		}
-	case Node:
-		{
-			return o.UID, o.Version
-		}
-	case *Node:
-		{
-			return o.UID, o.Version
-		}
-	}
-	return "", 0
-}
-
 func toBSONDoc(data interface{}) (*bson.D, error) {
 	docRaw, err := bson.Marshal(data)
 	if err != nil {
@@ -99,4 +56,38 @@ func toBSONDoc(data interface{}) (*bson.D, error) {
 		return nil, err
 	}
 	return doc, nil
+}
+
+func getEmptyStruct(dataType interface{}) interface{} {
+	switch dataType.(type) {
+	case NodeTop, *NodeTop:
+		{
+			return &NodeTop{}
+		}
+	case NodeVersion, *NodeVersion:
+		{
+			return &NodeVersion{}
+		}
+	case Node, *Node:
+		{
+			return &Node{}
+		}
+	case UserData, *UserData:
+		{
+			return &UserData{}
+		}
+	case User, *User:
+		{
+			return &User{}
+		}
+	case Team, *Team:
+		{
+			return &Team{}
+		}
+	case TeamUser, *TeamUser:
+		{
+			return &TeamUser{}
+		}
+	}
+	return nil
 }

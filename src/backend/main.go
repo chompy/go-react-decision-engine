@@ -13,10 +13,10 @@ func main() {
 	}
 	// open database
 	log.Println("Open database.")
-	if err := DatabaseOpen(&config); err != nil {
+	if err := databaseOpen(&config); err != nil {
 		panic(err)
 	}
-	defer DatabaseClose()
+	defer databaseClose()
 	log.Println("Starting backend.")
 	// start http
 	if err := HTTPStart(&config); err != nil {

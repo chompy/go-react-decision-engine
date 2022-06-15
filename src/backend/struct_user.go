@@ -70,6 +70,68 @@ func (u *User) FetchTeams() ([]*TeamUser, error) {
 	return out, nil
 }
 
-func (u *User) IsOnTeam(uid string) bool {
+func (u *User) IsOnTeam(team *Team) bool {
 	return true
+}
+
+func (u *User) FetchTeamPermissions(team *Team) UserPermission {
+	return PermTeamAdmin
+}
+
+func (u *User) HasPermission(perm UserPermission, team *Team) bool {
+	if u.Permission.Has(PermGlobalAdmin) || u.Permission.Has(perm) {
+		return true
+	}
+	if team == nil {
+		return false
+	}
+	if team.Creator == u.UID {
+		return true
+	}
+	// TODO
+	return true
+}
+
+func (u *User) HasEditPermission(o interface{}) bool {
+	switch o := o.(type) {
+	case *NodeTop:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+			switch o.Type {
+			case NodeForm:
+				{
+					team, err := FetchTeamByUID(o.Parent)
+					if err != nil {
+						return false
+					}
+					teamPerm := u.FetchTeamPermissions(team)
+					return teamPerm.Has(PermTeamAdmin) || teamPerm.Has(PermTeamEditForm)
+				}
+			case NodeDocument:
+				{
+					nodeForm, err := DatabaseNodeTopFetch(o.Parent)
+					if err != nil {
+						return false
+					}
+					team, err := FetchTeamByUID(nodeForm.Parent)
+					if err != nil {
+						return false
+					}
+					teamPerm := u.FetchTeamPermissions(team)
+					return teamPerm.Has(PermTeamAdmin) || teamPerm.Has(PermTeamEditDocument)
+				}
+			}
+			return false
+		}
+	case *NodeVersion:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+
+		}
+	}
+	return false
 }

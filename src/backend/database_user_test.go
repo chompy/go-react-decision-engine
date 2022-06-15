@@ -17,7 +17,8 @@ func TestDatabaseUser(t *testing.T) {
 		UID:        generateUID(),
 		Email:      "test@test.com",
 		Password:   hpw,
-		Permission: PermGlobalAdmin,
+		Team:       "TEAM1",
+		Permission: PermAdmin,
 	}
 	if err := DatabaseUserStore(u); err != nil {
 		t.Error(err)

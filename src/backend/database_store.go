@@ -16,7 +16,7 @@ func databaseFilter(data interface{}) interface{} {
 		{
 			return bson.M{"version": d.Version, "uid": d.UID}
 		}
-	case *UserData:
+	case *Submission:
 		{
 			return bson.M{"key": d.Key, "root_uid": d.RootUID, "root_version": d.RootVersion}
 		}

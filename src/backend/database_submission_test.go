@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDatabaseUserData(t *testing.T) {
+func TestDatabaseSubmission(t *testing.T) {
 	if err := databaseOpen(testGetConfig()); err != nil {
 		t.Error(err)
 		return
@@ -12,28 +12,28 @@ func TestDatabaseUserData(t *testing.T) {
 	defer databaseClose()
 	testCleanDatabase()
 	rootUid := generateUID()
-	ud1 := &UserData{
+	ud1 := &Submission{
 		Key:         "UD1",
 		RootUID:     rootUid,
 		RootVersion: 1,
 		Answers:     map[string][]string{"question1": []string{"answer1"}, "question2": []string{"test1", "test2"}},
 	}
-	ud2 := &UserData{
+	ud2 := &Submission{
 		Key:         "UD2",
 		RootUID:     rootUid,
 		RootVersion: 2,
 		Answers:     map[string][]string{"question1": []string{"answer1"}, "question2": []string{"test3", "test4"}},
 	}
-	if err := DatabaseUserDataStore(ud1); err != nil {
+	if err := DatabaseSubmissionStore(ud1); err != nil {
 		t.Error(err)
 		return
 	}
-	if err := DatabaseUserDataStore(ud2); err != nil {
+	if err := DatabaseSubmissionStore(ud2); err != nil {
 		t.Error(err)
 		return
 	}
 
-	userDataList, count, err := DatabaseUserDataList(rootUid, 0, nil, 0)
+	userDataList, count, err := DatabaseSubmissionList(rootUid, 0, nil, 0)
 	if err != nil {
 		t.Error(err)
 		return
@@ -42,7 +42,7 @@ func TestDatabaseUserData(t *testing.T) {
 		t.Errorf("unexpected user data count, expected 2, got %d", count)
 		return
 	}
-	userDataList, count, err = DatabaseUserDataList(rootUid, 2, nil, 0)
+	userDataList, count, err = DatabaseSubmissionList(rootUid, 2, nil, 0)
 	if count != 1 {
 		t.Errorf("unexpected user data count, expected 1, got %d", count)
 		return
@@ -52,7 +52,7 @@ func TestDatabaseUserData(t *testing.T) {
 		return
 	}
 
-	fetchedUserData, err := DatabaseUserDataFetch(ud1.Key, rootUid, ud1.RootVersion)
+	fetchedUserData, err := DatabaseSubmissionFetch(ud1.Key, rootUid, ud1.RootVersion)
 	if err != nil {
 		t.Error(err)
 		return
@@ -62,11 +62,11 @@ func TestDatabaseUserData(t *testing.T) {
 		return
 	}
 
-	if err := DatabaseUserDataDelete(ud2.Key, rootUid, ud2.RootVersion); err != nil {
+	if err := DatabaseSubmissionDelete(ud2.Key, rootUid, ud2.RootVersion); err != nil {
 		t.Error(err)
 		return
 	}
-	userDataList, count, err = DatabaseUserDataList(rootUid, 0, nil, 0)
+	userDataList, count, err = DatabaseSubmissionList(rootUid, 0, nil, 0)
 	if err != nil {
 		t.Error(err)
 		return

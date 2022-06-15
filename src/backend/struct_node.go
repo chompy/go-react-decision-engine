@@ -3,49 +3,7 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
-	"time"
 )
-
-// NodeType is the top level node type.
-type NodeType string
-
-const (
-	NodeForm     NodeType = "form"
-	NodeDocument NodeType = "document"
-)
-
-// NodeTop is a top level node for any decision tree.
-type NodeTop struct {
-	UID      string    `bson:"uid" json:"uid"`
-	Created  time.Time `bson:"created" json:"created"`
-	Modified time.Time `bson:"modified" json:"modified"`
-	Creator  string    `bson:"creator" json:"creator"`
-	Modifier string    `bson:"modifier" json:"modifier"`
-	Type     NodeType  `bson:"type" json:"type"`
-	Parent   string    `bson:"parent" json:"parent"`
-	Label    string    `bson:"label" json:"label"`
-}
-
-// NodeState is the current state of a node version
-type NodeState string
-
-const (
-	NodeDraft     NodeState = "draft"
-	NodePublished NodeState = "published"
-	NodeArchived  NodeState = "archived"
-)
-
-// NodeVersion is a node's version and its state.
-type NodeVersion struct {
-	UID      string    `bson:"uid" json:"uid"`
-	Created  time.Time `bson:"created" json:"created"`
-	Modified time.Time `bson:"modified" json:"modified"`
-	Creator  string    `bson:"creator" json:"creator"`
-	Modifier string    `bson:"modifier" json:"modifier"`
-	Version  int       `bson:"version" json:"version"`
-	State    NodeState `bson:"state" json:"state"`
-	Tree     Node      `bson:"tree" json:"tree"`
-}
 
 // Node is a node in a form or document.
 type Node struct {

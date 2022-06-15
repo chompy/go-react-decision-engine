@@ -27,7 +27,8 @@ func FetchUserByUID(uid string) (*User, error) {
 		Email:      "admin@example.com",
 		Password:   hashedPw,
 		Created:    time.Now(),
-		Permission: PermGlobalAdmin,
+		Team:       "TEAM1",
+		Permission: PermAdmin,
 	}, nil
 }
 
@@ -68,25 +69,11 @@ func (u *User) HasEditPermission(o interface{}) bool {
 			switch o.Type {
 			case NodeForm:
 				{
-					team, err := FetchTeamByUID(o.Parent)
-					if err != nil {
-						return false
-					}
-					teamPerm := u.FetchTeamPermissions(team)
-					return teamPerm.Has(PermTeamAdmin) || teamPerm.Has(PermTeamEditForm)
+					return u.HasPermission(PermEditForm)
 				}
 			case NodeDocument:
 				{
-					nodeForm, err := DatabaseNodeTopFetch(o.Parent)
-					if err != nil {
-						return false
-					}
-					team, err := FetchTeamByUID(nodeForm.Parent)
-					if err != nil {
-						return false
-					}
-					teamPerm := u.FetchTeamPermissions(team)
-					return teamPerm.Has(PermTeamAdmin) || teamPerm.Has(PermTeamEditDocument)
+					return u.HasPermission(PermEditDocument)
 				}
 			}
 			return false
@@ -96,7 +83,99 @@ func (u *User) HasEditPermission(o interface{}) bool {
 			if o.Creator == u.UID {
 				return true
 			}
+			nodeTop, err := DatabaseNodeTopFetch(o.UID)
+			if err != nil {
+				return false
+			}
+			if nodeTop.Creator == u.UID {
+				return true
+			}
+			switch nodeTop.Type {
+			case NodeForm:
+				{
+					return u.HasPermission(PermEditForm)
+				}
+			case NodeDocument:
+				{
+					return u.HasPermission(PermEditDocument)
+				}
+			}
+			return false
+		}
+	case *Submission:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+			return u.HasPermission(PermEditSubmission)
+		}
+	case *User:
+		{
+			if u.UID == o.UID {
+				return true
+			}
+			return u.HasPermission(PermEditUser)
+		}
+	}
+	return false
+}
 
+func (u *User) HasDeletePermission(o interface{}) bool {
+	switch o := o.(type) {
+	case *NodeTop:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+			switch o.Type {
+			case NodeForm:
+				{
+					return u.HasPermission(PermDeleteForm)
+				}
+			case NodeDocument:
+				{
+					return u.HasPermission(PermEdit)
+				}
+			}
+			return false
+		}
+	case *NodeVersion:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+			nodeTop, err := DatabaseNodeTopFetch(o.UID)
+			if err != nil {
+				return false
+			}
+			if nodeTop.Creator == u.UID {
+				return true
+			}
+			switch nodeTop.Type {
+			case NodeForm:
+				{
+					return u.HasPermission(PermEditForm)
+				}
+			case NodeDocument:
+				{
+					return u.HasPermission(PermEditDocument)
+				}
+			}
+			return false
+		}
+	case *Submission:
+		{
+			if o.Creator == u.UID {
+				return true
+			}
+			return u.HasPermission(PermEditSubmission)
+		}
+	case *User:
+		{
+			if u.UID == o.UID {
+				return true
+			}
+			return u.HasPermission(PermEditUser)
 		}
 	}
 	return false

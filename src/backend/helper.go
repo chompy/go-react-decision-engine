@@ -25,9 +25,9 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 		{
 			return "node_version"
 		}
-	case UserData, *UserData:
+	case Submission, *Submission:
 		{
-			return "user_data"
+			return "submission"
 		}
 	case User, *User:
 		{
@@ -68,9 +68,9 @@ func getEmptyStruct(dataType interface{}) interface{} {
 		{
 			return &Node{}
 		}
-	case UserData, *UserData:
+	case Submission, *Submission:
 		{
-			return &UserData{}
+			return &Submission{}
 		}
 	case User, *User:
 		{

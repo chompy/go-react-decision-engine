@@ -2,7 +2,7 @@ package main
 
 import "time"
 
-type UserData struct {
+type Submission struct {
 	Key         string              `bson:"key" json:"key"`
 	RootUID     string              `bson:"root_uid" json:"root_uid"`
 	RootVersion int                 `bson:"root_version" json:"root_version"`

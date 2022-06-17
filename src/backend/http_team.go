@@ -1,7 +1,6 @@
 package main
 
-import "net/http"
-
+/*
 func HTTPTeam(w http.ResponseWriter, r *http.Request) {
 	// uid param
 	uid := r.URL.Query().Get("uid")
@@ -58,3 +57,4 @@ func HTTPTeamUsers(w http.ResponseWriter, r *http.Request) {
 		Data:    teamUsers,
 	}, http.StatusOK)
 }
+*/

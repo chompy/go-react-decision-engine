@@ -2,10 +2,10 @@ package main
 
 import "time"
 
-type Submission struct {
+type FormSubmission struct {
 	Key         string              `bson:"key" json:"key"`
-	RootUID     string              `bson:"root_uid" json:"root_uid"`
-	RootVersion int                 `bson:"root_version" json:"root_version"`
+	TreeUID     string              `bson:"tree_uid" json:"tree_uid"`
+	TreeVersion int                 `bson:"tree_version" json:"tree_version"`
 	Created     time.Time           `bson:"created" json:"created"`
 	Modified    time.Time           `bson:"modified" json:"modified"`
 	Creator     string              `bson:"creator" json:"creator"`

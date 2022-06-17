@@ -1,7 +1,6 @@
 package main
 
 func getTestTree(root string) Node {
-
 	return Node{
 		UID:  root,
 		Type: "root",

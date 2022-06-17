@@ -12,20 +12,20 @@ import (
 
 type HTTPMessage struct {
 	Success bool        `json:"success"`
-	Message string      `json:"message"`
+	Message string      `json:"message,omitempty"`
 	Count   int         `json:"count,omitempty"`
-	Data    interface{} `json:"data"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func HTTPStart(config *Config) error {
 	// init routes
 	r := mux.NewRouter()
-	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
+	/*r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
 	r.HandleFunc("/api/user/logout", HTTPUserLogout).Methods("GET", "POST")
 	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
 	r.HandleFunc("/api/user/teams", HTTPUserTeams).Methods("GET")
 	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")
-	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")
+	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")*/
 	log.Println("HTTP listening.")
 	// start server
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.HTTPPort), r)

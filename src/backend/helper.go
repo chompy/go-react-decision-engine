@@ -17,15 +17,15 @@ func generateUID() string {
 
 func getDatabaseCollectionNameFromData(data interface{}) string {
 	switch data.(type) {
-	case NodeType, NodeTop, *NodeTop:
+	case TreeType, TreeRoot, *TreeRoot:
 		{
-			return "node_top"
+			return "tree_root"
 		}
-	case NodeVersion, *NodeVersion:
+	case TreeVersion, *TreeVersion:
 		{
-			return "node_version"
+			return "tree_version"
 		}
-	case Submission, *Submission:
+	case FormSubmission, *FormSubmission:
 		{
 			return "submission"
 		}
@@ -56,21 +56,21 @@ func toBSONDoc(data interface{}) (*bson.D, error) {
 
 func getEmptyStruct(dataType interface{}) interface{} {
 	switch dataType.(type) {
-	case NodeTop, *NodeTop:
+	case TreeRoot, *TreeRoot:
 		{
-			return &NodeTop{}
+			return &TreeRoot{}
 		}
-	case NodeVersion, *NodeVersion:
+	case TreeVersion, *TreeVersion:
 		{
-			return &NodeVersion{}
+			return &TreeVersion{}
 		}
 	case Node, *Node:
 		{
 			return &Node{}
 		}
-	case Submission, *Submission:
+	case FormSubmission, *FormSubmission:
 		{
-			return &Submission{}
+			return &FormSubmission{}
 		}
 	case User, *User:
 		{

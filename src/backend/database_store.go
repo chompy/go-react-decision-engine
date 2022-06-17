@@ -8,17 +8,17 @@ import (
 
 func databaseFilter(data interface{}) interface{} {
 	switch d := data.(type) {
-	case *NodeTop:
+	case *TreeRoot:
 		{
 			return bson.M{"parent": d.Parent, "uid": d.UID}
 		}
-	case *NodeVersion:
+	case *TreeVersion:
 		{
 			return bson.M{"version": d.Version, "uid": d.UID}
 		}
-	case *Submission:
+	case *FormSubmission:
 		{
-			return bson.M{"key": d.Key, "root_uid": d.RootUID, "root_version": d.RootVersion}
+			return bson.M{"key": d.Key, "tree_uid": d.TreeUID, "tree_version": d.TreeVersion}
 		}
 	case *User:
 		{

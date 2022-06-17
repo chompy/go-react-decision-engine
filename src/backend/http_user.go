@@ -1,14 +1,11 @@
 package main
 
-import (
-	"net/http"
-)
-
 type HTTPUserLoginPayload struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+/*
 func HTTPUserLogin(w http.ResponseWriter, r *http.Request) {
 	// read payload
 	payload := HTTPUserLoginPayload{}
@@ -134,3 +131,4 @@ func httpUserCheckTeamPermission(r *http.Request, teamUid string, perm UserPermi
 	}
 	return false
 }
+*/

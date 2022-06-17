@@ -1,13 +1,6 @@
 package main
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"testing"
-)
-
+/*
 func testFetchTestUser() *User {
 	return &User{
 		UID:        "USER1",
@@ -98,3 +91,4 @@ func TestHTTPNodeTopNew(t *testing.T) {
 		t.Errorf("unexpected label for top node expected %s, got %s", payload.Label, nodeList[0].Label)
 	}
 }
+*/

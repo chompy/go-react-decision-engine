@@ -14,7 +14,7 @@ func testGetConfig() *Config {
 }
 
 func testCleanDatabase() error {
-	dataTypes := []interface{}{NodeTop{}, NodeVersion{}, Node{}}
+	dataTypes := []interface{}{TreeRoot{}, TreeVersion{}, FormSubmission{}, User{}, Team{}}
 	for _, dataType := range dataTypes {
 		nodeTopCol, err := databaseCollectionFromData(dataType)
 		if err != nil {

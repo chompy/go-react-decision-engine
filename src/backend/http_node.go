@@ -1,14 +1,5 @@
 package main
 
-import (
-	"errors"
-	"net/http"
-	"strconv"
-	"time"
-
-	"go.mongodb.org/mongo-driver/mongo"
-)
-
 type HTTPNodeTopPayload struct {
 	UID   string `json:"uid"`
 	Team  string `json:"team"`
@@ -23,7 +14,7 @@ type HTTPNodeVersionPayload struct {
 	State   string `json:"state"`
 }
 
-func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
+/*func HTTPNodeTopStore(w http.ResponseWriter, r *http.Request) {
 	// parse payload
 	payload := HTTPNodeTopPayload{}
 	if err := HTTPReadPayload(r, &payload); err != nil {
@@ -262,3 +253,4 @@ func HTTPNodeVersionDelete(w http.ResponseWriter, r *http.Request) {
 
 func HTTPNodeVersionList(w http.ResponseWriter, r *http.Request) {
 }
+*/

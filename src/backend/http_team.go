@@ -1,21 +1,20 @@
 package main
 
-/*
+import (
+	"net/http"
+	"strconv"
+)
+
 func HTTPTeam(w http.ResponseWriter, r *http.Request) {
-	// uid param
-	uid := r.URL.Query().Get("uid")
-	if uid == "" {
-		HTTPSendError(w, ErrHTTPMissingParam)
-		return
-	}
-	// check session
+	// get user from session
 	s := HTTPGetSession(r)
-	if s.uid == "" {
+	user := s.getUser()
+	if user == nil {
 		HTTPSendError(w, ErrHTTPLoginRequired)
 		return
 	}
 	// fetch team
-	team, err := FetchTeamByUID(uid)
+	team, err := FetchTeamByID(user.ID.Hex(), user)
 	if err != nil {
 		HTTPSendError(w, err)
 		return
@@ -28,25 +27,21 @@ func HTTPTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func HTTPTeamUsers(w http.ResponseWriter, r *http.Request) {
-	// uid param
-	uid := r.URL.Query().Get("uid")
-	if uid == "" {
-		HTTPSendError(w, ErrHTTPMissingParam)
-		return
+	// get offset param
+	offsetStr := r.URL.Query().Get("offset")
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
+		offset = 0
 	}
-	// check session
+	// get user from session
 	s := HTTPGetSession(r)
-	if s.uid == "" {
+	user := s.getUser()
+	if user == nil {
 		HTTPSendError(w, ErrHTTPLoginRequired)
 		return
 	}
-	// fetch team
-	team, err := FetchTeamByUID(uid)
-	if err != nil {
-		HTTPSendError(w, err)
-		return
-	}
-	teamUsers, err := team.FetchUsers()
+	// fetch team users
+	userList, count, err := ListUserTeam(user, offset)
 	if err != nil {
 		HTTPSendError(w, err)
 		return
@@ -54,7 +49,7 @@ func HTTPTeamUsers(w http.ResponseWriter, r *http.Request) {
 	// send success response
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
-		Data:    teamUsers,
+		Count:   count,
+		Data:    userList,
 	}, http.StatusOK)
 }
-*/

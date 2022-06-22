@@ -3,20 +3,22 @@ package main
 import (
 	"net/http"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HTTPTreeVersionPayload struct {
-	UID     string `json:"uid"`
+	ID      string `json:"id"`
 	Version int    `json:"version"`
 	State   string `json:"state"`
-	Tree    []Node `json:"tree"`
+	Tree    Node   `json:"tree"`
 }
 
 func HTTPTreeVersionFetch(w http.ResponseWriter, r *http.Request) {
 	// get params
-	uid := r.URL.Query().Get("uid")
+	id := r.URL.Query().Get("id")
 	verStr := r.URL.Query().Get("version")
-	if uid == "" {
+	if id == "" {
 		HTTPSendError(w, ErrHTTPMissingParam)
 		return
 	}
@@ -28,9 +30,9 @@ func HTTPTreeVersionFetch(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var res *TreeVersion
 	if ver > 0 {
-		res, err = FetchTreeVersion(uid, ver, user)
+		res, err = FetchTreeVersion(id, ver, user)
 	} else {
-		res, err = FetchTreeVersionLatestPublished(uid, user)
+		res, err = FetchTreeVersionLatestPublished(id, user)
 	}
 	if err != nil {
 		HTTPSendError(w, err)
@@ -44,17 +46,101 @@ func HTTPTreeVersionFetch(w http.ResponseWriter, r *http.Request) {
 }
 
 func HTTPTreeVersionList(w http.ResponseWriter, r *http.Request) {
-
-	uid := r.URL.Query().Get("uid")
-	if uid == "" {
+	// get params
+	id := r.URL.Query().Get("id")
+	if id == "" {
 		HTTPSendError(w, ErrHTTPMissingParam)
 		return
 	}
+	offsetStr := r.URL.Query().Get("offset")
+	offset, _ := strconv.Atoi(offsetStr)
+	if offset < 0 {
+		offset = 0
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// fetch
+	res, count, err := ListTreeVersion(id, user, offset)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Count:   count,
+		Data:    res,
+	}, http.StatusOK)
 }
 
 func HTTPTreeVersionStore(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPTreeVersionPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// missing id
+	if payload.ID == "" {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// build
+	rootId, err := primitive.ObjectIDFromHex(payload.ID)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	treeVersion := TreeVersion{
+		RootID:  rootId,
+		Version: payload.Version,
+		State:   TreeState(payload.State),
+		Tree:    payload.Tree,
+	}
+	// store
+	if err := treeVersion.Store(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    treeVersion,
+	}, http.StatusOK)
 }
 
 func HTTPTreeVersionDelete(w http.ResponseWriter, r *http.Request) {
-
+	// parse payload
+	payload := HTTPTreeVersionPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// missing uid or version
+	if payload.ID == "" || payload.Version <= 0 {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// fetch
+	treeVersion, err := FetchTreeVersion(payload.ID, payload.Version, user)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// delete
+	if err := treeVersion.Delete(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+	}, http.StatusOK)
 }

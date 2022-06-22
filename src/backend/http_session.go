@@ -11,7 +11,7 @@ const httpSessionCookieName = "ccde_session"
 const httpSessionExpire = 3600
 
 type httpSession struct {
-	uid     string
+	id      string
 	created time.Time
 }
 
@@ -24,7 +24,7 @@ func HTTPNewSession(w http.ResponseWriter, user *User) {
 	sessionToken := uuid.NewString()
 	// store session
 	httpSessions[sessionToken] = httpSession{
-		uid:     user.UID,
+		id:      user.ID.Hex(),
 		created: time.Now(),
 	}
 	// set session cookie
@@ -61,10 +61,10 @@ func (s httpSession) hasExpired() bool {
 }
 
 func (s httpSession) getUser() *User {
-	if s.uid == "" {
+	if s.id == "" {
 		return nil
 	}
-	user, _ := FetchUserByUID(s.uid)
+	user, _ := FetchUserByID(s.id)
 	return user
 }
 

@@ -3,19 +3,20 @@ package main
 type UserPermission int
 
 const (
-	PermAdmin            UserPermission = 1 << iota // Full access to everything in team.
-	PermCreateUser                                  // Create new user for team.
-	PermEditUser                                    // Edit user on team.
-	PermDeleteUser                                  // Delete user.
-	PermCreateForm                                  // Create form.
-	PermEditForm                                    // Edit existing form.
-	PermDeleteForm                                  // Delete existing form.
-	PermCreateDocument                              // Create document.
-	PermEditDocument                                // Edit existing document.
-	PermDeleteDocument                              // Delete existing document.
-	PermCreateSubmission                            // Create a form submission.
-	PermEditSubmission                              // Edit existing submission.
-	PermDeleteSubmission                            // Delete existing submission.
+	PermNone             UserPermission = 1 << iota
+	PermAdmin                           // Full access to everything in team.
+	PermCreateUser                      // Create new user for team.
+	PermEditUser                        // Edit user on team.
+	PermDeleteUser                      // Delete user.
+	PermCreateForm                      // Create form.
+	PermEditForm                        // Edit existing form.
+	PermDeleteForm                      // Delete existing form.
+	PermCreateDocument                  // Create document.
+	PermEditDocument                    // Edit existing document.
+	PermDeleteDocument                  // Delete existing document.
+	PermCreateSubmission                // Create a form submission.
+	PermEditSubmission                  // Edit existing submission.
+	PermDeleteSubmission                // Delete existing submission.
 )
 
 func (p UserPermission) Add(flag UserPermission) UserPermission {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"testing"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestTreeVersion(t *testing.T) {
@@ -14,9 +16,9 @@ func TestTreeVersion(t *testing.T) {
 	testCleanDatabase()
 
 	testUser := User{
-		UID:        "USER1",
-		Team:       "TEAM1",
-		Permission: PermCreateForm,
+		ID:         primitive.NewObjectID(),
+		Team:       primitive.NewObjectID(),
+		Permission: PermCreateForm | PermEditForm,
 	}
 	testTreeRoot := TreeRoot{
 		Type: TreeForm,
@@ -25,16 +27,16 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if testTreeRoot.UID == "" {
+	if testTreeRoot.ID.IsZero() {
 		t.Errorf("expect uid to be generated")
 		return
 	}
 
 	// store
 	testTreeVersion := TreeVersion{
-		UID:   testTreeRoot.UID,
-		State: TreeDraft,
-		Tree:  getTestTree(testTreeRoot.UID),
+		RootID: testTreeRoot.ID,
+		State:  TreeDraft,
+		Tree:   getTestTree(testTreeRoot.ID.Hex()),
 	}
 	if err := testTreeVersion.Store(&testUser); err != nil {
 		t.Error(err)
@@ -42,7 +44,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest
-	fetchLatest, err := FetchTreeVersionLatest(testTreeRoot.UID, &testUser)
+	fetchLatest, err := FetchTreeVersionLatest(testTreeRoot.ID.Hex(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -68,8 +70,8 @@ func TestTreeVersion(t *testing.T) {
 
 	// create new version, check that version number is incrementedc
 	testTreeVersion2 := TreeVersion{
-		UID:   testTreeRoot.UID,
-		State: TreeDraft,
+		RootID: testTreeRoot.ID,
+		State:  TreeDraft,
 	}
 	if err := testTreeVersion2.Store(&testUser); err != nil {
 		t.Error(err)
@@ -81,7 +83,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest again and check that new latest version is 2
-	fetchLatest, err = FetchTreeVersionLatest(testTreeVersion.UID, &testUser)
+	fetchLatest, err = FetchTreeVersionLatest(testTreeVersion.RootID.Hex(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -92,7 +94,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest published version
-	fetchLatest, err = FetchTreeVersionLatestPublished(testTreeVersion.UID, &testUser)
+	fetchLatest, err = FetchTreeVersionLatestPublished(testTreeVersion.RootID.Hex(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -103,7 +105,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// list all versions
-	_, count, err := ListTreeVersion(testTreeVersion.UID, &testUser, 0)
+	_, count, err := ListTreeVersion(testTreeVersion.RootID.Hex(), &testUser, 0)
 	if err != nil {
 		t.Error(err)
 		return

@@ -3,10 +3,12 @@ package main
 import (
 	"net/http"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HTTPTreeRootPayload struct {
-	UID   string `json:"uid"`
+	ID    string `json:"id"`
 	Team  string `json:"team"`
 	Form  string `json:"form"`
 	Type  string `json:"type"`
@@ -14,9 +16,9 @@ type HTTPTreeRootPayload struct {
 }
 
 func HTTPTreeRootFetch(w http.ResponseWriter, r *http.Request) {
-	// get uid
-	uid := r.URL.Query().Get("uid")
-	if uid == "" {
+	// get id
+	id := r.URL.Query().Get("id")
+	if id == "" {
 		HTTPSendError(w, ErrHTTPMissingParam)
 		return
 	}
@@ -24,7 +26,7 @@ func HTTPTreeRootFetch(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// fetch
-	treeRoot, err := FetchTreeRoot(uid, user)
+	treeRoot, err := FetchTreeRoot(id, user)
 	if err != nil {
 		HTTPSendError(w, err)
 		return
@@ -51,15 +53,15 @@ func HTTPTreeRootList(w http.ResponseWriter, r *http.Request) {
 	var err error
 	count := 0
 	rootType := r.URL.Query().Get("type")
-	formUid := r.URL.Query().Get("form")
+	formId := r.URL.Query().Get("form")
 	switch rootType {
 	case string(TreeDocument):
 		{
-			if formUid == "" {
+			if formId == "" {
 				HTTPSendError(w, ErrHTTPMissingParam)
 				return
 			}
-			res, count, err = ListDocumentRoot(formUid, user, offset)
+			res, count, err = ListDocumentRoot(formId, user, offset)
 			break
 		}
 	default:
@@ -88,29 +90,42 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// build + validate
+	treeRootId, err := primitive.ObjectIDFromHex(payload.ID)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
 	treeRoot := TreeRoot{
-		UID:   payload.UID,
+		ID:    treeRootId,
 		Label: payload.Label,
 	}
 	switch payload.Type {
 	case string(TreeForm):
 		{
-			if payload.UID == "" && payload.Team == "" {
+			if payload.ID == "" && payload.Team == "" {
 				HTTPSendError(w, ErrHTTPInvalidPayload)
 				return
 			}
 			treeRoot.Type = TreeForm
-			treeRoot.Parent = payload.Team
+			treeRoot.Parent, err = primitive.ObjectIDFromHex(payload.Team)
+			if err != nil {
+				HTTPSendError(w, err)
+				return
+			}
 			break
 		}
 	case string(TreeDocument):
 		{
-			if payload.UID == "" && payload.Form == "" {
+			if payload.ID == "" && payload.Form == "" {
 				HTTPSendError(w, ErrHTTPInvalidPayload)
 				return
 			}
 			treeRoot.Type = TreeDocument
-			treeRoot.Parent = payload.Form
+			treeRoot.Parent, err = primitive.ObjectIDFromHex(payload.Form)
+			if err != nil {
+				HTTPSendError(w, err)
+				return
+			}
 			break
 		}
 	default:
@@ -141,8 +156,8 @@ func HTTPTreeRootDelete(w http.ResponseWriter, r *http.Request) {
 		HTTPSendError(w, err)
 		return
 	}
-	// missing uid
-	if payload.UID == "" {
+	// missing id
+	if payload.ID == "" {
 		HTTPSendError(w, ErrHTTPInvalidPayload)
 		return
 	}
@@ -150,7 +165,7 @@ func HTTPTreeRootDelete(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// fetch
-	treeRoot, err := FetchTreeRoot(payload.UID, user)
+	treeRoot, err := FetchTreeRoot(payload.ID, user)
 	if err != nil {
 		HTTPSendError(w, err)
 		return

@@ -10,23 +10,23 @@ func databaseFilter(data interface{}) interface{} {
 	switch d := data.(type) {
 	case *TreeRoot:
 		{
-			return bson.M{"parent": d.Parent, "uid": d.UID}
+			return bson.M{"_id": d.ID}
 		}
 	case *TreeVersion:
 		{
-			return bson.M{"version": d.Version, "uid": d.UID}
+			return bson.M{"version": d.Version, "root_id": d.RootID}
 		}
 	case *FormSubmission:
 		{
-			return bson.M{"key": d.Key, "tree_uid": d.TreeUID, "tree_version": d.TreeVersion}
+			return bson.M{"_id": d.ID}
 		}
 	case *User:
 		{
-			return bson.M{"uid": d.UID}
+			return bson.M{"_id": d.ID}
 		}
 	case *Team:
 		{
-			return bson.M{"uid": d.UID}
+			return bson.M{"_id": d.ID}
 		}
 	}
 	return nil

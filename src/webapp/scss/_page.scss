@@ -7,6 +7,10 @@
             padding: 20px;
             .section-name {
                 border-bottom: 1px solid $page-section-divide;
+                span {
+                    font-size: 16px;
+                    font-style: italic;
+                }
             }
         }
         .options {
@@ -21,6 +25,21 @@
         &.login section {
             max-width: 300px;
             margin: auto;
+        }
+
+        &.loading {
+            margin-top: 25px;
+            text-align: center;
+            svg {
+                width: 64px;
+                height: 64px;
+                animation: loading-spin 4s infinite linear;
+                color: $header-bg;
+                @keyframes loading-spin {
+                    0%  {-webkit-transform: rotate(0deg);}
+                    100% {-webkit-transform: rotate(360deg);}   
+                }
+            }
         }
 
         @import 'page_team';

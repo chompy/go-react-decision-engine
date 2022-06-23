@@ -20,7 +20,11 @@ func FetchTeamByID(id string, user *User) (*Team, error) {
 	if user != nil && id != user.Team.Hex() {
 		return nil, ErrInvalidPermission
 	}
-	res, err := databaseFetch(Team{}, bson.M{"_id": id}, nil)
+	pId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	res, err := databaseFetch(Team{}, bson.M{"_id": pId}, nil)
 	if err != nil {
 		return nil, err
 	}

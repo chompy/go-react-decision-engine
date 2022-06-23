@@ -11,12 +11,15 @@ export default class LoginPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state = {
-            email: '',
-            password: '',
-            message: '',
-            disabled: false
+        this.state.email = '';
+        this.state.password = '';
+        this.state.message = '';
+        this.state.disabled = false;
+        this.state.team = props.team;
+        if (this.state.team) {
+            this.state.loading = false;
         }
+        this.onTeam = this.onTeam.bind(this);
         this.onEmail = this.onEmail.bind(this);
         this.onPassword = this.onPassword.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -27,7 +30,16 @@ export default class LoginPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     componentDidMount() {
+        if (!this.state.team) {
+            Events.listen('team', this.onTeam);
+        }
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    componentWillUnmount() {
+        Events.remove('team', this.onTeam);
     }
 
     /**
@@ -40,8 +52,15 @@ export default class LoginPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-    getTitle() {
+    static getTitle() {
         return 'Login';
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onTeam(e) {
+        this.setState({team: e.detail, loading: false});
     }
 
     /**
@@ -68,7 +87,11 @@ export default class LoginPageComponent extends BasePageComponent {
     onSubmit(e) {
         e.preventDefault();
         this.setState({ disabled: true });
-        BackendAPI.post('user/login', null, {email: this.state.email, password: this.state.password}, this.onSubmitResponse);
+        BackendAPI.post(
+            'user/login', null, 
+            {email: this.state.email, password: this.state.password, team: this.props.team.id},
+            this.onSubmitResponse
+        );
     }
 
     /**
@@ -85,6 +108,7 @@ export default class LoginPageComponent extends BasePageComponent {
         }
         Events.dispatch('login', {
             email: this.state.email,
+            team : this.state.team
         });
     }
 
@@ -92,6 +116,11 @@ export default class LoginPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
      render() {
+        if (this.state.error) {
+            return this.renderError();
+        } else if (this.state.loading) {
+            return this.renderLoader();
+        }
         return <div className='page login'>
             <section>
                 <h2 className='section-name'>Login</h2>

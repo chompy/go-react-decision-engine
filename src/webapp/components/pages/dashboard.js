@@ -10,9 +10,7 @@ export default class DashboardPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state = {
-            teams: []
-        };
+        this.state.teams = [];
         this.onAPITeams = this.onAPITeams.bind(this);
         this.onSelectTeam = this.onSelectTeam.bind(this);
     }
@@ -34,7 +32,7 @@ export default class DashboardPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-    getTitle() {
+    static getTitle() {
         return 'Dashboard';
     }
 

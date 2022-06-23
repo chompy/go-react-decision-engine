@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -107,5 +109,8 @@ func databaseCount(dataType interface{}, filter interface{}) (int, error) {
 	}
 	// do count
 	count, err := col.CountDocuments(databaseContext(), filter)
-	return int(count), err
+	if err != nil && !errors.Is(err, mongo.ErrNilDocument) {
+		return 0, err
+	}
+	return int(count), nil
 }

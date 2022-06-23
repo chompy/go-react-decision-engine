@@ -20,12 +20,19 @@ type HTTPMessage struct {
 func HTTPStart(config *Config) error {
 	// init routes
 	r := mux.NewRouter()
-	/*r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
+	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
 	r.HandleFunc("/api/user/logout", HTTPUserLogout).Methods("GET", "POST")
 	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
-	r.HandleFunc("/api/user/teams", HTTPUserTeams).Methods("GET")
 	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")
-	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")*/
+	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")
+	r.HandleFunc("/api/tree/fetch", HTTPTreeRootFetch).Methods("GET")
+	r.HandleFunc("/api/tree/list", HTTPTreeRootList).Methods("GET")
+	r.HandleFunc("/api/tree/store", HTTPTreeRootStore).Methods("POST")
+	r.HandleFunc("/api/tree/delete", HTTPTreeRootDelete).Methods("POST")
+	r.HandleFunc("/api/tree/version/fetch", HTTPTreeVersionFetch).Methods("GET")
+	r.HandleFunc("/api/tree/version/list", HTTPTreeVersionList).Methods("GET")
+	r.HandleFunc("/api/tree/version/store", HTTPTreeVersionStore).Methods("POST")
+	r.HandleFunc("/api/tree/version/delete", HTTPTreeVersionDelete).Methods("POST")
 	log.Println("HTTP listening.")
 	// start server
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.HTTPPort), r)

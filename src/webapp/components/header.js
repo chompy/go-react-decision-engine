@@ -55,7 +55,7 @@ export default class AppHeaderComponent extends React.Component {
      */
     render() {
         return <div className='header'>
-            <div className='app-name'>Contextual Code Logic Engine</div>
+            <div className='app-name'>{this.props.team ? this.props.team.name : ''}</div>
             {this.renderUser()}
         </div>;
     }

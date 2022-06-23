@@ -1,14 +1,11 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import DashboardPageComponent from './dashboard';
 
-export default class FormManagePageComponent extends BasePageComponent {
+export default class FormListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state.name = '';
-        this.onName = this.onName.bind(this);
     }
 
     /**
@@ -22,18 +19,14 @@ export default class FormManagePageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     static getName() {
-        return 'form';
+        return 'form-list';
     }
 
     /**
      * {@inheritdoc}
      */
-    getTitle() {
-        return 'Form Manager';
-    }
-
-    onName(e) {
-        this.setState({ name: e.target.value });
+    static getTitle() {
+        return 'Forms';
     }
 
     /**
@@ -42,24 +35,9 @@ export default class FormManagePageComponent extends BasePageComponent {
      render() {
         return <div className='page form'>
             <div className='options top'>
-                {this.renderPageButton('Back', DashboardPageComponent.getName(), {}, faBackward)}                
+     
             </div>
-            <section>
-                <h2 className='section-name'>{this.getTitle()}</h2>
-                <form className='pure-form pure-form-stacked'>
-                    {this.renderFormField({
-                            id: 'name',
-                            label: 'Form Name',
-                            value: this.state.name,
-                            callback: this.onName
-                    })}
-                </form>
 
-                <div className='options pure-button-group' role='group'>
-                    
-                </div>
-
-            </section>
             <section>
 
                 <table className='pure-table'>

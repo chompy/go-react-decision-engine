@@ -3,33 +3,27 @@ import BackendAPI from '../api';
 import Events from '../events';
 import AppHeaderComponent from './header';
 import BasePageComponent from './pages/base';
-import BuilderPageComponent from './pages/builder';
-import FormManagePageComponent from './pages/form_manage';
 import LoginPageComponent from './pages/login';
-import DashboardPageComponent from './pages/dashboard';
+import PathResolver from '../path_resolver';
+import FormListPageComponent from './pages/form_list';
+import ErrorPageComponent from './pages/error';
+import { ERR_NOT_FOUND } from '../config';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
-    /**
-     * List of available page components.
-     */
-    static pageComponents = [
-        DashboardPageComponent,
-        FormManagePageComponent,
-        BuilderPageComponent,
-        LoginPageComponent
-    ];
-
     constructor(props) {
         super(props);
+        let pathResolve = PathResolver.resolveCurrentPath();
+        console.log('> Path resolved to "' + pathResolve.component.getName() + '."');
         this.state = {
-            page: LoginPageComponent.getName(),
-            params: {},
+            path: pathResolve,
             user: null,
+            team: null,
             message: ''
         };
-        this.onHashChange = this.onHashChange.bind(this);
+        this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
+        this.onTeam = this.onTeam.bind(this);
         this.onLogin = this.onLogin.bind(this);
         this.onLogout = this.onLogout.bind(this);
     }
@@ -38,11 +32,10 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     componentDidMount() {
-        window.addEventListener('hashchange', this.onHashChange);
-        if (window.location.hash) {
-            this.gotoHashPage(window.location.hash);
+        window.addEventListener('popstate', this.onPopState);
+        if (typeof this.state.path.team != 'undefined' && this.state.path.team) {
+            BackendAPI.get('team', {id: this.state.path.team}, this.onTeam);
         }
-        BackendAPI.get('user/me', null, this.onUserMe);
         Events.listen('login', this.onLogin);
         Events.listen('logout', this.onLogout);
     }
@@ -51,7 +44,6 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     componentWillUnmount() {
-        window.removeEventListener('hashchange', this.onHashChange);
         Events.remove('login', this.onLogin);
         Events.remove('logout', this.onLogout);
     }
@@ -60,14 +52,37 @@ export default class DecisionEngineMainComponent extends React.Component {
      * @param {Object} res 
      */
     onUserMe(res) {
-        if (!res.success) { return; }
-        console.log('> Fetched user "' + res.data.email + '."');
-        this.setState({
-            user: res.data
-        });
-        if (this.state.page == LoginPageComponent.getName()) {
-            this.gotoHashPage(window.location.hash);
+        if (!res.success) { 
+            if (this.state.path.component == LoginPageComponent) {
+                return;
+            } else if (this.state.path.component != LoginPageComponent && this.state.path.team) {
+                this.gotoPage(LoginPageComponent, {team: this.state.path.team});
+                return;
+            }
+            this.displayError(ERR_NOT_FOUND);
+            return;            
         }
+        console.log('> Fetched user "' + res.data.email + ' (' + res.data.id + ')."');
+        this.setState({user: res.data});
+        if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
+            this.gotoPage(FormListPageComponent, {team: res.data.team});
+        }
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onTeam(res) {
+        if (!res.success) { 
+            this.displayError(ERR_NOT_FOUND);
+            return;
+        }
+        console.log('> Fetched team "' + res.data.name + '" (' + res.data.id + ').');
+        this.setState({
+            team: res.data
+        });
+        Events.dispatch('team', res.data);
+        BackendAPI.get('user/me', null, this.onUserMe);
     }
 
     /**
@@ -76,7 +91,8 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogin(e) {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
-        window.location.hash = '#' + DashboardPageComponent.getName();
+        this.setState({message: 'Login successful.'});
+        this.gotoPage(FormListPageComponent);
     }
 
     /**
@@ -84,51 +100,45 @@ export default class DecisionEngineMainComponent extends React.Component {
      */
     onLogout(e) {
         console.log('> Log out successful.');
-        this.setState({user: null, page: LoginPageComponent.getName(), message: 'You have logged out.'});
+        this.setState({user: null, message: 'You have logged out.'});
+        this.gotoPage(LoginPageComponent, {team: this.state.team.id});
     }
 
     /**
      * @param {Event} e 
      */
-    onHashChange(e) {
+    onPopState(e) {
         e.preventDefault();
-        this.gotoHashPage(window.location.hash);
+        let resolvedPage = PathResolver.resolveCurrentPath();
+        if (resolvedPage.component == LoginPageComponent && this.state.user) {
+            this.gotoPage(FormListPageComponent, {team: this.state.user.team});
+            return;
+        }
+        this.setState({path: resolvedPage});
     }
 
     /**
-     * Navigate to page based on hash string.
-     * @param {string} hash 
+     * @param {BasePageComponent} component 
+     * @param {Object} params 
      */
-    gotoHashPage(hash) {
-        if (!this.state.user) {
-            this.setState({
-                page: LoginPageComponent.getName(),
-                params: {},
-                message: ''
-            });
-            return;
-        }
-        if (hash[0] == '#') {
-            hash = window.location.hash.substring(1);
-        }
-        if (!hash) {
-            this.setState({
-                page: DecisionEngineMainComponent.pageComponents[0].getName(),
-                params: {},
-                message: ''
-            });
-            return;
-        }
-        hash = hash.split('-');
-        let page = hash[0];
-        let params = {};
-        for (let i = 1; i < hash.length; i += 2) {
-            params[hash[i]] = hash[i+1];
-        }
+    gotoPage(component, params) {
+        console.log('> Go to "' + component.getName() + '" page.');
+        params = Object.assign({}, {
+            team: this.state.team ? this.state.team.id : '',
+            user: this.state.user ? this.state.user.id : ''
+        }, params ? params : {});
+        PathResolver.setPathFromComponent(component, params);
+        let resolvedPage = PathResolver.resolveCurrentPath();
+        this.setState({path: resolvedPage});
+    }
+
+    /**
+     * @param {string} message 
+     */
+    displayError(message) {
+        console.error('> Display error. (' + message + ').');
         this.setState({
-            page: page,
-            params: params,
-            message: ''
+            path: {component: ErrorPageComponent, message: message, team: this.state.team ? this.state.team.id : ''}
         });
     }
 
@@ -136,17 +146,11 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     render() {
-        let Component = BasePageComponent;
-        for (let i in DecisionEngineMainComponent.pageComponents) {
-            if (DecisionEngineMainComponent.pageComponents[i].getName() == this.state.page) {
-                Component = DecisionEngineMainComponent.pageComponents[i];
-                break;
-            }
-        }
+        let PageComponent = this.state.path.component;
         return <div className='decision-engine'>
-            <AppHeaderComponent user={this.state.user} />
+            <AppHeaderComponent user={this.state.user} team={this.state.team} />
             <div className={'alert message' + (this.state.message ? '' : ' hidden')}>{this.state.message}</div>
-            <Component user={this.state.user} team={this.state.team} params={this.state.params} />
+            <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} />
         </div>;
     }
 

@@ -8,9 +8,7 @@ export default class BuilderPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state = {
-            name: ''
-        };
+        this.state.name = '';
         this.onName = this.onName.bind(this);
     }
 
@@ -31,7 +29,7 @@ export default class BuilderPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-    getTitle() {
+    static getTitle() {
         return 'Decision Builder';
     }
 

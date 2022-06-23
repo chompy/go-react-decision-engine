@@ -6,15 +6,19 @@ import (
 )
 
 func HTTPTeam(w http.ResponseWriter, r *http.Request) {
-	// get user from session
-	s := HTTPGetSession(r)
-	user := s.getUser()
-	if user == nil {
-		HTTPSendError(w, ErrHTTPLoginRequired)
-		return
+	// get team id, user current user team if team id not provided
+	teamId := r.URL.Query().Get("id")
+	if teamId == "" {
+		s := HTTPGetSession(r)
+		user := s.getUser()
+		if user == nil {
+			HTTPSendError(w, ErrHTTPLoginRequired)
+			return
+		}
+		teamId = user.Team.Hex()
 	}
 	// fetch team
-	team, err := FetchTeamByID(user.ID.Hex(), user)
+	team, err := FetchTeamByID(teamId, nil)
 	if err != nil {
 		HTTPSendError(w, err)
 		return

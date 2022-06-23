@@ -1,5 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleExclamation, faCog } from '@fortawesome/free-solid-svg-icons';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
@@ -8,6 +9,10 @@ export default class BasePageComponent extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            loading: true,
+            error: ''
+        };
         this.onPageButton = this.onPageButton.bind(this);
     }
 
@@ -30,7 +35,7 @@ export default class BasePageComponent extends React.Component {
      * Display title of page.
      * @returns {string}
      */
-    getTitle() {
+    static getTitle() {
         return 'Unknown';
     }
 
@@ -135,6 +140,34 @@ export default class BasePageComponent extends React.Component {
                 {fieldRender}
             </div>
         ;
+    }
+
+    /**
+     * Render loading animation. 
+     */
+    renderLoader() {
+        return <div className='page loading'>
+            <FontAwesomeIcon icon={faCog} />
+        </div>;
+    }
+
+    /**
+     * Render error message.
+     */
+    renderError() {
+        let message = 'An error has occured.';
+        if (this.state.error) {
+            message = this.state.error;
+        }
+        return <div className='page error'>
+            <section>
+                <h2 className='section-name'>Error</h2>
+                        <div className='alert error'>
+                        <FontAwesomeIcon icon={faCircleExclamation} /><br/>
+                        {message}
+                    </div>
+            </section>
+        </div>;
     }
 
     /**

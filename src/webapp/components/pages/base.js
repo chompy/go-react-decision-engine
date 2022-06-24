@@ -1,6 +1,8 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation, faCog } from '@fortawesome/free-solid-svg-icons';
+import Events from '../../events';
+import md5 from 'blueimp-md5';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
@@ -10,17 +12,31 @@ export default class BasePageComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loading: true,
-            error: ''
+            error: '',
+            team: typeof props.team != 'undefined' ? props.team : null,
+            user: typeof props.user != 'undefined' ? props.user : null
         };
+        this.state.loading = !(this.state.team && this.state.user);
         this.onPageButton = this.onPageButton.bind(this);
+        this.onTeam = this.onTeam.bind(this);
+        this.onUserMe = this.onUserMe.bind(this);
+        this.pageButtons = {};
     }
 
     /**
      * {@inheritdoc}
      */
     componentDidMount() {
+        Events.listen('team', this.onTeam);
+        Events.listen('user_me', this.onUserMe);
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    componentWillUnmount() {
+        Events.remove('team', this.onTeam);
+        Events.remove('user_me', this.onUserMe);
     }
 
     /**
@@ -41,17 +57,11 @@ export default class BasePageComponent extends React.Component {
 
     /**
      * Navigate to a new page.
-     * @param {string} name 
+     * @param {BasePageComponent} component 
      * @param {Object} params 
      */
-    gotoPage(name, params) {
-        let hash = '#' + name;
-        if (params && typeof params == 'object') {
-            for (let k in params) {
-                hash += '-' + k + '-' + params[k];
-            }
-        }
-        window.location.hash = hash;
+    gotoPage(component, params) {
+        Events.dispatch('goto_page', {component: component, params: params});
     }
 
     /**
@@ -60,37 +70,66 @@ export default class BasePageComponent extends React.Component {
      */
     onPageButton(e) {
         e.preventDefault();
-        let page = e.target.getAttribute('data-page');
-        if (!page) { return; }
-        let params = e.target.getAttribute('data-params');
-        window.location.hash = '#' + page + params;
+        let key = e.target.getAttribute('data-key');
+        if (!(key in this.pageButtons)) {
+            return;
+        }
+        this.gotoPage(
+            this.pageButtons[key].component,
+            this.pageButtons[key].params,
+        );
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onTeam(e) {
+        this.setState({team: e.detail});
+        if (this.state.user) {
+            this.onReady();
+        }
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onUserMe(e) {
+        this.setState({user: e.detail});
+        if (this.state.team) {
+            this.onReady();
+        }
+    }
+
+    /**
+     * Fires when all pre-api calls have been made.
+     */
+    onReady() {
+        this.setState({loading: false});
     }
 
     /**
      * Render page navigation button.
      * @param {string} label 
-     * @param {string} page 
+     * @param {BasePageComponent} component 
      * @param {Object} params 
      * @param {*} icon 
      */
-    renderPageButton(label, page, params, icon) {
-        let paramStr = '';
-        if (typeof params == 'object') {
-            for (let k in params) {
-                paramStr += '-' + k + '-' + params[k];
-            }
-        }
+    renderPageButton(label, component, params, icon) {
+        let key = md5(component.getName() + JSON.stringify(params));
+        this.pageButtons[key] = {
+            component: component,
+            params: params
+        };
         let renderIcon = null;
         if (icon) {
             renderIcon = <FontAwesomeIcon icon={icon} />;
             label = ' ' + label;
         }
         return <button
-                key={'pbtn-' + label + '-' + page + paramStr}
+                key={'pbtn-' + label + '-' + key}
                 className='pure-button'
-                onClick={this.onPageButton} data-page={page}
+                onClick={this.onPageButton} data-key={key}
                 title={label}
-                data-params={paramStr}
             >
                 {renderIcon}{label}
         </button>;
@@ -173,7 +212,7 @@ export default class BasePageComponent extends React.Component {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         return <div className='page base'>
             <em>ERROR!</em>
         </div>;

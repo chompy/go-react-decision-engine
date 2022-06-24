@@ -56,8 +56,10 @@ func ListUserTeam(user *User, offset int) ([]*User, int, error) {
 		return nil, 0, err
 	}
 	// check permission
-	if err := checkFetchPermission(res[0], user); err != nil {
-		return nil, 0, err
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, 0, err
+		}
 	}
 	// format output
 	out := make([]*User, 0)

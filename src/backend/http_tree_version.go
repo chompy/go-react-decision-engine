@@ -8,7 +8,7 @@ import (
 )
 
 type HTTPTreeVersionPayload struct {
-	ID      string `json:"id"`
+	RootID  string `json:"id"`
 	Version int    `json:"version"`
 	State   string `json:"state"`
 	Tree    Node   `json:"tree"`
@@ -81,8 +81,8 @@ func HTTPTreeVersionStore(w http.ResponseWriter, r *http.Request) {
 		HTTPSendError(w, err)
 		return
 	}
-	// missing id
-	if payload.ID == "" {
+	// missing root id
+	if payload.RootID == "" {
 		HTTPSendError(w, ErrHTTPInvalidPayload)
 		return
 	}
@@ -90,7 +90,7 @@ func HTTPTreeVersionStore(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// build
-	rootId, err := primitive.ObjectIDFromHex(payload.ID)
+	rootId, err := primitive.ObjectIDFromHex(payload.RootID)
 	if err != nil {
 		HTTPSendError(w, err)
 		return
@@ -121,7 +121,7 @@ func HTTPTreeVersionDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// missing uid or version
-	if payload.ID == "" || payload.Version <= 0 {
+	if payload.RootID == "" || payload.Version <= 0 {
 		HTTPSendError(w, ErrHTTPInvalidPayload)
 		return
 	}
@@ -129,7 +129,7 @@ func HTTPTreeVersionDelete(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// fetch
-	treeVersion, err := FetchTreeVersion(payload.ID, payload.Version, user)
+	treeVersion, err := FetchTreeVersion(payload.RootID, payload.Version, user)
 	if err != nil {
 		HTTPSendError(w, err)
 		return

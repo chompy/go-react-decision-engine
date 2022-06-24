@@ -60,8 +60,10 @@ func ListFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
 		return nil, 0, err
 	}
 	// check permission
-	if err := checkFetchPermission(res[0], user); err != nil {
-		return nil, 0, err
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, 0, err
+		}
 	}
 	// format output
 	out := make([]*TreeRoot, 0)
@@ -86,8 +88,10 @@ func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, 
 		return nil, 0, err
 	}
 	// check permission
-	if err := checkFetchPermission(res[0], user); err != nil {
-		return nil, 0, err
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, 0, err
+		}
 	}
 	// format output + check permission
 	out := make([]*TreeRoot, 0)

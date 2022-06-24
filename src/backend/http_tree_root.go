@@ -90,10 +90,14 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// build + validate
-	treeRootId, err := primitive.ObjectIDFromHex(payload.ID)
-	if err != nil {
-		HTTPSendError(w, err)
-		return
+	treeRootId := primitive.NilObjectID
+	var err error
+	if payload.ID != "" {
+		treeRootId, err = primitive.ObjectIDFromHex(payload.ID)
+		if err != nil {
+			HTTPSendError(w, err)
+			return
+		}
 	}
 	treeRoot := TreeRoot{
 		ID:    treeRootId,
@@ -102,7 +106,7 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 	switch payload.Type {
 	case string(TreeForm):
 		{
-			if payload.ID == "" && payload.Team == "" {
+			if payload.Team == "" {
 				HTTPSendError(w, ErrHTTPInvalidPayload)
 				return
 			}
@@ -116,7 +120,7 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 		}
 	case string(TreeDocument):
 		{
-			if payload.ID == "" && payload.Form == "" {
+			if payload.Form == "" {
 				HTTPSendError(w, ErrHTTPInvalidPayload)
 				return
 			}

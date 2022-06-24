@@ -15,11 +15,7 @@ export default class LoginPageComponent extends BasePageComponent {
         this.state.password = '';
         this.state.message = '';
         this.state.disabled = false;
-        this.state.team = props.team;
-        if (this.state.team) {
-            this.state.loading = false;
-        }
-        this.onTeam = this.onTeam.bind(this);
+        this.state.loading = !this.state.team;
         this.onEmail = this.onEmail.bind(this);
         this.onPassword = this.onPassword.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
@@ -30,16 +26,14 @@ export default class LoginPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     componentDidMount() {
-        if (!this.state.team) {
-            Events.listen('team', this.onTeam);
-        }
+        super.componentDidMount();
     }
 
     /**
      * {@inheritdoc}
      */
     componentWillUnmount() {
-        Events.remove('team', this.onTeam);
+        super.componentWillUnmount();
     }
 
     /**

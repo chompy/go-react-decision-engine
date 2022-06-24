@@ -93,8 +93,10 @@ func ListTreeVersion(rootId string, user *User, offset int) ([]*TreeVersion, int
 		return nil, 0, err
 	}
 	// check permission
-	if err := checkFetchPermission(res[0], user); err != nil {
-		return nil, 0, err
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, 0, err
+		}
 	}
 	// format output + check permissions
 	out := make([]*TreeVersion, 0)

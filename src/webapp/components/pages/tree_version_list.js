@@ -1,65 +1,53 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import DashboardPageComponent from './dashboard';
+import BackendAPI from '../../api';
+import FormListPageComponent from './form_list';
 
-export default class FormManagePageComponent extends BasePageComponent {
+export default class TreeVersionListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state.name = '';
-        this.onName = this.onName.bind(this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidMount() {
-
+        this.onForms = this.onForms.bind(this);
     }
 
     /**
      * {@inheritdoc}
      */
     static getName() {
-        return 'form';
+        return 'tree-version-list';
     }
 
     /**
      * {@inheritdoc}
      */
-    getTitle() {
-        return 'Form Manager';
-    }
-
-    onName(e) {
-        this.setState({ name: e.target.value });
+    static getTitle() {
+        return 'Version List';
     }
 
     /**
      * {@inheritdoc}
      */
-     render() {
-        return <div className='page form'>
+    onReady() {
+        //BackendAPI.get('tree/list', {type: 'form'}, this.onForms);    
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    render() {
+
+        if (this.state.error) {
+            return this.renderError();
+        } else if (this.state.loading) {
+            return this.renderLoader();
+        }
+
+        return <div className='page tree-version-list'>
             <div className='options top'>
-                {this.renderPageButton('Back', DashboardPageComponent.getName(), {}, faBackward)}                
+            {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
             </div>
-            <section>
-                <h2 className='section-name'>{this.getTitle()}</h2>
-                <form className='pure-form pure-form-stacked'>
-                    {this.renderFormField({
-                            id: 'name',
-                            label: 'Form Name',
-                            value: this.state.name,
-                            callback: this.onName
-                    })}
-                </form>
 
-                <div className='options pure-button-group' role='group'>
-                    {this.renderPageButton('New Form', 'builder', {}, faCirclePlus)}
-                </div>
-
-            </section>
             <section>
 
                 <table className='pure-table'>
@@ -80,9 +68,9 @@ export default class FormManagePageComponent extends BasePageComponent {
                                 <td>1/1/2020 5:01 PM (Sam Ogden)</td>
                                 <td>
                                     <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
+                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
+                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
+                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
                                     </div>
                                 </td>
                             </tr>
@@ -93,9 +81,9 @@ export default class FormManagePageComponent extends BasePageComponent {
                                 <td>1/1/2020 5:01 PM (Sam Ogden)</td>
                                 <td>
                                     <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
+                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
+                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
+                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
                                     </div>
                                 </td>
                             </tr>
@@ -106,9 +94,9 @@ export default class FormManagePageComponent extends BasePageComponent {
                                 <td>1/1/2020 5:01 PM (Sam Ogden)</td>
                                 <td>
                                     <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
+                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
+                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
+                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
                                     </div>
                                 </td>
                             </tr>

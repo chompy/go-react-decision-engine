@@ -26,6 +26,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.onTeam = this.onTeam.bind(this);
         this.onLogin = this.onLogin.bind(this);
         this.onLogout = this.onLogout.bind(this);
+        this.onGotoPage = this.onGotoPage.bind(this);
     }
 
     /**
@@ -38,6 +39,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         }
         Events.listen('login', this.onLogin);
         Events.listen('logout', this.onLogout);
+        Events.listen('goto_page', this.onGotoPage);
     }
 
     /**
@@ -46,6 +48,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     componentWillUnmount() {
         Events.remove('login', this.onLogin);
         Events.remove('logout', this.onLogout);
+        Events.remove('goto_page', this.onGotoPage);
     }
 
     /**
@@ -67,6 +70,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
             this.gotoPage(FormListPageComponent, {team: res.data.team});
         }
+        Events.dispatch('user_me', res.data);
     }
 
     /**
@@ -115,6 +119,13 @@ export default class DecisionEngineMainComponent extends React.Component {
             return;
         }
         this.setState({path: resolvedPage});
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onGotoPage(e) {
+        this.gotoPage(e.detail.component, e.detail.params);
     }
 
     /**

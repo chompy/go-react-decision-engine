@@ -1,18 +1,21 @@
 import React from 'react';
-import { faBackward, faTrash, faEdit, faCopy } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
+import BackendAPI from '../../api';
+import { MSG_NO_LIST_DATA, TREE_FORM } from '../../config';
+import Helper from '../../helpers';
+import TruncateIdComponent from '../truncate_id';
 
 export default class FormListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidMount() {
-
+        this.state.offset = 0;
+        this.state.count = 0;
+        this.state.data = [];
+        this.onFormsResponse = this.onFormsResponse.bind(this);
+        this.onClickNewForm = this.onClickNewForm.bind(this);
+        this.onNewFormResponse = this.onNewFormResponse.bind(this);
     }
 
     /**
@@ -32,10 +35,91 @@ export default class FormListPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-     render() {
-        return <div className='page form'>
+    onReady() {
+        this.fetchForms(0);
+    }
+
+    /**
+     * Fetch form list.
+     * @param {integer} offset 
+     */
+    fetchForms(offset) {
+        this.setState({offset: offset});
+        BackendAPI.get('tree/list', {type: 'form', offset: offset}, this.onFormsResponse);
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onFormsResponse(res) {
+        this.setState({
+            loading: false,
+            count: res.count,
+            data: res.data
+        });
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickNewForm(e) {
+        e.preventDefault();
+        BackendAPI.post(
+            'tree/store',
+            null,
+            {
+                team: this.state.user.team,
+                type: TREE_FORM,
+                label: 'Untitled Form'
+            },
+            this.onNewFormResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onNewFormResponse(res) {
+        console.log(res);
+    }
+
+    /**
+     * Render form list table rows.
+     */
+    renderTableRows() {
+        if (!this.state.data || this.state.data.length == 0) {
+            return <tr><td rowSpan={5}><em>{MSG_NO_LIST_DATA}</em></td></tr>;
+        }
+        let out = [];
+        for (let i in this.state.data) {
+            let data = this.state.data[i];
+            out.push(
+                <tr key={'form-list-row-' + data.id}>
+                    <td><TruncateIdComponent id={data.id} /></td>
+                    <td>{data.label}</td>
+                    <td>{Helper.formatDate(data.created)} ({data.creator})</td>
+                    <td>{Helper.formatDate(data.modified)} ({data.modifier})</td>
+                    <td></td>
+                </tr>
+            );
+        }
+        return out;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    render() {
+
+        if (this.state.error) {
+            return this.renderError();
+        } else if (this.state.loading) {
+            return this.renderLoader();
+        }
+
+        return <div className='page form-list'>
             <div className='options top'>
-     
+                {this.renderCallbackButton('New Form', this.onClickNewForm, faCirclePlus)}
             </div>
 
             <section>
@@ -43,53 +127,15 @@ export default class FormListPageComponent extends BasePageComponent {
                 <table className='pure-table'>
                         <thead>
                             <tr>
-                                <th>Version</th>
-                                <th>State</th>
+                                <th>ID</th>
+                                <th>Name</th>
                                 <th>Created</th>
                                 <th>Modified</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Published</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Draft</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Draft</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', 'builder', {}, faEdit)}
-                                        {this.renderPageButton('Copy', 'builder', {}, faCopy)}
-                                        {this.renderPageButton('Delete', 'builder', {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
+                            {this.renderTableRows()}
                         </tbody>
                     </table>
 

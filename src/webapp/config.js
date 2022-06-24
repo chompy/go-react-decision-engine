@@ -16,6 +16,9 @@ export const BTN_EDIT = 'Edit';
 export const BTN_CANCEL = 'Cancel';
 export const BTN_OK = 'Ok';
 export const BTN_SUBMIT = 'Submit';
+export const BTN_BACK = 'Back';
+export const BTN_NEXT = 'Next';
 
 // generic messages
 export const MSG_NO_LIST_DATA = 'No data.';
+export const MSG_SESSION_EXPIRED = 'Your session has expired.';

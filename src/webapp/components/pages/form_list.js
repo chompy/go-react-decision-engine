@@ -2,21 +2,17 @@ import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { MSG_NO_LIST_DATA, TREE_FORM } from '../../config';
-import Helper from '../../helpers';
-import TruncateIdComponent from '../helper/truncate_id';
+import { TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
+import PaginatedTableComponent from '../helper/api_table';
 
 export default class FormListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.state.offset = 0;
-        this.state.count = 0;
-        this.state.data = [];
-        this.onFormsResponse = this.onFormsResponse.bind(this);
         this.onClickNewForm = this.onClickNewForm.bind(this);
         this.onNewFormResponse = this.onNewFormResponse.bind(this);
+        this.onSelectForm = this.onSelectForm.bind(this);
     }
 
     /**
@@ -37,28 +33,7 @@ export default class FormListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     onReady() {
-        this.setState({loading: true});
-        this.fetchForms(0);
-    }
-
-    /**
-     * Fetch form list.
-     * @param {integer} offset 
-     */
-    fetchForms(offset) {
-        this.setState({offset: offset});
-        BackendAPI.get('tree/list', {type: 'form', offset: offset}, this.onFormsResponse);
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onFormsResponse(res) {
-        this.setState({
-            loading: false,
-            count: res.count,
-            data: res.data
-        });
+        this.setState({loading: false});
     }
 
     /**
@@ -97,28 +72,16 @@ export default class FormListPageComponent extends BasePageComponent {
     }
 
     /**
-     * Render form list table rows.
+     * @param {Object} data 
      */
-    renderTableRows() {
-        if (!this.state.data || this.state.data.length == 0) {
-            return <tr><td rowSpan={5}><em>{MSG_NO_LIST_DATA}</em></td></tr>;
-        }
-        let out = [];
-        for (let i in this.state.data) {
-            let data = this.state.data[i];
-            out.push(
-                <tr key={'form-list-row-' + data.id}>
-                    <td><TruncateIdComponent id={data.id} /></td>
-                    <td>{data.label}</td>
-                    <td>{Helper.formatDate(data.created)} ({data.creator})</td>
-                    <td>{Helper.formatDate(data.modified)} ({data.modifier})</td>
-                    <td>
-                        {this.renderPageButton('Go', TreeVersionListPageComponent, {id: data.id}, faForward)}
-                    </td>
-                </tr>
-            );
-        }
-        return out;
+    onSelectForm(data)  {
+        this.gotoPage(
+            TreeVersionListPageComponent,
+            {
+                team: this.state.user.team,
+                id: data.id
+            }
+        );
     }
 
     /**
@@ -138,22 +101,17 @@ export default class FormListPageComponent extends BasePageComponent {
             </div>
 
             <section>
-
-                <table className='pure-table'>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Created</th>
-                                <th>Modified</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {this.renderTableRows()}
-                        </tbody>
-                    </table>
-
+                <PaginatedTableComponent
+                    columns={{
+                        'id': 'ID',
+                        'label': 'Name',
+                        'created': 'Created',
+                        'modified': 'Modified'
+                    }}
+                    endpoint='tree/list'
+                    params={{type: 'form', team: this.state.user.team}}
+                    callback={this.onSelectForm}
+                />
             </section>
         </div>;
     }

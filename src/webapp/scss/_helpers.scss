@@ -39,3 +39,29 @@
         margin-left: 7px;
     }
 }
+
+// UserTimeComponent
+.user-time {
+    .user {
+        margin-left: 5px;
+        font-size: 14px;
+    }
+}
+
+// ApiTableComponent
+.api-table {
+    .pagination {
+        text-align: right;
+        margin-top: 10px;
+        .btn-back {
+            svg {
+                margin-right: 5px;
+            }
+        }
+        .btn-next {
+            svg {
+                margin-left: 5px;
+            }
+        }
+    }
+}

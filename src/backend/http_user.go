@@ -46,6 +46,37 @@ func HTTPUserLogout(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
+func HTTPUser(w http.ResponseWriter, r *http.Request) {
+	// get id
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		HTTPSendError(w, ErrHTTPMissingParam)
+		return
+	}
+	// must be logged in
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	if user == nil {
+		HTTPSendError(w, ErrHTTPInvalidSession)
+		return
+	}
+	// fetch
+	fetchedUser, err := FetchUserByID(id)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	if fetchedUser.Team != user.Team {
+		HTTPSendError(w, ErrInvalidPermission)
+		return
+	}
+	// done
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    fetchedUser,
+	}, http.StatusOK)
+}
+
 func HTTPUserMe(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()

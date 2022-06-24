@@ -7,7 +7,7 @@ import LoginPageComponent from './pages/login';
 import PathResolver from '../path_resolver';
 import FormListPageComponent from './pages/form_list';
 import ErrorPageComponent from './pages/error';
-import { ERR_NOT_FOUND } from '../config';
+import { ERR_NOT_FOUND, MSG_SESSION_EXPIRED } from '../config';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -27,6 +27,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.onLogin = this.onLogin.bind(this);
         this.onLogout = this.onLogout.bind(this);
         this.onGotoPage = this.onGotoPage.bind(this);
+        this.onSessionExpire = this.onSessionExpire.bind(this);
     }
 
     /**
@@ -40,6 +41,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.listen('login', this.onLogin);
         Events.listen('logout', this.onLogout);
         Events.listen('goto_page', this.onGotoPage);
+        Events.listen('session_expire', this.onSessionExpire);
     }
 
     /**
@@ -49,6 +51,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.remove('login', this.onLogin);
         Events.remove('logout', this.onLogout);
         Events.remove('goto_page', this.onGotoPage);
+        Events.remove('session_expire', this.onSessionExpire);
     }
 
     /**
@@ -59,13 +62,13 @@ export default class DecisionEngineMainComponent extends React.Component {
             if (this.state.path.component == LoginPageComponent) {
                 return;
             } else if (this.state.path.component != LoginPageComponent && this.state.path.team) {
-                this.gotoPage(LoginPageComponent, {team: this.state.path.team});
+                this.gotoPage(LoginPageComponent, {team: this.state.path.team, referer: this.state.path});
                 return;
             }
             this.displayError(ERR_NOT_FOUND);
             return;            
         }
-        console.log('> Fetched user "' + res.data.email + ' (' + res.data.id + ')."');
+        console.log('> Fetched user "' + res.data.email + '" (' + res.data.id + ').');
         this.setState({user: res.data});
         if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
             this.gotoPage(FormListPageComponent, {team: res.data.team});
@@ -96,6 +99,10 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
         this.setState({message: 'Login successful.'});
+        if (typeof this.state.path.referer != 'undefined') {
+            this.gotoPage(this.state.referer.component, this.state.referer);
+            return; 
+        }
         this.gotoPage(FormListPageComponent);
     }
 
@@ -119,6 +126,16 @@ export default class DecisionEngineMainComponent extends React.Component {
             return;
         }
         this.setState({path: resolvedPage});
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onSessionExpire(e) {
+        this.setState({message: MSG_SESSION_EXPIRED});
+        this.gotoPage(
+            LoginPageComponent, {referer: this.state.path}
+        );
     }
 
     /**

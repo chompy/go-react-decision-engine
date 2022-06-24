@@ -23,6 +23,7 @@ func HTTPStart(config *Config) error {
 	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
 	r.HandleFunc("/api/user/logout", HTTPUserLogout).Methods("GET", "POST")
 	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
+	r.HandleFunc("/api/user", HTTPUser).Methods("GET")
 	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")
 	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")
 	r.HandleFunc("/api/tree/fetch", HTTPTreeRootFetch).Methods("GET")

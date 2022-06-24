@@ -1,5 +1,5 @@
 // Generic helper functions.
-export default class Helper {
+export default class Helpers {
 
     /**
      * Format date object to human readable string.

@@ -1,3 +1,5 @@
+import Events from "./events";
+
 const URL_PREFIX = '/api/';
 
 export default class BackendAPI {
@@ -18,9 +20,14 @@ export default class BackendAPI {
         if (method != 'GET') {
             params['body'] = JSON.stringify(data);
         }
-
         fetch(url, params)
             .then(res => res.json())
+            .then(function(res) {
+                if (!res.success && res.message.includes('no user provided')) {
+                    Events.dispatch('session_expire', null);
+                }
+                return res;
+            })
             .then(callback)
         ;
     }

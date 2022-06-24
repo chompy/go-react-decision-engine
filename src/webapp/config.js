@@ -12,6 +12,10 @@ export const ERR_LOGIN_REQUIRED = 'Login required.';
 
 // button text
 export const BTN_COPY = 'Copy';
+export const BTN_EDIT = 'Edit';
+export const BTN_CANCEL = 'Cancel';
+export const BTN_OK = 'Ok';
+export const BTN_SUBMIT = 'Submit';
 
 // generic messages
 export const MSG_NO_LIST_DATA = 'No data.';

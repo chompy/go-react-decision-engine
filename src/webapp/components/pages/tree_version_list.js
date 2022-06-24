@@ -3,12 +3,21 @@ import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
 import FormListPageComponent from './form_list';
+import EditTitleComponent from '../helper/edit_title';
+import { ERR_NOT_FOUND } from '../../config';
 
 export default class TreeVersionListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
-        this.onForms = this.onForms.bind(this);
+        this.state.root = null;
+        this.state.list = [];
+        this.state.title = '';
+        this.state.count = 0;
+        this.onTreeResponse = this.onTreeResponse.bind(this);
+        this.onTreeListResponse = this.onTreeListResponse.bind(this);
+        this.onLabel = this.onLabel.bind(this);
+        this.onLabelResponse = this.onLabelResponse.bind(this);
     }
 
     /**
@@ -29,7 +38,75 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     onReady() {
-        //BackendAPI.get('tree/list', {type: 'form'}, this.onForms);    
+        this.setState({loading: true});
+        let treeRootId = typeof this.props.path.id != 'undefined' ? this.props.path.id : null;
+        if (!treeRootId) {
+            console.error('> ERROR: Missing ID parameter.')
+            this.setState({error: ERR_NOT_FOUND});
+            return;
+        }
+        BackendAPI.get('tree/fetch', {team: this.state.user.team, id: treeRootId}, this.onTreeResponse);    
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onTreeResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            this.setState({error: res.message});
+            return;
+        };
+        this.setState({
+            root: res.data,
+            title: res.data.label,
+        })
+        BackendAPI.get('tree/list', {team: this.state.user.team, id: res.data.id}, this.onTreeListResponse);
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onTreeListResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            this.setState({error: res.message});
+            return;       
+        }
+        this.setState({
+            loading: false,
+            count: res.count,
+            list: res.data
+        });
+    }
+
+    /**
+     * @param {string} text
+     */
+    onLabel(text) {
+        BackendAPI.post(
+            'tree/store', null, {
+                id: this.state.root.id,
+                team: this.state.root.parent,
+                form: this.state.root.parent,
+                type: this.state.root.type,
+                label: text
+            },
+            this.onLabelResponse
+        );
+        this.setState({
+            title: text
+        });
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onLabelResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            this.setState({error: res.message});
+        }
     }
 
     /**
@@ -42,12 +119,13 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-
+        
         return <div className='page tree-version-list'>
+
             <div className='options top'>
             {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
             </div>
-
+            <EditTitleComponent title={this.state.title} callback={this.onLabel} />
             <section>
 
                 <table className='pure-table'>

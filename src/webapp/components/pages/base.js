@@ -29,6 +29,9 @@ export default class BasePageComponent extends React.Component {
     componentDidMount() {
         Events.listen('team', this.onTeam);
         Events.listen('user_me', this.onUserMe);
+        if (this.state.team && this.state.user) {
+            this.onReady();
+        }
     }
 
     /**
@@ -101,7 +104,7 @@ export default class BasePageComponent extends React.Component {
     }
 
     /**
-     * Fires when all pre-api calls have been made.
+     * Fires when all pre-api (user, team) calls have been made.
      */
     onReady() {
         this.setState({loading: false});

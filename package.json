@@ -6,13 +6,13 @@
   "main": "src/backend/backend.go",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "npm run build && cd src/backend && go build -o backend.exe && backend.exe",
+    "start": "npm run build && cd src/backend && go run .",
     "webapp": "webpack serve --mode development --devtool inline-source-map --hot",
-    "backend": "nodemon --ext go --exec \"cd src/backend && go build -o backend.exe && backend.exe || exit 1\"",
+    "backend": "nodemon --ext go --exec \"cd src/backend && go run . || exit 1\"",
     "dev": "concurrently \"npm run backend\" \"npm run webapp\""
   },
-  "author": "Neal Andrews",
-  "license": "ISC",
+  "author": "Contextual Code",
+  "license": "",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.1.1",

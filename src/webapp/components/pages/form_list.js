@@ -1,10 +1,11 @@
 import React from 'react';
-import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
 import { MSG_NO_LIST_DATA, TREE_FORM } from '../../config';
 import Helper from '../../helpers';
-import TruncateIdComponent from '../truncate_id';
+import TruncateIdComponent from '../helper/truncate_id';
+import TreeVersionListPageComponent from './tree_version_list';
 
 export default class FormListPageComponent extends BasePageComponent {
 
@@ -36,6 +37,7 @@ export default class FormListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     onReady() {
+        this.setState({loading: true});
         this.fetchForms(0);
     }
 
@@ -80,7 +82,18 @@ export default class FormListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onNewFormResponse(res) {
-        console.log(res);
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            this.setState({error: res.message});
+            return;
+        }
+        this.gotoPage(
+            TreeVersionListPageComponent,
+            {
+                team: this.state.user.team,
+                id: res.data.id
+            }
+        );
     }
 
     /**
@@ -99,7 +112,9 @@ export default class FormListPageComponent extends BasePageComponent {
                     <td>{data.label}</td>
                     <td>{Helper.formatDate(data.created)} ({data.creator})</td>
                     <td>{Helper.formatDate(data.modified)} ({data.modifier})</td>
-                    <td></td>
+                    <td>
+                        {this.renderPageButton('Go', TreeVersionListPageComponent, {id: data.id}, faForward)}
+                    </td>
                 </tr>
             );
         }

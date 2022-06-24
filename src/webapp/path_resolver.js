@@ -1,6 +1,7 @@
 import ErrorPageComponent from "./components/pages/error";
 import FormListPageComponent from "./components/pages/form_list";
 import LoginPageComponent from "./components/pages/login";
+import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 
 
@@ -54,6 +55,17 @@ export default class PathResolver {
                     case 'forms': {
                         return {component: FormListPageComponent, team: teamId};
                     }
+                    case 'tree': {
+                        if (path.length < 3) {
+                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                        }
+                        let treeId = path[2];
+                        if (path.length < 4) {
+                            return {component: TreeVersionListPageComponent, team: teamId, id: treeId};
+                        }
+                        // TODO
+                        return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_IMPLEMENTED};
+                    }
                     default: {
                         return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
                     }
@@ -88,7 +100,8 @@ export default class PathResolver {
     static setPathFromComponent(component, params) {
         let componentList = {
             [LoginPageComponent]: '{team}/login',
-            [FormListPageComponent]: '{team}/forms'
+            [FormListPageComponent]: '{team}/forms',
+            [TreeVersionListPageComponent]: '{team}/tree/{id}'
         };
         if (component in componentList) {
             let path = componentList[component];

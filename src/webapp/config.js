@@ -18,7 +18,12 @@ export const BTN_OK = 'Ok';
 export const BTN_SUBMIT = 'Submit';
 export const BTN_BACK = 'Back';
 export const BTN_NEXT = 'Next';
+export const BTN_GO = 'Go';
+export const BTN_DELETE = 'Delete';
 
 // generic messages
+export const MSG_LOGIN_SUCCESS = 'Login successful.';
+export const MSG_LOGOUT_SUCCESS = 'You have been logged out.';
 export const MSG_NO_LIST_DATA = 'No data.';
 export const MSG_SESSION_EXPIRED = 'Your session has expired.';
+export const MSG_TREE_DELETE = '{name} was deleted successfully.';

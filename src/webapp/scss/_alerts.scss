@@ -13,4 +13,16 @@
         background-color: $alert-err-bg;
         color: $alert-err-fg;
     }
+    &.fade {
+        position: absolute;
+        width: 100%;
+        opacity: 0;
+        pointer-events: none;
+        animation: message-fade 6s linear;
+        @keyframes message-fade {
+            0%  { opacity: 1; }
+            75% { opacity: 1; }
+            100% { opacity: 0; }   
+        }
+    }
 }

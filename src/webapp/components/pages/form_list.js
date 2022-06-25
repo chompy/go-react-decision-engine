@@ -4,12 +4,13 @@ import BasePageComponent from './base';
 import BackendAPI from '../../api';
 import { TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
-import PaginatedTableComponent from '../helper/api_table';
+import ApiTableComponent from '../helper/api_table';
 
 export default class FormListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
+        this.state.loading = true;
         this.onClickNewForm = this.onClickNewForm.bind(this);
         this.onNewFormResponse = this.onNewFormResponse.bind(this);
         this.onSelectForm = this.onSelectForm.bind(this);
@@ -88,20 +89,19 @@ export default class FormListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     render() {
-
         if (this.state.error) {
             return this.renderError();
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-
         return <div className='page form-list'>
+            <h1 className='page-title'>Forms</h1>
             <div className='options top'>
                 {this.renderCallbackButton('New Form', this.onClickNewForm, faCirclePlus)}
             </div>
 
             <section>
-                <PaginatedTableComponent
+                <ApiTableComponent
                     columns={{
                         'id': 'ID',
                         'label': 'Name',

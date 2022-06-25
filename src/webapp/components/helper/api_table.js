@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons'
-import { BTN_BACK, BTN_NEXT, MSG_NO_LIST_DATA } from "../../config";
+import { BTN_BACK, BTN_GO, BTN_NEXT, MSG_NO_LIST_DATA } from "../../config";
 import md5 from 'blueimp-md5';
 import BackendAPI from '../../api';
 import TruncateIdComponent from './truncate_id';
@@ -52,7 +52,7 @@ export default class ApiTableComponent extends React.Component {
         console.log('> Fetched API table "' + this.endpoint + '."');
         this.setState({
             loading: false,
-            count: res.count,
+            count: typeof res.count != 'undefined' ? res.count : 0, 
             data: res.data,
             limit: this.state.limit == -1 ? res.data.length : this.state.limit
         });
@@ -148,9 +148,9 @@ export default class ApiTableComponent extends React.Component {
             }
             if (this.callback) {
                 cols.push(<td key={this.key + '-' + key + '-callback'}>
-                    <a href='#' className='pure-button btn-go' onClick={this.onSelectRow} data-index={i}>
-                        Go <FontAwesomeIcon icon={faForward} />
-                    </a>
+                    <button className='pure-button btn-go' onClick={this.onSelectRow} data-index={i}>
+                        {BTN_GO} <FontAwesomeIcon icon={faForward} />
+                    </button>
                 </td>);
             }
             out.push(
@@ -172,24 +172,23 @@ export default class ApiTableComponent extends React.Component {
         let pages = [];
         for (let i = 0; i < totalPages; i++) {
             pages.push(
-                <a
+                <button
                     key={'table-' + this.key + '-page-' + (i+1)}
                     className='pure-button btn-page'
-                    href='#'
                     disabled={currentPage == (i+1)}
                     data-page={currentPage != (i+1) ? (i+1) : -1}
                     onClick={this.onPagination}
-                >{i+1}</a>
+                >{i+1}</button>
             );
         }
         return <div className='pagination'>
-            <a href='#' className='pure-button btn-back' disabled={totalPages <= 1 || currentPage <= 1} onClick={this.onPagination} data-page={currentPage-1}>
+            <button className='pure-button btn-back' disabled={totalPages <= 1 || currentPage <= 1} onClick={this.onPagination} data-page={currentPage-1}>
                 <FontAwesomeIcon icon={faBackward} />{BTN_BACK}
-            </a>
+            </button>
             {pages}
-            <a href='#' className='pure-button btn-next' disabled={totalPages <= 1 || currentPage >= totalPages} onClick={this.onPagination} data-page={currentPage+1}>
+            <button className='pure-button btn-next' disabled={totalPages <= 1 || currentPage >= totalPages} onClick={this.onPagination} data-page={currentPage+1}>
                 {BTN_NEXT}<FontAwesomeIcon icon={faForward} />
-            </a>
+            </button>
         </div>;
     }
 

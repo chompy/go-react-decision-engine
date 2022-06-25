@@ -5,19 +5,22 @@ import BackendAPI from '../../api';
 import FormListPageComponent from './form_list';
 import EditTitleComponent from '../helper/edit_title';
 import { ERR_NOT_FOUND } from '../../config';
+import Events from '../../events';
+import ApiTableComponent from '../helper/api_table';
 
 export default class TreeVersionListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
         this.state.root = null;
-        this.state.list = [];
         this.state.title = '';
-        this.state.count = 0;
+        this.state.loading = true;
         this.onTreeResponse = this.onTreeResponse.bind(this);
-        this.onTreeListResponse = this.onTreeListResponse.bind(this);
         this.onLabel = this.onLabel.bind(this);
         this.onLabelResponse = this.onLabelResponse.bind(this);
+        this.onClickDelete = this.onClickDelete.bind(this);
+        this.onDeleteResponse = this.onDeleteResponse.bind(this);
+        this.onSelectVersion = this.onSelectVersion.bind(this);
     }
 
     /**
@@ -60,23 +63,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         this.setState({
             root: res.data,
             title: res.data.label,
-        })
-        BackendAPI.get('tree/list', {team: this.state.user.team, id: res.data.id}, this.onTreeListResponse);
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onTreeListResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            this.setState({error: res.message});
-            return;       
-        }
-        this.setState({
-            loading: false,
-            count: res.count,
-            list: res.data
+            loading: false
         });
     }
 
@@ -110,6 +97,43 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickDelete(e) {
+        e.preventDefault();
+        // TODO really make sure the user wants to delete this
+        if (!confirm('Are you sure you want to delete this?')) {
+            return;
+        }
+        this.setState({loading: true});
+        BackendAPI.post(
+            'tree/delete', null,
+            { id: this.state.root.id },
+            this.onDeleteResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onDeleteResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            this.setState({error: res.message});
+            return;
+        }
+        Events.dispatch('tree_delete', this.state.root);
+        this.gotoPage(FormListPageComponent);
+    }
+
+    /**
+     * @param {Object} data 
+     */
+    onSelectVersion(data) {
+        console.log(data);
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -122,65 +146,25 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         
         return <div className='page tree-version-list'>
 
-            <div className='options top'>
-            {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
-            </div>
             <EditTitleComponent title={this.state.title} callback={this.onLabel} />
+            <div className='options top'>
+                {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
+                {this.renderCallbackButton('Delete', this.onClickDelete, faTrash)}
+            </div>
+
             <section>
 
-                <table className='pure-table'>
-                        <thead>
-                            <tr>
-                                <th>Version</th>
-                                <th>State</th>
-                                <th>Created</th>
-                                <th>Modified</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Published</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
-                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
-                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Draft</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
-                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
-                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Draft</td>
-                                <td>1/1/2020 5:00 PM (Nathan Ogden)</td>
-                                <td>1/1/2020 5:01 PM (Sam Ogden)</td>
-                                <td>
-                                    <div className='pure-button-group' role='group'>
-                                        {this.renderPageButton('Edit', FormListPageComponent, {}, faEdit)}
-                                        {this.renderPageButton('Copy', FormListPageComponent, {}, faCopy)}
-                                        {this.renderPageButton('Delete', FormListPageComponent, {}, faTrash)}
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
+                <ApiTableComponent
+                    columns={{
+                        'version': 'Version',
+                        'state': 'State',
+                        'created': 'Created',
+                        'modified': 'Modified'
+                    }}
+                    endpoint='tree/version/list'
+                    params={{id: this.state.root.id, team: this.state.user.team}}
+                    callback={this.onSelectVersion}
+                />
             </section>
         </div>;
     }

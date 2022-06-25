@@ -30,6 +30,7 @@ export default class BasePageComponent extends React.Component {
         Events.listen('team', this.onTeam);
         Events.listen('user_me', this.onUserMe);
         if (this.state.team && this.state.user) {
+            console.log('> Page "' + this.constructor.getName() + '" is ready.');
             this.onReady();
         }
     }
@@ -89,6 +90,7 @@ export default class BasePageComponent extends React.Component {
     onTeam(e) {
         this.setState({team: e.detail});
         if (this.state.user) {
+            console.log('> Page "' + this.constructor.getName() + '" is ready.');
             this.onReady();
         }
     }
@@ -99,6 +101,7 @@ export default class BasePageComponent extends React.Component {
     onUserMe(e) {
         this.setState({user: e.detail});
         if (this.state.team) {
+            console.log('> Page "' + this.constructor.getName() + '" is ready.');
             this.onReady();
         }
     }

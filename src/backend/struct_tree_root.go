@@ -122,12 +122,28 @@ func (t *TreeRoot) Store(user *User) error {
 	// update create/modifier
 	t.Modifier = user.ID
 	t.Modified = time.Now()
+	isNew := false
 	if t.ID.IsZero() {
+		isNew = true
 		t.ID = primitive.NewObjectID()
 		t.Creator = user.ID
 		t.Created = t.Modified
 	}
-	return databaseStoreOne(t)
+	if err := databaseStoreOne(t); err != nil {
+		return err
+	}
+	// create first version if new tree
+	if isNew && !t.ID.IsZero() {
+		v := TreeVersion{
+			RootID:  t.ID,
+			State:   TreeDraft,
+			Version: 1,
+		}
+		if err := v.Store(user); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Delete the tree root.

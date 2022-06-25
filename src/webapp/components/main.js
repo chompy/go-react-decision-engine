@@ -7,7 +7,7 @@ import LoginPageComponent from './pages/login';
 import PathResolver from '../path_resolver';
 import FormListPageComponent from './pages/form_list';
 import ErrorPageComponent from './pages/error';
-import { ERR_NOT_FOUND, MSG_SESSION_EXPIRED } from '../config';
+import { ERR_NOT_FOUND, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED, MSG_TREE_DELETE } from '../config';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -28,6 +28,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.onLogout = this.onLogout.bind(this);
         this.onGotoPage = this.onGotoPage.bind(this);
         this.onSessionExpire = this.onSessionExpire.bind(this);
+        this.onTreeDelete = this.onTreeDelete.bind(this);
     }
 
     /**
@@ -42,6 +43,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.listen('logout', this.onLogout);
         Events.listen('goto_page', this.onGotoPage);
         Events.listen('session_expire', this.onSessionExpire);
+        Events.listen('tree_delete', this.onTreeDelete);
     }
 
     /**
@@ -52,6 +54,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.remove('logout', this.onLogout);
         Events.remove('goto_page', this.onGotoPage);
         Events.remove('session_expire', this.onSessionExpire);
+        Events.remove('tree_delete', this.onTreeDelete);
     }
 
     /**
@@ -98,7 +101,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogin(e) {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
-        this.setState({message: 'Login successful.'});
+        this.setState({message: MSG_LOGIN_SUCCESS});
         if (typeof this.state.path.referer != 'undefined') {
             this.gotoPage(this.state.referer.component, this.state.referer);
             return; 
@@ -111,7 +114,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      */
     onLogout(e) {
         console.log('> Log out successful.');
-        this.setState({user: null, message: 'You have logged out.'});
+        this.setState({user: null, message: MSG_LOGOUT_SUCCESS});
         this.gotoPage(LoginPageComponent, {team: this.state.team.id});
     }
 
@@ -136,6 +139,15 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.gotoPage(
             LoginPageComponent, {referer: this.state.path}
         );
+    }
+
+   /**
+     * @param {Event} e 
+     */
+    onTreeDelete(e) {
+        let msg = MSG_TREE_DELETE;
+        msg = msg.replace('{name}', e.detail.label);
+        this.setState({message: msg});
     }
 
     /**
@@ -174,10 +186,18 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     render() {
+        // TODO kind of jank?
+        if (this.state.message) {
+            let hideMsg = function() {
+                this.setState({message: ''});
+            }
+            hideMsg = hideMsg.bind(this);
+            setTimeout(hideMsg, 8000);
+        }
         let PageComponent = this.state.path.component;
         return <div className='decision-engine'>
             <AppHeaderComponent user={this.state.user} team={this.state.team} />
-            <div className={'alert message' + (this.state.message ? '' : ' hidden')}>{this.state.message}</div>
+            <div className={'alert message' + (this.state.message ? ' fade' : ' hidden')}>{this.state.message}</div>
             <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} />
         </div>;
     }

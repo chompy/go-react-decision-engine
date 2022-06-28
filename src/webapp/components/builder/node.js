@@ -11,6 +11,7 @@ import BuilderFormComponent from './form';
 import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
+import { MSG_CLIPBOARD } from '../../config';
 
 const DROP_STATE_NONE = 0;
 const DROP_STATE_UP = 1;
@@ -126,11 +127,11 @@ export default class BuilderNodeComponent extends React.Component {
         child.parent = this.node.uid;
         switch (child.constructor) {
             case GroupNode: {
-                child.name = 'Group ' + child.uid;
+                child.label = 'Group ' + child.uid;
                 break;
             }
             case MatrixNode: {
-                child.name = 'Matrix ' + child.uid;
+                child.label = 'Matrix ' + child.uid;
                 break;
             }
             case QuestionNode: {
@@ -203,7 +204,7 @@ export default class BuilderNodeComponent extends React.Component {
         if (!this.node) {
             return;
         }
-        prompt('Copy the uid.', this.node.uid);
+        prompt(MSG_CLIPBOARD, this.node.uid);
     }
 
     /**

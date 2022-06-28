@@ -21,6 +21,7 @@ export default class BasePageComponent extends React.Component {
         this.onTeam = this.onTeam.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
         this.pageButtons = {};
+        this.bindEvents();
     }
 
     /**
@@ -57,6 +58,19 @@ export default class BasePageComponent extends React.Component {
      */
     static getTitle() {
         return 'Unknown';
+    }
+
+    /**
+     * Bind 'on' functions to this.
+     */
+    bindEvents() {
+        let funcs = Object.getOwnPropertyNames(this.__proto__);
+        for (let k in funcs) {
+            let name = funcs[k];
+            if (name.substring(0, 2) == 'on') {
+                this[name] = this[name].bind(this);
+            }
+        }
     }
 
     /**
@@ -111,6 +125,18 @@ export default class BasePageComponent extends React.Component {
      */
     onReady() {
         this.setState({loading: false});
+    }
+
+    /**
+     * Handle an error API response.
+     * @param {Object} res 
+     * @returns {boolean}
+     */
+    handleErrorResponse(res) {
+        if (res.success) { return false; }
+        console.error('> ERROR: ' + res.message, res);
+        this.setState({error: res.message});
+        return true;
     }
 
     /**

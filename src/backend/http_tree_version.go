@@ -144,3 +144,36 @@ func HTTPTreeVersionDelete(w http.ResponseWriter, r *http.Request) {
 		Success: true,
 	}, http.StatusOK)
 }
+
+func HTTPTreeVersionPublish(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPTreeVersionPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// missing uid or version
+	if payload.RootID == "" || payload.Version <= 0 {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// fetch
+	treeVersion, err := FetchTreeVersion(payload.RootID, payload.Version, user)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// publish
+	if err := treeVersion.Publish(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    treeVersion,
+	}, http.StatusOK)
+}

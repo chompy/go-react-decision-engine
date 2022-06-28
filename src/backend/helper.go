@@ -1,19 +1,8 @@
 package main
 
 import (
-	"math/rand"
-	"strings"
-	"time"
-
-	"github.com/martinlindhe/base36"
 	"go.mongodb.org/mongo-driver/bson"
 )
-
-func generateUID() string {
-	rand.Seed(time.Now().UnixMicro())
-	ut := time.Now().Unix()
-	return strings.ToLower(base36.Encode(uint64(ut)) + base36.Encode(uint64(rand.Intn(35))))
-}
 
 func getDatabaseCollectionNameFromData(data interface{}) string {
 	switch data.(type) {

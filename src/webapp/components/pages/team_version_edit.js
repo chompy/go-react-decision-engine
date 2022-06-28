@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { ERR_NOT_FOUND } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder';
@@ -16,10 +16,6 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         this.state.root = null;
         this.state.object = null;
         this.state.tree = null;
-        this.onTreeRootResponse = this.onTreeRootResponse.bind(this);
-        this.onTreeVersionResponse = this.onTreeVersionResponse.bind(this);
-        this.onTreeUpdate = this.onTreeUpdate.bind(this);
-        this.onTreeStore = this.onTreeStore.bind(this);
         this.storeTimeout = null;
     }
 
@@ -131,7 +127,6 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
      */
     onTreeStore(data) {
         clearTimeout(this.storeTimeout);
-        console.log(data);
         BackendAPI.post(
             'tree/version/store',
             null,
@@ -149,11 +144,46 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onTreeStoreResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            return;
-        }
+        if (this.handleErrorResponse(res)) { return; }
         console.log('> Stored tree version data.', res.data);
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickDelete(e) {
+        e.preventDefault();
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickPublish(e) {
+        e.preventDefault();
+        BackendAPI.post(
+            'tree/version/publish',
+            null,
+            {
+                id: this.state.object.root_id,
+                version: this.state.object.version
+            },
+            this.onPublishResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onPublishResponse(res) {
+        if (this.handleErrorResponse(res)) { return; }
+
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickCopy(e) {
+        e.preventDefault();
     }
 
     /**
@@ -165,12 +195,13 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        return <div className='page tree-version-list'>
+        return <div className='page tree-version-edit'>
             <h1 className='title'>{this.state.root.label} - v{this.state.object.version}</h1>
             <div className='options top'>
-                {this.renderPageButton('Back', TreeVersionListPageComponent, {id: this.props.path.id}, faBackward)}
-                {this.renderCallbackButton('Delete', null, faTrash)}
-                {this.renderCallbackButton('Publish', null, faFloppyDisk)}
+                {this.renderPageButton(BTN_BACK, TreeVersionListPageComponent, {id: this.props.path.id}, faBackward)}
+                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
+                {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk)}
+                {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
             </div>
             <section>
                 <BuilderComponent node={this.state.tree} />

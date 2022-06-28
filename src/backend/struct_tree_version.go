@@ -149,3 +149,30 @@ func (t *TreeVersion) Delete(user *User) error {
 	}
 	return databaseDelete(TreeVersion{}, bson.M{"root_id": t.RootID, "version": t.Version})
 }
+
+// Publish the tree version, archive any previously published versions.
+func (t *TreeVersion) Publish(user *User) error {
+	if t.RootID.IsZero() || t.Version <= 0 {
+		return ErrObjMissingParam
+	}
+	if err := checkStorePermission(t, user); err != nil {
+		return err
+	}
+	currentPublished, err := FetchTreeVersionLatestPublished(t.RootID.Hex(), user)
+	if err != nil {
+		return err
+	}
+	currentPublished.Modified = time.Now()
+	currentPublished.Modifier = user.ID
+	currentPublished.State = TreeArchived
+	if err := currentPublished.Store(user); err != nil {
+		return err
+	}
+	t.State = TreePublished
+	t.Modified = currentPublished.Modified
+	t.Modifier = user.ID
+	if err := t.Store(user); err != nil {
+		return err
+	}
+	return nil
+}

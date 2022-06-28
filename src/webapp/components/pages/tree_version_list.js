@@ -16,12 +16,6 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         this.state.root = null;
         this.state.title = '';
         this.state.loading = true;
-        this.onTreeResponse = this.onTreeResponse.bind(this);
-        this.onLabel = this.onLabel.bind(this);
-        this.onLabelResponse = this.onLabelResponse.bind(this);
-        this.onClickDelete = this.onClickDelete.bind(this);
-        this.onDeleteResponse = this.onDeleteResponse.bind(this);
-        this.onSelectVersion = this.onSelectVersion.bind(this);
     }
 
     /**
@@ -56,11 +50,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onTreeResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            this.setState({error: res.message});
-            return;
-        };
+        if (this.handleErrorResponse(res)) { return; }
         this.setState({
             root: res.data,
             title: res.data.label,
@@ -91,10 +81,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onLabelResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            this.setState({error: res.message});
-        }
+        if (this.handleErrorResponse(res)) { return; }
     }
 
     /**
@@ -118,11 +105,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onDeleteResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            this.setState({error: res.message});
-            return;
-        }
+        if (this.handleErrorResponse(res)) { return; }
         Events.dispatch('tree_delete', this.state.root);
         this.gotoPage(FormListPageComponent);
     }
@@ -144,21 +127,17 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     render() {
-
         if (this.state.error) {
             return this.renderError();
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        
         return <div className='page tree-version-list'>
-
             <EditTitleComponent title={this.state.title} callback={this.onLabel} />
             <div className='options top'>
                 {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
                 {this.renderCallbackButton('Delete', this.onClickDelete, faTrash)}
             </div>
-
             <section>
                 <ApiTableComponent
                     columns={{

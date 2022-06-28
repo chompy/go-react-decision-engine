@@ -2,7 +2,7 @@ import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from '@fortawesome/free-solid-svg-icons'
 import Helpers from "../../helpers";
-import { BTN_COPY } from "../../config";
+import { BTN_COPY, MSG_CLIPBOARD } from "../../config";
 
 export default class TruncateIdComponent extends React.Component {
 
@@ -17,7 +17,7 @@ export default class TruncateIdComponent extends React.Component {
      */
     onClickCopy(e) {
         e.preventDefault();
-        prompt('Copy to clipboard: Ctrl+C, Enter', this.id);
+        prompt(MSG_CLIPBOARD, this.id);
     }
 
     render() {

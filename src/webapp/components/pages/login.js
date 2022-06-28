@@ -16,10 +16,6 @@ export default class LoginPageComponent extends BasePageComponent {
         this.state.message = '';
         this.state.disabled = false;
         this.state.loading = !this.state.team;
-        this.onEmail = this.onEmail.bind(this);
-        this.onPassword = this.onPassword.bind(this);
-        this.onSubmit = this.onSubmit.bind(this);
-        this.onSubmitResponse = this.onSubmitResponse.bind(this);
     }
 
     /**

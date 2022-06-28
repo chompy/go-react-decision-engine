@@ -73,7 +73,7 @@ func (p *UserPermission) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	for _, name := range permNames {
-		p.Add(UserPermissionFromName(name))
+		*p = p.Add(UserPermissionFromName(name))
 	}
 	return nil
 }

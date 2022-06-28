@@ -135,9 +135,8 @@ func (t *TreeRoot) Store(user *User) error {
 	// create first version if new tree
 	if isNew && !t.ID.IsZero() {
 		v := TreeVersion{
-			RootID:  t.ID,
-			State:   TreeDraft,
-			Version: 1,
+			RootID: t.ID,
+			State:  TreeDraft,
 		}
 		if err := v.Store(user); err != nil {
 			return err

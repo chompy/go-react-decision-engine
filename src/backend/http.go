@@ -39,6 +39,7 @@ func HTTPStart(config *Config) error {
 	r.HandleFunc("/api/tree/version/list", HTTPTreeVersionList).Methods("GET")
 	r.HandleFunc("/api/tree/version/store", HTTPTreeVersionStore).Methods("POST")
 	r.HandleFunc("/api/tree/version/delete", HTTPTreeVersionDelete).Methods("POST")
+	r.HandleFunc("/api/tree/version/publish", HTTPTreeVersionPublish).Methods("POST")
 	log.Println("HTTP listening.")
 	// start server
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.HTTPPort), r)

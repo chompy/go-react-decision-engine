@@ -1,5 +1,5 @@
 import React from 'react';
-import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
 import { TREE_FORM } from '../../config';
@@ -11,9 +11,6 @@ export default class FormListPageComponent extends BasePageComponent {
     constructor(props) {
         super(props);
         this.state.loading = true;
-        this.onClickNewForm = this.onClickNewForm.bind(this);
-        this.onNewFormResponse = this.onNewFormResponse.bind(this);
-        this.onSelectForm = this.onSelectForm.bind(this);
     }
 
     /**
@@ -58,11 +55,7 @@ export default class FormListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onNewFormResponse(res) {
-        if (!res.success) {
-            console.error('> ERROR: ' + res.message, res);
-            this.setState({error: res.message});
-            return;
-        }
+        if (this.handleErrorResponse(res)) { return; }
         this.gotoPage(
             TreeVersionListPageComponent,
             {

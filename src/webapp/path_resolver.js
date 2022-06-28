@@ -1,6 +1,7 @@
 import ErrorPageComponent from "./components/pages/error";
 import FormListPageComponent from "./components/pages/form_list";
 import LoginPageComponent from "./components/pages/login";
+import TreeVersionEditPageComponent from "./components/pages/team_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 
@@ -56,15 +57,25 @@ export default class PathResolver {
                         return {component: FormListPageComponent, team: teamId};
                     }
                     case 'tree': {
-                        if (path.length < 3) {
+                        if (path.length < 4) {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                         }
                         let treeId = path[2];
-                        if (path.length < 4) {
-                            return {component: TreeVersionListPageComponent, team: teamId, id: treeId};
+                        switch (path[3]) {
+                            case 'list': {
+                                return {component: TreeVersionListPageComponent, team: teamId, id: treeId};
+                            }
+                            case 'edit': {
+                                if (path.length < 5) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
+                                let versionNo = parseInt(path[4]);
+                                return {component: TreeVersionEditPageComponent, team: teamId, id: treeId, version: versionNo};
+                            }
+                            default: {
+                                return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
+                            }
                         }
-                        // TODO
-                        return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_IMPLEMENTED};
                     }
                     default: {
                         return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
@@ -101,7 +112,8 @@ export default class PathResolver {
         let componentList = {
             [LoginPageComponent]: '{team}/login',
             [FormListPageComponent]: '{team}/forms',
-            [TreeVersionListPageComponent]: '{team}/tree/{id}'
+            [TreeVersionListPageComponent]: '{team}/tree/{id}/list',
+            [TreeVersionEditPageComponent]: '{team}/tree/{id}/edit/{version}'
         };
         if (component in componentList) {
             let path = componentList[component];
@@ -110,7 +122,6 @@ export default class PathResolver {
             }
             PathResolver.setPath(path, component.getTitle());
         }
-
     }
 
 }

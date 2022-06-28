@@ -49,14 +49,13 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if fetchLatest.Version != 1 {
-		t.Errorf("expected latest version to be version 1")
+	if fetchLatest.Version != 2 {
+		t.Errorf("expected latest version to be version 2")
 		return
 	}
 
 	// test tree nodes
-	if fetchLatest.Tree.Children[0].UID != testTreeVersion.Tree.Children[0].UID {
-
+	if fetchLatest.Tree[1].UID != testTreeVersion.Tree[1].UID {
 		t.Errorf("tree mismatch")
 		return
 	}
@@ -77,18 +76,18 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if testTreeVersion2.Version != 2 {
+	if testTreeVersion2.Version != 3 {
 		t.Errorf("unexpected version")
 		return
 	}
 
-	// fetch latest again and check that new latest version is 2
+	// fetch latest again and check that new latest version is 3
 	fetchLatest, err = FetchTreeVersionLatest(testTreeVersion.RootID.Hex(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if fetchLatest.Version != 2 {
+	if fetchLatest.Version != 3 {
 		t.Errorf("expected latest version to be version 2")
 		return
 	}
@@ -99,8 +98,8 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if fetchLatest.Version != 1 {
-		t.Errorf("expected latest published version to be version 1")
+	if fetchLatest.Version != 2 {
+		t.Errorf("expected latest published version to be version 2")
 		return
 	}
 
@@ -110,8 +109,8 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if count != 2 {
-		t.Errorf("expected two versions")
+	if count != 3 {
+		t.Errorf("expected three versions")
 		return
 	}
 

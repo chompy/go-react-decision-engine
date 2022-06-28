@@ -5,10 +5,12 @@ import MatrixNode from '../objects/matrix';
 import RootNode from '../objects/root';
 import BaseConverter from './base';
 import RuleNode from '../objects/rule';
+import { KEY_TYPE } from '../objects/base';
 
-export default class JsonConverter extends BaseConverter{
+export default class JsonConverter extends BaseConverter {
 
     constructor() {
+        super();
         this.classes = [
             RootNode,
             QuestionNode,
@@ -30,9 +32,9 @@ export default class JsonConverter extends BaseConverter{
         let flatNodeList = [];
         for (let i in data) {
             let nodeData = data[i];
-            for (let c in t.classes) {
-                if (t.classes[c].getTypeName() == nodeData[KEY_TYPE]) {
-                    let node = t.classes[c].importJSON(value);
+            for (let c in this.classes) {
+                if (this.classes[c].getTypeName() == nodeData[KEY_TYPE]) {
+                    let node = this.classes[c].importJSON(data[i]);
                     if (node) {
                         flatNodeList.push(node);
                     }

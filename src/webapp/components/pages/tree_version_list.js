@@ -7,6 +7,7 @@ import EditTitleComponent from '../helper/edit_title';
 import { ERR_NOT_FOUND } from '../../config';
 import Events from '../../events';
 import ApiTableComponent from '../helper/api_table';
+import TreeVersionEditPageComponent from './team_version_edit';
 
 export default class TreeVersionListPageComponent extends BasePageComponent {
 
@@ -130,7 +131,13 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Object} data 
      */
     onSelectVersion(data) {
-        console.log(data);
+        this.gotoPage(
+            TreeVersionEditPageComponent,
+            {
+                id: data.root_id,
+                version: data.version
+            }
+        );
     }
 
     /**
@@ -153,7 +160,6 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
             </div>
 
             <section>
-
                 <ApiTableComponent
                     columns={{
                         'version': 'Version',

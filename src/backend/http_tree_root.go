@@ -74,6 +74,14 @@ func HTTPTreeRootList(w http.ResponseWriter, r *http.Request) {
 		HTTPSendError(w, err)
 		return
 	}
+	// TODO let front end know user permissions
+	/*userPermOpts := make([]string, 0)
+	if err := checkStorePermission(&TreeRoot{Team: user.Team, Type: TreeForm}, user); err == nil {
+		userPermOpts = append(userPermOpts, UserCanEdit)
+	}
+	if err := checkDeletePermission(&TreeRoot{Team: user.Team, Type: TreeForm}, user); err == nil {
+		userPermOpts = append(userPermOpts, UserCanDelete)
+	}*/
 	// send results
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,

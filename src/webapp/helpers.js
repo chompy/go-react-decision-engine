@@ -13,6 +13,11 @@ export default class Helpers {
         return date.toLocaleString();
     }
 
+    /**
+     * Shorten an id string.
+     * @param {string} id 
+     * @returns 
+     */
     static truncateId(id) {
         if (typeof id != 'string') {
             return '(no data)';
@@ -22,5 +27,6 @@ export default class Helpers {
         }
         return id.substring(0, 6) + '...';
     }
+
 
 }

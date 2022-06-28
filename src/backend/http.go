@@ -10,11 +10,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const UserCanEdit = "edit"
+const UserCanDelete = "delete"
+const UserCanCreate = "create"
+
 type HTTPMessage struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message,omitempty"`
 	Count   int         `json:"count,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
+	UserCan []string    `json:"user_can,omitempty"`
 }
 
 func HTTPStart(config *Config) error {

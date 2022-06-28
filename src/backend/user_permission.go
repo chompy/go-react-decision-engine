@@ -1,5 +1,9 @@
 package main
 
+import (
+	"encoding/json"
+)
+
 type UserPermission int
 
 const (
@@ -19,6 +23,23 @@ const (
 	PermDeleteSubmission                // Delete existing submission.
 )
 
+var permissionNameMap = map[UserPermission]string{
+	PermNone:             "none",
+	PermAdmin:            "admin",
+	PermCreateUser:       "create_user",
+	PermEditUser:         "edit_user",
+	PermDeleteUser:       "delete_user",
+	PermCreateForm:       "create_form",
+	PermEditForm:         "edit_form",
+	PermDeleteForm:       "delete_form",
+	PermCreateDocument:   "create_document",
+	PermEditDocument:     "edit_document",
+	PermDeleteDocument:   "delete_document",
+	PermCreateSubmission: "create_submission",
+	PermEditSubmission:   "edit_submission",
+	PermDeleteSubmission: "delete_submission",
+}
+
 func (p UserPermission) Add(flag UserPermission) UserPermission {
 	return p | flag
 }
@@ -32,117 +53,36 @@ func (p UserPermission) Has(flag UserPermission) bool {
 }
 
 func (p UserPermission) Name() string {
-	switch p {
-	case PermAdmin:
-		{
-			return "admin"
-		}
-	case PermCreateUser:
-		{
-			return "create_user"
-		}
-	case PermEditUser:
-		{
-			return "edit_user"
-		}
-	case PermDeleteUser:
-		{
-			return "delete_user"
-		}
-	case PermCreateForm:
-		{
-			return "create_form"
-		}
-	case PermEditForm:
-		{
-			return "edit_form"
-		}
-	case PermDeleteForm:
-		{
-			return "delete_form"
-		}
-	case PermCreateDocument:
-		{
-			return "create_document"
-		}
-	case PermEditDocument:
-		{
-			return "edit_document"
-		}
-	case PermDeleteDocument:
-		{
-			return "delete_document"
-		}
-	case PermCreateSubmission:
-		{
-			return "create_submission"
-		}
-	case PermEditSubmission:
-		{
-			return "edit_submission"
-		}
-	case PermDeleteSubmission:
-		{
-			return "delete_suibmission"
+	return permissionNameMap[p]
+}
+
+func (p *UserPermission) MarshalJSON() ([]byte, error) {
+	out := make([]string, 0)
+	for pmap := range permissionNameMap {
+		if p.Has(pmap) {
+			out = append(out, pmap.Name())
 		}
 	}
-	return ""
+	return json.Marshal(out)
+}
+
+func (p *UserPermission) UnmarshalJSON(data []byte) error {
+	*p = PermNone
+	permNames := make([]string, 0)
+	if err := json.Unmarshal(data, &permNames); err != nil {
+		return err
+	}
+	for _, name := range permNames {
+		p.Add(UserPermissionFromName(name))
+	}
+	return nil
 }
 
 func UserPermissionFromName(name string) UserPermission {
-	switch name {
-	case PermAdmin.Name():
-		{
-			return PermAdmin
-		}
-	case PermCreateUser.Name():
-		{
-			return PermCreateUser
-		}
-	case PermEditUser.Name():
-		{
-			return PermEditUser
-		}
-	case PermDeleteUser.Name():
-		{
-			return PermDeleteUser
-		}
-	case PermCreateForm.Name():
-		{
-			return PermCreateForm
-		}
-	case PermEditForm.Name():
-		{
-			return PermEditForm
-		}
-	case PermDeleteForm.Name():
-		{
-			return PermDeleteForm
-		}
-	case PermCreateDocument.Name():
-		{
-			return PermCreateDocument
-		}
-	case PermEditDocument.Name():
-		{
-			return PermEditDocument
-		}
-	case PermDeleteDocument.Name():
-		{
-			return PermDeleteDocument
-		}
-	case PermCreateSubmission.Name():
-		{
-			return PermCreateSubmission
-		}
-	case PermEditSubmission.Name():
-		{
-			return PermEditSubmission
-		}
-	case PermDeleteSubmission.Name():
-		{
-			return PermDeleteSubmission
+	for p, n := range permissionNameMap {
+		if name == n {
+			return p
 		}
 	}
-	return 0
+	return PermNone
 }

@@ -11,7 +11,7 @@ type HTTPTreeVersionPayload struct {
 	RootID  string `json:"id"`
 	Version int    `json:"version"`
 	State   string `json:"state"`
-	Tree    Node   `json:"tree"`
+	Tree    []Node `json:"tree"`
 }
 
 func HTTPTreeVersionFetch(w http.ResponseWriter, r *http.Request) {

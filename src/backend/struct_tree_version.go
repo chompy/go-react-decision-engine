@@ -29,12 +29,16 @@ type TreeVersion struct {
 	Modifier primitive.ObjectID `bson:"modifier,omitempty" json:"modifier"`
 	Version  int                `bson:"version" json:"version"`
 	State    TreeState          `bson:"state" json:"state"`
-	Tree     Node               `bson:"tree" json:"tree"`
+	Tree     []Node             `bson:"tree" json:"tree"`
 }
 
 func FetchTreeVersion(rootId string, version int, user *User) (*TreeVersion, error) {
 	// database fetch
-	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": rootId, "version": version}, nil)
+	pRootId, err := primitive.ObjectIDFromHex(rootId)
+	if err != nil {
+		return nil, err
+	}
+	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": pRootId, "version": version}, nil)
 	if err != nil {
 		return nil, err
 	}

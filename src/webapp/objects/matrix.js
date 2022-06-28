@@ -5,7 +5,6 @@ export default class MatrixNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.name = '';
     }
 
     /**
@@ -21,24 +20,13 @@ export default class MatrixNode extends BaseNode {
     getComponent() {
         return MatrixNodeComponent;
     }
-
-    /**
-     * @inheritdoc
-     */
-    exportJSON() {
-        let out = super.exportJSON();
-        out[KEY_DATA] = {
-            'name' : this.name
-        }
-        return out;
-    }
-
+    
     /**
      * @inheritdoc
      */
     builderFields() {
         return [
-            ['name', 'Name', 'text'],
+            ['label', 'Label', 'text'],
         ];
     }
 

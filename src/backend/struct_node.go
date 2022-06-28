@@ -6,6 +6,7 @@ type Node struct {
 	Type   string   `bson:"type" json:"type"`
 	Tags   []string `bson:"tags" json:"tags"`
 	Parent string   `bson:"parent" json:"parent"`
+	Label  string   `bson:"label" json:"label"`
 	Data   NodeData `bson:"data" json:"data"`
 }
 

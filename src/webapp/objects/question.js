@@ -9,7 +9,6 @@ export default class QuestionNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.label = '';
         this.type = DECISION_FORM_TYPE_TEXT;
         this.textLines = 1;
         this.defaultAnswer = '';
@@ -33,16 +32,13 @@ export default class QuestionNode extends BaseNode {
     /**
      * @inheritdoc
      */
-    exportJSON() {
-        let out = super.exportJSON();
-        out[KEY_DATA] = {
-            'label' : this.label,
+    getData() {
+        return {
             'type' : this.type,
             'textLines' : this.textLines,
             'defaultAnswer' : this.defaultAnswer,
-            'multiple' : this.multiple
+            'multiple' : this.multiple            
         };
-        return out;
     }
 
     builderFields() {

@@ -7,7 +7,6 @@ export default class AnswerNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.label = '';
         this.value = '';
     }
 
@@ -21,13 +20,10 @@ export default class AnswerNode extends BaseNode {
     /**
      * @inheritdoc
      */
-    exportJSON() {
-        let out = super.exportJSON();
-        out[KEY_DATA] = {
-            'label' : this.label,
-            'value' : this.value
-        }
-        return out;
+    getData() {
+        return {
+            'value' : this.value            
+        };
     }
 
     /**

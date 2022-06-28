@@ -8,7 +8,6 @@ export default class RootNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.name = '';
         this.type = '';
         this.versionHash = '';
     }
@@ -30,13 +29,10 @@ export default class RootNode extends BaseNode {
     /**
      * @inheritdoc
      */
-    exportJSON() {
-        let out = super.exportJSON();
-        out[KEY_DATA] = {
-            'name' : this.name,
-            'type' : this.type
+    getData() {
+        return {
+            'type' : this.type            
         };
-        return out;
     }
 
 }

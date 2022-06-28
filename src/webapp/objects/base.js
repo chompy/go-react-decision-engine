@@ -1,13 +1,10 @@
 import md5 from 'blueimp-md5';
 
 export const KEY_UID = 'uid';
-export const KEY_VERSION = 'version';
 export const KEY_PARENT = 'parent';
 export const KEY_TYPE = 'type';
 export const KEY_TAGS = 'tags';
 export const KEY_DATA = 'data';
-export const KEY_CREATED = 'created';
-export const KEY_MODIFIED = 'modified';
 export const KEY_LABEL = 'label';
 
 /**
@@ -17,14 +14,12 @@ export default class BaseNode {
 
     constructor(uid) {
         this.uid = uid;
-        this.version = 0;
         this.level = 0;
         this.tags = [];
         this.embeds = {};
         this.children = [];
         this.parent = '';
-        this.created = new Date;
-        this.modified = new Date;
+        this.label = '';
     }
 
     /**
@@ -123,15 +118,10 @@ export default class BaseNode {
 
     /**
      * Get display name for object.
-     * @returns 
+     * @returns {string}
      */
     getName() {
-        if (typeof this.name != 'undefined' && this.name) {
-            return this.name;
-        } else if (typeof this.label != 'undefined' && this.label) {
-            return this.label;
-        }
-        return this.uid;
+        return this.label ? this.label : this.uid;
     }
 
     /**
@@ -149,13 +139,10 @@ export default class BaseNode {
     exportJSON() {
         let out = [{
             [KEY_UID]:      this.uid,
-            [KEY_VERSION]:  this.verison,
             [KEY_TYPE]:     this.constructor.getTypeName(),
             [KEY_TAGS]:     this.tags,
             [KEY_LABEL]:    this.getName(),
             [KEY_PARENT]:   this.parent,
-            [KEY_CREATED]:  this.created.toISOString(),
-            [KEY_MODIFIED]: this.modified.toISOString(),
             [KEY_DATA]:     this.getData()
         }];
         for (let i in this.children) {
@@ -174,19 +161,10 @@ export default class BaseNode {
             return null;
         }
         let obj = new this(data[KEY_UID]);
-        obj.version = typeof data[KEY_VERSION] == 'undefined' ? null : data[KEY_VERSION];
         obj.type = typeof data[KEY_TYPE] == 'undefined' ? null : data[KEY_TYPE];
         obj.parent = typeof data[KEY_PARENT] == 'undefined' ? '' : data[KEY_PARENT];
         obj.tags = typeof data[KEY_TAGS] == 'undefined' ? [] : data[KEY_TAGS];
-        obj.created = typeof data[KEY_CREATED] == 'undefined' ? null : new Date(data[KEY_CREATED]);
-        obj.modified = typeof data[KEY_MODIFIED] == 'undefined' ? null : new Date(data[KEY_MODIFIED]);
-        if (typeof data[KEY_LABEL] != 'undefined') {
-            if (typeof obj.name != 'undefined') {
-                obj.name = data[KEY_LABEL];
-            } else if (typeof obj.label != 'undefined') {
-                obj.label = data[KEY_LABEL];
-            }
-        }
+        obj.label = data[KEY_LABEL];
         if (typeof data[KEY_DATA] != 'undefined') {
             obj.importData(data[KEY_DATA]);
         }
@@ -198,7 +176,7 @@ export default class BaseNode {
      */
     importData(data) {
         for (let k in data) {
-            this.data[k] = data[k];
+            this[k] = data[k];
         }
     }
 

@@ -123,6 +123,7 @@ export default class BuilderNodeComponent extends React.Component {
         }
         let child = new type[0];
         child.uid = BaseNode.generateUid();
+        child.parent = this.node.uid;
         switch (child.constructor) {
             case GroupNode: {
                 child.name = 'Group ' + child.uid;
@@ -167,6 +168,7 @@ export default class BuilderNodeComponent extends React.Component {
                 continue;
             }
             let node = new AnswerNode(AnswerNode.generateUid());
+            node.parent = this.node.uid;
             node.label = answer;
             node.value = answer;
             this.node.children.push(node);
@@ -374,6 +376,7 @@ export default class BuilderNodeComponent extends React.Component {
         // insert as child
         if (asChild) {
             this.node.children = [this.currentDragNode];
+            this.currentDragNode.parent = this.node.uid;
             this.currentDragNode = null;
             this.onUpdate({detail: true});
             Events.dispatch('update', this.root);
@@ -393,6 +396,7 @@ export default class BuilderNodeComponent extends React.Component {
                     insertIndex = 0;
                 }
                 this.parent.children.splice(insertIndex, 0, this.currentDragNode);
+                this.currentDragNode.parent = this.parent.uid;
                 break;
             }
         }

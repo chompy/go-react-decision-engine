@@ -21,7 +21,6 @@ const (
 
 // TreeVersion is a tree's version and its state.
 type TreeVersion struct {
-	ID       primitive.ObjectID `bson:"_id" json:"id"`
 	RootID   primitive.ObjectID `bson:"root_id" json:"root_id"`
 	Created  time.Time          `bson:"created,omitempty" json:"created"`
 	Modified time.Time          `bson:"modified,omitempty" json:"modified"`
@@ -115,9 +114,6 @@ func (t *TreeVersion) Store(user *User) error {
 	if t.RootID.IsZero() {
 		return ErrObjMissingParam
 	}
-	if !t.ID.IsZero() && t.Version <= 0 {
-		return ErrObjMissingParam
-	}
 	// check permission
 	if err := checkStorePermission(t, user); err != nil {
 		return err
@@ -126,8 +122,7 @@ func (t *TreeVersion) Store(user *User) error {
 	t.Modifier = user.ID
 	t.Modified = time.Now()
 	// new
-	if t.ID.IsZero() {
-		t.ID = primitive.NewObjectID()
+	if t.Version <= 0 {
 		t.Creator = user.ID
 		t.Created = t.Modified
 		// determine version
@@ -145,12 +140,12 @@ func (t *TreeVersion) Store(user *User) error {
 
 // Delete the tree version.
 func (t *TreeVersion) Delete(user *User) error {
-	if t.ID.IsZero() {
+	if t.RootID.IsZero() || t.Version <= 0 {
 		return ErrObjMissingParam
 	}
 	// check permission
 	if err := checkDeletePermission(t, user); err != nil {
 		return err
 	}
-	return databaseDelete(TreeVersion{}, bson.M{"_id": t.ID})
+	return databaseDelete(TreeVersion{}, bson.M{"root_id": t.RootID, "version": t.Version})
 }

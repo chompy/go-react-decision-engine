@@ -6,6 +6,7 @@ import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder';
 import JsonConverter from '../../converters/json';
+import Events from '../../events';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -17,6 +18,25 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         this.state.tree = null;
         this.onTreeRootResponse = this.onTreeRootResponse.bind(this);
         this.onTreeVersionResponse = this.onTreeVersionResponse.bind(this);
+        this.onTreeUpdate = this.onTreeUpdate.bind(this);
+        this.onTreeStore = this.onTreeStore.bind(this);
+        this.storeTimeout = null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    componentDidMount() {
+        super.componentDidMount();
+        Events.listen('root_update', this.onTreeUpdate);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        Events.remove('root_update', this.onTreeUpdate);
     }
 
     /**
@@ -81,11 +101,11 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 uid: this.state.root.id,
                 type: "root",
                 version: res.data.version,
-                label: 'TOP',
                 created: new Date(),
                 modified: new Date()
             }];
         }
+        res.data.tree[0].label = 'TOP';
         let jc = new JsonConverter;
         this.setState({
             loading: false,
@@ -94,6 +114,47 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         });
     }
 
+    /**
+     * @param {Event} e 
+     */
+    onTreeUpdate(e) {
+        clearTimeout(this.storeTimeout);
+        this.storeTimeout = setTimeout(
+            this.onTreeStore,
+            5000,
+            e.detail.data
+        );
+    }
+
+    /**
+     * @param {Array} data 
+     */
+    onTreeStore(data) {
+        clearTimeout(this.storeTimeout);
+        console.log(data);
+        BackendAPI.post(
+            'tree/version/store',
+            null,
+            {
+                id: this.state.object.root_id,
+                version: this.state.object.version,
+                state: this.state.object.state,
+                tree: data
+            },
+            this.onTreeStoreResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onTreeStoreResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);
+            return;
+        }
+        console.log('> Stored tree version data.', res.data);
+    }
 
     /**
      * {@inheritdoc}

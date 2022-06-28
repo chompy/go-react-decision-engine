@@ -7,7 +7,6 @@ export default class RuleNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.label = '';
         this.type = RULE_TYPE_VISIBILITY;
         this.script = '';
         this.scriptFieldValues = {};
@@ -23,16 +22,13 @@ export default class RuleNode extends BaseNode {
     /**
      * @inheritdoc
      */
-    exportJSON() {
-        let out = super.exportJSON();
-        out[KEY_DATA] = {
+    getData() {
+        return {
             'type' : this.type,
-            'label' : this.label,
-            'script' : this.script
+            'script' : this.script            
         };
-        return out;
     }
-
+    
     /**
      * @inheritdoc
      */

@@ -119,7 +119,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		}
 	case *TreeVersion:
 		{
-			new = i.ID.IsZero()
+			new = i.Version <= 0
 			creator = i.Creator
 			perm = PermEditForm
 			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.RootID}, nil)

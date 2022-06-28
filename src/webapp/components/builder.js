@@ -35,7 +35,7 @@ export default class BuilderComponent extends React.Component {
      * Set decision node via callback.
      * @param {BaseNode} node 
      */
-     setNodeCallback(node) {
+    setNodeCallback(node) {
         if (node instanceof BaseNode) {
             this.node = node;
         } else if (typeof node == 'string') {
@@ -48,7 +48,7 @@ export default class BuilderComponent extends React.Component {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         return <div className='decision-engine-builder'>
             <ul className='top builder'><BuilderNodeComponent root={this.node} node={this.node} /></ul>
         </div>;

@@ -1,6 +1,6 @@
 // app config
 export const APP_TITLE = 'Contextual Code Decision Engine';
-export const MSG_DISPLAY_TIME = 8000;
+export const MSG_DISPLAY_TIME = 4000;
 
 // tree types
 export const TREE_FORM = 'form';
@@ -30,3 +30,9 @@ export const MSG_NO_LIST_DATA = 'No data.';
 export const MSG_SESSION_EXPIRED = 'Your session has expired.';
 export const MSG_TREE_DELETE = '{name} was deleted successfully.';
 export const MSG_CLIPBOARD = 'Copy to clipboard: Ctrl+C, Enter.';
+export const MSG_LOADING = 'Loading...';
+export const MSG_DONE = 'Done.';
+export const MSG_SAVING = 'Saving...';
+export const MSG_SAVED = 'Saved.';
+export const MSG_DELETE_SUCCESS = '{name} was deleted.';
+export const MSG_COPY_SUCCESS = 'v{version} was copied.';

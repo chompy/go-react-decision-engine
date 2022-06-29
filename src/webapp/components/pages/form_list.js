@@ -2,9 +2,10 @@ import React from 'react';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { TREE_FORM } from '../../config';
+import { MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import ApiTableComponent from '../helper/api_table';
+import { message as msgPopup } from 'react-message-popup';
 
 export default class FormListPageComponent extends BasePageComponent {
 
@@ -39,6 +40,7 @@ export default class FormListPageComponent extends BasePageComponent {
      */
     onClickNewForm(e) {
         e.preventDefault();
+        this.msgLoadPromise = msgPopup.loading(MSG_LOADING, 10000);
         BackendAPI.post(
             'tree/store',
             null,
@@ -55,7 +57,9 @@ export default class FormListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onNewFormResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
+        msgPopup.success(MSG_DONE, MSG_DISPLAY_TIME);
         this.gotoPage(
             TreeVersionListPageComponent,
             {

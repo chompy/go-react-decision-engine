@@ -3,6 +3,8 @@
     color: $header-fg;
     padding: 10px;
     border-bottom: 1px solid $page-section-divide;
+    position: relative;
+    z-index: 2;
 
     .app-name {
         display: inline-block;

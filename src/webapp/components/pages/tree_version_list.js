@@ -4,10 +4,10 @@ import BasePageComponent from './base';
 import BackendAPI from '../../api';
 import FormListPageComponent from './form_list';
 import EditTitleComponent from '../helper/edit_title';
-import { ERR_NOT_FOUND } from '../../config';
-import Events from '../../events';
+import { ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_LOADING } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import TreeVersionEditPageComponent from './team_version_edit';
+import { message as msgPopup } from 'react-message-popup';
 
 export default class TreeVersionListPageComponent extends BasePageComponent {
 
@@ -93,7 +93,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         if (!confirm('Are you sure you want to delete this?')) {
             return;
         }
-        this.setState({loading: true});
+        this.msgLoadPromise = msgPopup.loading(MSG_LOADING, 10000);
         BackendAPI.post(
             'tree/delete', null,
             { id: this.state.root.id },
@@ -105,8 +105,9 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onDeleteResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
-        Events.dispatch('tree_delete', this.state.root);
+        msgPopup.success(MSG_DELETE_SUCCESS.replace('{name}', this.state.root.label), MSG_DISPLAY_TIME);
         this.gotoPage(FormListPageComponent);
     }
 

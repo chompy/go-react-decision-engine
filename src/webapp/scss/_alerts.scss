@@ -5,24 +5,40 @@
     text-align: center;
     margin: 10px 0;
     padding: 8px 5px;
-    &.message {
-        background-color: $alert-msg-bg;
-        color: $alert-msg-fg;
-    }
     &.error {
         background-color: $alert-err-bg;
         color: $alert-err-fg;
     }
-    &.fade {
+    &.message {
+        background-color: $alert-msg-bg;
+        color: $alert-msg-fg;
         position: absolute;
         width: 100%;
         opacity: 0;
         pointer-events: none;
-        animation: message-fade 6s linear;
-        @keyframes message-fade {
-            0%  { opacity: 1; }
-            75% { opacity: 1; }
-            100% { opacity: 0; }   
+        top: 0;
+        z-index: 1;
+        margin-top: 86px;
+        &:nth-child(2) {
+            margin-top: 48px;
         }
+        &:nth-child(3) {
+            margin-top: 0px;
+        }
+        transition: margin-top .5 linear;
+
+    }
+    &.state-enter {
+        opacity: 0;
+    }
+    &.state-show {
+        opacity: 1;
+        top: 64px;
+        transition: opacity .5s linear;
+        transition: top .5s linear;
+    }
+    &.state-exit {
+        opacity: 0;
+        transition: opacity 1s linear;
     }
 }

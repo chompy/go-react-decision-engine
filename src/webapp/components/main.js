@@ -7,8 +7,8 @@ import LoginPageComponent from './pages/login';
 import PathResolver from '../path_resolver';
 import FormListPageComponent from './pages/form_list';
 import ErrorPageComponent from './pages/error';
-import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED, MSG_TREE_DELETE } from '../config';
-import AlertMessageComponent from './helper/alert_message';
+import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED } from '../config';
+import { message as msgPopup } from 'react-message-popup';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -19,8 +19,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.state = {
             path: pathResolve,
             user: null,
-            team: null,
-            messages: {}
+            team: null
         };
         this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
@@ -99,7 +98,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogin(e) {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
-        this.addMessage(MSG_LOGIN_SUCCESS);
+        msgPopup.success(MSG_LOGIN_SUCCESS, MSG_DISPLAY_TIME);
         if (typeof this.state.path.referer != 'undefined') {
             this.gotoPage(this.state.referer.component, this.state.referer);
             return; 
@@ -113,7 +112,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     onLogout(e) {
         console.log('> Log out successful.');
         this.setState({user: null});
-        this.addMessage(MSG_LOGOUT_SUCCESS);
+        msgPopup.success(MSG_LOGOUT_SUCCESS, MSG_DISPLAY_TIME);
         this.gotoPage(LoginPageComponent, {team: this.state.team.id});
     }
 
@@ -134,7 +133,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      * @param {Event} e 
      */
     onSessionExpire(e) {
-        this.addMessage(MSG_SESSION_EXPIRED);
+        msgPopup.success(MSG_SESSION_EXPIRED, MSG_DISPLAY_TIME);
         this.gotoPage(
             LoginPageComponent, {referer: this.state.path}
         );
@@ -165,27 +164,6 @@ export default class DecisionEngineMainComponent extends React.Component {
     /**
      * @param {String} message 
      */
-    addMessage(message) {
-        this.setState(function(state, props) {
-            // clear old messages
-            let now = new Date().getTime();
-            for (let t in state.messages) {
-                if (t + MSG_DISPLAY_TIME < now) {
-                    delete state.messages[t];
-                }
-            }
-            // add new message
-            let timestamp = new Date().getTime();
-            state.messages[timestamp] = message;
-            return {
-                messages: state.messages
-            }
-        });
-    }
-
-    /**
-     * @param {String} message 
-     */
     displayError(message) {
         console.error('> Display error. (' + message + ').');
         this.setState({
@@ -197,16 +175,9 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     render() {
-        let messages = [];
-        for (let t in this.state.messages) {
-            messages.push(
-                <AlertMessageComponent key={'msg_' + t} message={this.state.messages} />
-            );
-        }
         let PageComponent = this.state.path.component;
         return <div className='decision-engine'>
             <AppHeaderComponent user={this.state.user} team={this.state.team} />
-            <div className='messages'>{messages}</div>
             <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} />
         </div>;
     }

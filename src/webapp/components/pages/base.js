@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCircleExclamation, faCog } from '@fortawesome/free-solid-svg-icons';
 import Events from '../../events';
 import md5 from 'blueimp-md5';
+import { message as msgPopup } from 'react-message-popup';
+import { MSG_DISPLAY_TIME } from '../../config';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
@@ -21,6 +23,7 @@ export default class BasePageComponent extends React.Component {
         this.onTeam = this.onTeam.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
         this.pageButtons = {};
+        this.msgLoadPromise = null;
         this.bindEvents();
     }
 
@@ -135,7 +138,11 @@ export default class BasePageComponent extends React.Component {
     handleErrorResponse(res) {
         if (res.success) { return false; }
         console.error('> ERROR: ' + res.message, res);
-        this.setState({error: res.message});
+        if (this.state.loading) {
+            this.setState({error: res.message});
+            return true;
+        }
+        msgPopup.error(res.message, MSG_DISPLAY_TIME);
         return true;
     }
 
@@ -172,8 +179,9 @@ export default class BasePageComponent extends React.Component {
      * @param {string} label 
      * @param {CallableFunction} callback 
      * @param {*} icon 
+     * @param {boolean} disable
      */
-    renderCallbackButton(label, callback, icon) {
+    renderCallbackButton(label, callback, icon, disable) {
         let renderIcon = null;
         if (icon) {
             label = ' ' + label;
@@ -183,6 +191,7 @@ export default class BasePageComponent extends React.Component {
                 key={'cbtn-' + label}
                 className='pure-button'
                 onClick={callback}
+                disabled={disable}
             >
                 {renderIcon}{label}
         </button>;

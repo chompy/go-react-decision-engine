@@ -147,6 +147,14 @@ func (t *TreeVersion) Delete(user *User) error {
 	if err := checkDeletePermission(t, user); err != nil {
 		return err
 	}
+	// ensure this isn't the only version
+	count, err := databaseCount(TreeVersion{}, bson.M{"root_id": t.RootID})
+	if err != nil {
+		return err
+	}
+	if count <= 1 {
+		return ErrCannotDeleteOnlyVersion
+	}
 	return databaseDelete(TreeVersion{}, bson.M{"root_id": t.RootID, "version": t.Version})
 }
 
@@ -159,17 +167,20 @@ func (t *TreeVersion) Publish(user *User) error {
 		return err
 	}
 	currentPublished, err := FetchTreeVersionLatestPublished(t.RootID.Hex(), user)
-	if err != nil {
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return err
 	}
-	currentPublished.Modified = time.Now()
-	currentPublished.Modifier = user.ID
-	currentPublished.State = TreeArchived
-	if err := currentPublished.Store(user); err != nil {
-		return err
+	now := time.Now()
+	if currentPublished != nil {
+		currentPublished.Modified = now
+		currentPublished.Modifier = user.ID
+		currentPublished.State = TreeArchived
+		if err := currentPublished.Store(user); err != nil {
+			return err
+		}
 	}
 	t.State = TreePublished
-	t.Modified = currentPublished.Modified
+	t.Modified = now
 	t.Modifier = user.ID
 	if err := t.Store(user); err != nil {
 		return err

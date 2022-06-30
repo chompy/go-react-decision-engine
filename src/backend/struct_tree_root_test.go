@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"testing"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestTreeRoot(t *testing.T) {
@@ -16,8 +14,8 @@ func TestTreeRoot(t *testing.T) {
 	defer databaseClose()
 	testCleanDatabase()
 	testUser := User{
-		ID:         primitive.NewObjectID(),
-		Team:       primitive.NewObjectID(),
+		ID:         GenerateDatabaseId(),
+		Team:       GenerateDatabaseId(),
 		Permission: PermAdmin,
 	}
 	testTreeRoot := TreeRoot{
@@ -31,7 +29,7 @@ func TestTreeRoot(t *testing.T) {
 		return
 	}
 	// test fetch
-	testFetch, err := FetchTreeRoot(testTreeRoot.ID.Hex(), &testUser)
+	testFetch, err := FetchTreeRoot(testTreeRoot.ID.String(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -50,8 +48,8 @@ func TestTreeRootPermissions(t *testing.T) {
 	defer databaseClose()
 	testCleanDatabase()
 	testUser := User{
-		ID:         primitive.NewObjectID(),
-		Team:       primitive.NewObjectID(),
+		ID:         GenerateDatabaseId(),
+		Team:       GenerateDatabaseId(),
 		Permission: PermNone,
 	}
 	testTreeRoot := TreeRoot{
@@ -69,7 +67,7 @@ func TestTreeRootPermissions(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	err = testTreeRoot.Store(&User{ID: primitive.NewObjectID(), Team: testUser.Team, Permission: PermCreateDocument})
+	err = testTreeRoot.Store(&User{ID: GenerateDatabaseId(), Team: testUser.Team, Permission: PermCreateDocument})
 	if err == nil || !errors.Is(err, ErrInvalidPermission) {
 		t.Errorf("expected permission error")
 		return

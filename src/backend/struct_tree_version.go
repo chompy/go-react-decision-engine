@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,23 +20,20 @@ const (
 
 // TreeVersion is a tree's version and its state.
 type TreeVersion struct {
-	RootID   primitive.ObjectID `bson:"root_id" json:"root_id"`
-	Created  time.Time          `bson:"created,omitempty" json:"created"`
-	Modified time.Time          `bson:"modified,omitempty" json:"modified"`
-	Creator  primitive.ObjectID `bson:"creator,omitempty" json:"creator"`
-	Modifier primitive.ObjectID `bson:"modifier,omitempty" json:"modifier"`
-	Version  int                `bson:"version" json:"version"`
-	State    TreeState          `bson:"state" json:"state"`
-	Tree     []Node             `bson:"tree" json:"tree"`
+	RootID   DatabaseID `bson:"root_id" json:"root_id"`
+	Created  time.Time  `bson:"created,omitempty" json:"created"`
+	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
+	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
+	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
+	Version  int        `bson:"version" json:"version"`
+	State    TreeState  `bson:"state" json:"state"`
+	Tree     []Node     `bson:"tree" json:"tree"`
 }
 
 func FetchTreeVersion(rootId string, version int, user *User) (*TreeVersion, error) {
 	// database fetch
-	pRootId, err := primitive.ObjectIDFromHex(rootId)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": pRootId, "version": version}, nil)
+	rootDbId := DatabaseIDFromString(rootId)
+	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": rootDbId, "version": version}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -51,11 +47,8 @@ func FetchTreeVersion(rootId string, version int, user *User) (*TreeVersion, err
 
 func FetchTreeVersionLatest(rootId string, user *User) (*TreeVersion, error) {
 	// database fetch
-	pRootId, err := primitive.ObjectIDFromHex(rootId)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": pRootId}, bson.M{"version": -1})
+	rootDbId := DatabaseIDFromString(rootId)
+	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": rootDbId}, bson.M{"version": -1})
 	if err != nil {
 		return nil, err
 	}
@@ -69,11 +62,8 @@ func FetchTreeVersionLatest(rootId string, user *User) (*TreeVersion, error) {
 
 func FetchTreeVersionLatestPublished(rootId string, user *User) (*TreeVersion, error) {
 	// database fetch
-	pRootId, err := primitive.ObjectIDFromHex(rootId)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": pRootId, "state": TreePublished}, bson.M{"version": -1})
+	rootDbId := DatabaseIDFromString(rootId)
+	res, err := databaseFetch(TreeVersion{}, bson.M{"root_id": rootDbId, "state": TreePublished}, bson.M{"version": -1})
 	if err != nil {
 		return nil, err
 	}
@@ -87,11 +77,8 @@ func FetchTreeVersionLatestPublished(rootId string, user *User) (*TreeVersion, e
 
 func ListTreeVersion(rootId string, user *User, offset int) ([]*TreeVersion, int, error) {
 	// database fetch
-	pRootId, err := primitive.ObjectIDFromHex(rootId)
-	if err != nil {
-		return nil, 0, err
-	}
-	res, count, err := databaseList(TreeVersion{}, bson.M{"root_id": pRootId}, bson.M{"created": -1}, nil, offset)
+	rootDbId := DatabaseIDFromString(rootId)
+	res, count, err := databaseList(TreeVersion{}, bson.M{"root_id": rootDbId}, bson.M{"created": -1}, nil, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -111,7 +98,7 @@ func ListTreeVersion(rootId string, user *User, offset int) ([]*TreeVersion, int
 
 func (t *TreeVersion) Store(user *User) error {
 	// check params
-	if t.RootID.IsZero() {
+	if t.RootID.IsEmpty() {
 		return ErrObjMissingParam
 	}
 	// check permission
@@ -126,7 +113,7 @@ func (t *TreeVersion) Store(user *User) error {
 		t.Creator = user.ID
 		t.Created = t.Modified
 		// determine version
-		latestVersion, err := FetchTreeVersionLatest(t.RootID.Hex(), user)
+		latestVersion, err := FetchTreeVersionLatest(t.RootID.String(), user)
 		if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 			return err
 		}
@@ -140,7 +127,7 @@ func (t *TreeVersion) Store(user *User) error {
 
 // Delete the tree version.
 func (t *TreeVersion) Delete(user *User) error {
-	if t.RootID.IsZero() || t.Version <= 0 {
+	if t.RootID.IsEmpty() || t.Version <= 0 {
 		return ErrObjMissingParam
 	}
 	// check permission
@@ -160,13 +147,13 @@ func (t *TreeVersion) Delete(user *User) error {
 
 // Publish the tree version, archive any previously published versions.
 func (t *TreeVersion) Publish(user *User) error {
-	if t.RootID.IsZero() || t.Version <= 0 {
+	if t.RootID.IsEmpty() || t.Version <= 0 {
 		return ErrObjMissingParam
 	}
 	if err := checkStorePermission(t, user); err != nil {
 		return err
 	}
-	currentPublished, err := FetchTreeVersionLatestPublished(t.RootID.Hex(), user)
+	currentPublished, err := FetchTreeVersionLatestPublished(t.RootID.String(), user)
 	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
 		return err
 	}

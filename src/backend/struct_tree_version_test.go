@@ -2,8 +2,6 @@ package main
 
 import (
 	"testing"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestTreeVersion(t *testing.T) {
@@ -16,8 +14,8 @@ func TestTreeVersion(t *testing.T) {
 	testCleanDatabase()
 
 	testUser := User{
-		ID:         primitive.NewObjectID(),
-		Team:       primitive.NewObjectID(),
+		ID:         GenerateDatabaseId(),
+		Team:       GenerateDatabaseId(),
 		Permission: PermCreateForm | PermEditForm,
 	}
 	testTreeRoot := TreeRoot{
@@ -27,7 +25,7 @@ func TestTreeVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if testTreeRoot.ID.IsZero() {
+	if testTreeRoot.ID.IsEmpty() {
 		t.Errorf("expect uid to be generated")
 		return
 	}
@@ -36,7 +34,7 @@ func TestTreeVersion(t *testing.T) {
 	testTreeVersion := TreeVersion{
 		RootID: testTreeRoot.ID,
 		State:  TreeDraft,
-		Tree:   getTestTree(testTreeRoot.ID.Hex()),
+		Tree:   getTestTree(testTreeRoot.ID.String()),
 	}
 	if err := testTreeVersion.Store(&testUser); err != nil {
 		t.Error(err)
@@ -44,7 +42,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest
-	fetchLatest, err := FetchTreeVersionLatest(testTreeRoot.ID.Hex(), &testUser)
+	fetchLatest, err := FetchTreeVersionLatest(testTreeRoot.ID.String(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -82,7 +80,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest again and check that new latest version is 3
-	fetchLatest, err = FetchTreeVersionLatest(testTreeVersion.RootID.Hex(), &testUser)
+	fetchLatest, err = FetchTreeVersionLatest(testTreeVersion.RootID.String(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -93,7 +91,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// fetch latest published version
-	fetchLatest, err = FetchTreeVersionLatestPublished(testTreeVersion.RootID.Hex(), &testUser)
+	fetchLatest, err = FetchTreeVersionLatestPublished(testTreeVersion.RootID.String(), &testUser)
 	if err != nil {
 		t.Error(err)
 		return
@@ -104,7 +102,7 @@ func TestTreeVersion(t *testing.T) {
 	}
 
 	// list all versions
-	_, count, err := ListTreeVersion(testTreeVersion.RootID.Hex(), &testUser, 0)
+	_, count, err := ListTreeVersion(testTreeVersion.RootID.String(), &testUser, 0)
 	if err != nil {
 		t.Error(err)
 		return

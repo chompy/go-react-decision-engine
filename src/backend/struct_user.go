@@ -4,28 +4,24 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID         primitive.ObjectID `bson:"_id" json:"id"`
-	Created    time.Time          `bson:"created,omitempty" json:"created"`
-	Modified   time.Time          `bson:"modified,omitempty" json:"modified"`
-	Creator    primitive.ObjectID `bson:"creator,omitempty" json:"creator"`
-	Modifier   primitive.ObjectID `bson:"modifier,omitempty" json:"modifier"`
-	Email      string             `bson:"email" json:"email"`
-	Password   []byte             `bson:"password" json:"-"`
-	Team       primitive.ObjectID `bson:"team" json:"team"`
-	Permission UserPermission     `bson:"permission" json:"permission"`
+	ID         DatabaseID     `bson:"_id" json:"id"`
+	Created    time.Time      `bson:"created,omitempty" json:"created"`
+	Modified   time.Time      `bson:"modified,omitempty" json:"modified"`
+	Creator    DatabaseID     `bson:"creator,omitempty" json:"creator"`
+	Modifier   DatabaseID     `bson:"modifier,omitempty" json:"modifier"`
+	Email      string         `bson:"email" json:"email"`
+	Password   []byte         `bson:"password" json:"-"`
+	Team       DatabaseID     `bson:"team" json:"team"`
+	Permission UserPermission `bson:"permission" json:"permission"`
 }
 
 func FetchUserByID(id string) (*User, error) {
-	pId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(User{}, bson.M{"_id": pId}, nil)
+	dbId := DatabaseIDFromString(id)
+	res, err := databaseFetch(User{}, bson.M{"_id": dbId}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -34,11 +30,8 @@ func FetchUserByID(id string) (*User, error) {
 }
 
 func FetchUserByTeamEmail(team string, email string) (*User, error) {
-	pTeam, err := primitive.ObjectIDFromHex(team)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(User{}, bson.M{"team": pTeam, "email": email}, nil)
+	dbTeam := DatabaseIDFromString(team)
+	res, err := databaseFetch(User{}, bson.M{"team": dbTeam, "email": email}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -82,12 +75,12 @@ func (u *User) Store(editor *User) error {
 		return err
 	}
 	u.Modified = time.Now()
-	u.Modifier = primitive.ObjectID{}
+	u.Modifier = DatabaseID{}
 	if editor != nil {
 		u.Modifier = editor.ID
 	}
-	if u.ID.IsZero() {
-		u.ID = primitive.NewObjectID()
+	if u.ID.IsEmpty() {
+		u.ID = GenerateDatabaseId()
 		u.Created = u.Modified
 		if editor != nil {
 			u.Creator = editor.ID

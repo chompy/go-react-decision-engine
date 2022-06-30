@@ -3,8 +3,6 @@ package main
 import (
 	"net/http"
 	"strconv"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HTTPTreeRootPayload struct {
@@ -98,15 +96,7 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// build + validate
-	treeRootId := primitive.NilObjectID
-	var err error
-	if payload.ID != "" {
-		treeRootId, err = primitive.ObjectIDFromHex(payload.ID)
-		if err != nil {
-			HTTPSendError(w, err)
-			return
-		}
-	}
+	treeRootId := DatabaseIDFromString(payload.ID)
 	treeRoot := TreeRoot{
 		ID:    treeRootId,
 		Label: payload.Label,
@@ -119,11 +109,7 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			treeRoot.Type = TreeForm
-			treeRoot.Parent, err = primitive.ObjectIDFromHex(payload.Team)
-			if err != nil {
-				HTTPSendError(w, err)
-				return
-			}
+			treeRoot.Parent = DatabaseIDFromString(payload.Team)
 			break
 		}
 	case string(TreeDocument):
@@ -133,11 +119,7 @@ func HTTPTreeRootStore(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			treeRoot.Type = TreeDocument
-			treeRoot.Parent, err = primitive.ObjectIDFromHex(payload.Form)
-			if err != nil {
-				HTTPSendError(w, err)
-				return
-			}
+			treeRoot.Parent = DatabaseIDFromString(payload.Form)
 			break
 		}
 	default:

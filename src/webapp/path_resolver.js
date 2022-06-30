@@ -69,7 +69,7 @@ export default class PathResolver {
                                 if (path.length < 5) {
                                     return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                                 }
-                                let versionNo = parseInt(path[4]);
+                                let versionNo = parseInt(path[4].substring(1));
                                 return {component: TreeVersionEditPageComponent, team: teamId, id: treeId, version: versionNo};
                             }
                             default: {
@@ -113,7 +113,7 @@ export default class PathResolver {
             [LoginPageComponent]: '{team}/login',
             [FormListPageComponent]: '{team}/forms',
             [TreeVersionListPageComponent]: '{team}/tree/{id}/list',
-            [TreeVersionEditPageComponent]: '{team}/tree/{id}/edit/{version}'
+            [TreeVersionEditPageComponent]: '{team}/tree/{id}/edit/v{version}'
         };
         if (component in componentList) {
             let path = componentList[component];

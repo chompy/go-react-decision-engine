@@ -39,7 +39,7 @@ func createTestObjects() {
 		panic(err)
 	}
 	log.Println("===== SAMPLE USER CREATED ====")
-	log.Printf("TEST TEAM: %s\n", testTeam.ID.Hex())
+	log.Printf("TEST TEAM: %s\n", testTeam.ID.String())
 	log.Printf("TEST USER: %s / %s", adminTestUser.Email, "test1234")
 	log.Println("==============================")
 }

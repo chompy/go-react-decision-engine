@@ -3,8 +3,6 @@ package main
 import (
 	"net/http"
 	"strconv"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type HTTPTreeVersionPayload struct {
@@ -90,13 +88,8 @@ func HTTPTreeVersionStore(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// build
-	rootId, err := primitive.ObjectIDFromHex(payload.RootID)
-	if err != nil {
-		HTTPSendError(w, err)
-		return
-	}
 	treeVersion := TreeVersion{
-		RootID:  rootId,
+		RootID:  DatabaseIDFromString(payload.RootID),
 		Version: payload.Version,
 		State:   TreeState(payload.State),
 		Tree:    payload.Tree,

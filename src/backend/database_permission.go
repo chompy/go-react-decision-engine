@@ -2,7 +2,6 @@ package main
 
 import (
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func checkFetchPermission(i interface{}, user *User) error {
@@ -12,13 +11,13 @@ func checkFetchPermission(i interface{}, user *User) error {
 func checkStorePermission(i interface{}, user *User) error {
 	// gather parameters
 	new := false
-	team := primitive.NilObjectID
-	creator := primitive.NilObjectID
+	team := DatabaseID{}
+	creator := DatabaseID{}
 	perm := PermAdmin
 	switch i := i.(type) {
 	case *TreeRoot:
 		{
-			new = i.ID.IsZero()
+			new = i.ID.IsEmpty()
 			creator = i.Creator
 			switch i.Type {
 			case TreeForm:
@@ -74,7 +73,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		}
 	case *FormSubmission:
 		{
-			new = i.ID.IsZero()
+			new = i.ID.IsEmpty()
 			creator = i.Creator
 			perm = PermEditSubmission
 			if new {
@@ -89,7 +88,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		}
 	case *User:
 		{
-			new = i.ID.IsZero()
+			new = i.ID.IsEmpty()
 			team = i.Team
 			perm = PermEditUser
 			if new {
@@ -109,11 +108,11 @@ func checkStorePermission(i interface{}, user *User) error {
 		return ErrNoUser
 	}
 	// not on same team
-	if !team.IsZero() && user.Team != team {
+	if !team.IsEmpty() && user.Team.String() != team.String() {
 		return ErrInvalidPermission
 	}
 	// if editting existing and user is original creator then ok
-	if !new && !creator.IsZero() && user.ID == creator {
+	if !new && !creator.IsEmpty() && user.ID.String() == creator.String() {
 		return nil
 	}
 	// check if user has required permission

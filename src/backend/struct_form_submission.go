@@ -4,16 +4,15 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type FormSubmission struct {
-	ID          primitive.ObjectID  `bson:"_id" json:"id"`
+	ID          DatabaseID          `bson:"_id" json:"id"`
 	Created     time.Time           `bson:"created,omitempty" json:"created"`
 	Modified    time.Time           `bson:"modified,omitempty" json:"modified"`
-	Creator     primitive.ObjectID  `bson:"creator,omitempty" json:"creator"`
-	Modifier    primitive.ObjectID  `bson:"modifier,omitempty" json:"modifier"`
-	TreeID      primitive.ObjectID  `bson:"tree_id" json:"tree_id"`
+	Creator     DatabaseID          `bson:"creator,omitempty" json:"creator"`
+	Modifier    DatabaseID          `bson:"modifier,omitempty" json:"modifier"`
+	TreeID      DatabaseID          `bson:"tree_id" json:"tree_id"`
 	TreeVersion int                 `bson:"tree_version" json:"tree_version"`
 	Answers     map[string][]string `bson:"answers" json:"answers"`
 }
@@ -59,7 +58,7 @@ func ListFormSubmission(treeId string, user *User, offset int) ([]*FormSubmissio
 
 // Store the form submission.
 func (s *FormSubmission) Store(user *User) error {
-	if s.TreeID.IsZero() || s.TreeVersion <= 0 {
+	if s.TreeID.IsEmpty() || s.TreeVersion <= 0 {
 		return ErrNoData
 	}
 	if err := checkStorePermission(s, user); err != nil {
@@ -67,8 +66,8 @@ func (s *FormSubmission) Store(user *User) error {
 	}
 	s.Modifier = user.ID
 	s.Modified = time.Now()
-	if s.ID.IsZero() {
-		s.ID = primitive.NewObjectID()
+	if s.ID.IsEmpty() {
+		s.ID = GenerateDatabaseId()
 		s.Creator = user.ID
 		s.Created = s.Modified
 	}

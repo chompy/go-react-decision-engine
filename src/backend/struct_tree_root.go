@@ -17,14 +17,14 @@ const (
 
 // TreeRoot is the container for a decision tree.
 type TreeRoot struct {
-	ID       primitive.ObjectID `bson:"_id" json:"id"`
-	Created  time.Time          `bson:"created,omitempty" json:"created"`
-	Modified time.Time          `bson:"modified,omitempty" json:"modified"`
-	Creator  primitive.ObjectID `bson:"creator,omitempty" json:"creator"`
-	Modifier primitive.ObjectID `bson:"modifier,omitempty" json:"modifier"`
-	Type     TreeType           `bson:"type" json:"type"`
-	Parent   primitive.ObjectID `bson:"parent" json:"parent"`
-	Label    string             `bson:"label" json:"label"`
+	ID       DatabaseID `bson:"_id" json:"id"`
+	Created  time.Time  `bson:"created,omitempty" json:"created"`
+	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
+	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
+	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
+	Type     TreeType   `bson:"type" json:"type"`
+	Parent   DatabaseID `bson:"parent" json:"parent"`
+	Label    string     `bson:"label" json:"label"`
 }
 
 // Fetch a tree root object from the database.
@@ -33,11 +33,8 @@ func FetchTreeRoot(id string, user *User) (*TreeRoot, error) {
 		return nil, ErrNoUser
 	}
 	// database fetch
-	pId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(TreeRoot{}, bson.M{"_id": pId}, nil)
+	dbId := DatabaseIDFromString(id)
+	res, err := databaseFetch(TreeRoot{}, bson.M{"_id": dbId}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +100,7 @@ func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, 
 		out = append(out, item.(*TreeRoot))
 	}
 	if !hasCreator {
-		if _, err := FetchTreeRoot(out[0].Parent.Hex(), user); err != nil {
+		if _, err := FetchTreeRoot(out[0].Parent.String(), user); err != nil {
 			return nil, 0, err
 		}
 	}
@@ -123,9 +120,9 @@ func (t *TreeRoot) Store(user *User) error {
 	t.Modifier = user.ID
 	t.Modified = time.Now()
 	isNew := false
-	if t.ID.IsZero() {
+	if t.ID.IsEmpty() {
 		isNew = true
-		t.ID = primitive.NewObjectID()
+		t.ID = GenerateDatabaseId()
 		t.Creator = user.ID
 		t.Created = t.Modified
 	}
@@ -133,10 +130,15 @@ func (t *TreeRoot) Store(user *User) error {
 		return err
 	}
 	// create first version if new tree
-	if isNew && !t.ID.IsZero() {
+	if isNew && !t.ID.IsEmpty() {
 		v := TreeVersion{
-			RootID: t.ID,
-			State:  TreeDraft,
+			RootID:   t.ID,
+			State:    TreeDraft,
+			Version:  1,
+			Creator:  user.ID,
+			Modifier: user.ID,
+			Created:  time.Now(),
+			Modified: time.Now(),
 		}
 		if err := v.Store(user); err != nil {
 			return err

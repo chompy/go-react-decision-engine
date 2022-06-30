@@ -24,7 +24,7 @@ func HTTPNewSession(w http.ResponseWriter, user *User) {
 	sessionToken := uuid.NewString()
 	// store session
 	httpSessions[sessionToken] = httpSession{
-		id:      user.ID.Hex(),
+		id:      user.ID.String(),
 		created: time.Now(),
 	}
 	// set session cookie

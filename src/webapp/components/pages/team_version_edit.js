@@ -191,6 +191,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_DONE, MSG_DISPLAY_TIME);
+        this.setState({object: res.data});
     }
 
     /**

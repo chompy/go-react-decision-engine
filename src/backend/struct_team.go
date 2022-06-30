@@ -4,27 +4,23 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Team struct {
-	ID       primitive.ObjectID `bson:"_id" json:"id"`
-	Created  time.Time          `bson:"created,omitempty" json:"created"`
-	Modified time.Time          `bson:"modified,omitempty" json:"modified"`
-	Creator  primitive.ObjectID `bson:"creator,omitempty" json:"creator"`
-	Modifier primitive.ObjectID `bson:"modifier,omitempty" json:"modifier"`
-	Name     string             `bson:"name" json:"name"`
+	ID       DatabaseID `bson:"_id" json:"id"`
+	Created  time.Time  `bson:"created,omitempty" json:"created"`
+	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
+	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
+	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
+	Name     string     `bson:"name" json:"name"`
 }
 
 func FetchTeamByID(id string, user *User) (*Team, error) {
-	if user != nil && id != user.Team.Hex() {
+	if user != nil && id != user.Team.String() {
 		return nil, ErrInvalidPermission
 	}
-	pId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := databaseFetch(Team{}, bson.M{"_id": pId}, nil)
+	dbId := DatabaseIDFromString(id)
+	res, err := databaseFetch(Team{}, bson.M{"_id": dbId}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +34,8 @@ func (t *Team) Store(user *User) error {
 	}
 	t.Modified = time.Now()
 	t.Modifier = user.ID
-	if t.ID.IsZero() {
-		t.ID = primitive.NewObjectID()
+	if t.ID.IsEmpty() {
+		t.ID = GenerateDatabaseId()
 		t.Created = t.Modified
 		t.Creator = user.ID
 	}

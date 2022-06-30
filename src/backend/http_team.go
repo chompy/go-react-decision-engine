@@ -15,7 +15,7 @@ func HTTPTeam(w http.ResponseWriter, r *http.Request) {
 			HTTPSendError(w, ErrHTTPLoginRequired)
 			return
 		}
-		teamId = user.Team.Hex()
+		teamId = user.Team.String()
 	}
 	// fetch team
 	team, err := FetchTeamByID(teamId, nil)

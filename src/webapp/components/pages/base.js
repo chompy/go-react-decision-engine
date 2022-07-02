@@ -24,6 +24,7 @@ export default class BasePageComponent extends React.Component {
         this.onUserMe = this.onUserMe.bind(this);
         this.pageButtons = {};
         this.msgLoadPromise = null;
+        this.mountTime = null;
         this.bindEvents();
     }
 
@@ -31,6 +32,7 @@ export default class BasePageComponent extends React.Component {
      * {@inheritdoc}
      */
     componentDidMount() {
+        this.mountTime = new Date().getTime();
         Events.listen('team', this.onTeam);
         Events.listen('user_me', this.onUserMe);
         if (this.state.team && this.state.user) {
@@ -86,6 +88,13 @@ export default class BasePageComponent extends React.Component {
     }
 
     /**
+     * Navigate to referer page.
+     */
+    gotoReferer() {
+        Events.dispatch('goto_referer');
+    }
+
+    /**
      * Handle button click event with page navigation.
      * @param {Event} e 
      */
@@ -127,6 +136,21 @@ export default class BasePageComponent extends React.Component {
      * Fires when all pre-api (user, team) calls have been made.
      */
     onReady() {
+        this.setLoaded();
+    }
+
+    /**
+     * Flag that page is done loading, remove loading animation and render page.
+     */
+    setLoaded() {
+        if (new Date().getTime() - this.mountTime < 250) {
+            let delayLoading = function() {
+                this.setState({loading: false});        
+            }
+            delayLoading = delayLoading.bind(this);
+            setTimeout(delayLoading, 150);
+            return;
+        }
         this.setState({loading: false});
     }
 

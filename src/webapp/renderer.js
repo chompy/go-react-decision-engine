@@ -1,5 +1,5 @@
 import React from 'react';
-import BaseNode from './objects/base';
+import BaseNode from './nodes/base';
 
 export default class Renderer {
 

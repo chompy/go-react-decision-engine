@@ -28,5 +28,4 @@ export default class Helpers {
         return id.substring(0, 6) + '...';
     }
 
-
 }

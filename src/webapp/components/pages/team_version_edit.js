@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder';
@@ -97,10 +97,10 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         res.data.tree[0].label = 'TOP';
         let jc = new JsonConverter;
         this.setState({
-            loading: false,
             object: res.data,
             tree: jc.import(res.data.tree)
         });
+        this.setLoaded();
     }
 
     /**
@@ -235,7 +235,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             let treeExport = js.export(this.state.tree);
             this.onTreeStore(treeExport);
         }
-        this.gotoPage(TreeVersionListPageComponent, {id: this.state.root.id});
+        window.history.back();
     }
 
     /**

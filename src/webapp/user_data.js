@@ -1,6 +1,6 @@
-import BaseNode from './objects/base.js';
-import QuestionNode from './objects/question.js';
-import AnswerNode from './objects/answer.js';
+import BaseNode from './nodes/base.js';
+import QuestionNode from './nodes/question.js';
+import AnswerNode from './nodes/answer.js';
 
 /**
  * User specific decision engine data. Contains answers

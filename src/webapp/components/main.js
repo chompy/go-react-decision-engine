@@ -5,10 +5,10 @@ import AppHeaderComponent from './header';
 import BasePageComponent from './pages/base';
 import LoginPageComponent from './pages/login';
 import PathResolver from '../path_resolver';
-import FormListPageComponent from './pages/form_list';
 import ErrorPageComponent from './pages/error';
 import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED } from '../config';
 import { message as msgPopup } from 'react-message-popup';
+import TreeListPageComponent from './pages/tree_list';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -19,7 +19,8 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.state = {
             path: pathResolve,
             user: null,
-            team: null
+            team: null,
+            referer: null
         };
         this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
@@ -71,7 +72,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Fetched user "' + res.data.email + '" (' + res.data.id + ').');
         this.setState({user: res.data});
         if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
-            this.gotoPage(FormListPageComponent, {team: res.data.team});
+            this.gotoPage(TreeListPageComponent, {team: res.data.team});
         }
         Events.dispatch('user_me', res.data);
     }
@@ -100,10 +101,10 @@ export default class DecisionEngineMainComponent extends React.Component {
         BackendAPI.get('user/me', null, this.onUserMe);
         msgPopup.success(MSG_LOGIN_SUCCESS, MSG_DISPLAY_TIME);
         if (typeof this.state.path.referer != 'undefined') {
-            this.gotoPage(this.state.referer.component, this.state.referer);
+            this.gotoPage(this.state.path.referer.component, this.state.path.referer);
             return; 
         }
-        this.gotoPage(FormListPageComponent);
+        this.gotoPage(TreeListPageComponent);
     }
 
     /**
@@ -123,7 +124,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         e.preventDefault();
         let resolvedPage = PathResolver.resolveCurrentPath();
         if (resolvedPage.component == LoginPageComponent && this.state.user) {
-            this.gotoPage(FormListPageComponent, {team: this.state.user.team});
+            this.gotoPage(TreeListPageComponent, {team: this.state.user.team});
             return;
         }
         this.setState({path: resolvedPage});
@@ -158,7 +159,10 @@ export default class DecisionEngineMainComponent extends React.Component {
         }, params ? params : {});
         PathResolver.setPathFromComponent(component, params);
         let resolvedPage = PathResolver.resolveCurrentPath();
-        this.setState({path: resolvedPage});
+        if (component == LoginPageComponent && typeof params.referer != 'undefined') {
+            resolvedPage.referer = params.referer;
+        }
+        this.setState({path: resolvedPage, referer: this.state.path});
     }
 
     /**
@@ -178,7 +182,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         let PageComponent = this.state.path.component;
         return <div className='decision-engine'>
             <AppHeaderComponent user={this.state.user} team={this.state.team} />
-            <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} />
+            <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} referer={this.state.referer} />
         </div>;
     }
 

@@ -79,7 +79,7 @@ func checkStorePermission(i interface{}, user *User) error {
 			if new {
 				perm = PermCreateSubmission
 			}
-			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.TreeID}, nil)
+			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.FormID}, nil)
 			if err != nil {
 				return err
 			}

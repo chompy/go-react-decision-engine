@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tokenizer } from 'react-typeahead';
-import AnswerNode from '../objects/answer';
-import QuestionNode from '../objects/question';
+import AnswerNode from '../nodes/answer';
+import QuestionNode from '../nodes/question';
 
 export default class TypeaheadComponent extends React.Component {
 

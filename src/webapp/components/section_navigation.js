@@ -1,6 +1,6 @@
 import React from 'react';
 import Events from '../events';
-import GroupNode from '../objects/group';
+import GroupNode from '../nodes/group';
 
 export default class SectionNavigationComponent extends React.Component {
 

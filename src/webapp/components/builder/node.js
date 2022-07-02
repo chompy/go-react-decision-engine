@@ -1,12 +1,12 @@
 import React from 'react';
 import Events from '../../events';
-import AnswerNode from '../../objects/answer';
-import BaseNode from '../../objects/base';
-import GroupNode from '../../objects/group';
-import MatrixNode from '../../objects/matrix';
-import QuestionNode, { DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_UPLOAD } from '../../objects/question';
-import RootNode from '../../objects/root';
-import RuleNode, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../../objects/rule';
+import AnswerNode from '../../nodes/answer';
+import BaseNode from '../../nodes/base';
+import GroupNode from '../../nodes/group';
+import MatrixNode from '../../nodes/matrix';
+import QuestionNode, { DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_UPLOAD } from '../../nodes/question';
+import RootNode from '../../nodes/root';
+import RuleNode, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 import BuilderFormComponent from './form';
 import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

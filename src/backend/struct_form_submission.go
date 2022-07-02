@@ -12,8 +12,8 @@ type FormSubmission struct {
 	Modified    time.Time           `bson:"modified,omitempty" json:"modified"`
 	Creator     DatabaseID          `bson:"creator,omitempty" json:"creator"`
 	Modifier    DatabaseID          `bson:"modifier,omitempty" json:"modifier"`
-	TreeID      DatabaseID          `bson:"tree_id" json:"tree_id"`
-	TreeVersion int                 `bson:"tree_version" json:"tree_version"`
+	FormID      DatabaseID          `bson:"form_id" json:"form_id"`
+	FormVersion int                 `bson:"form_version" json:"form_version"`
 	Answers     map[string][]string `bson:"answers" json:"answers"`
 }
 
@@ -22,7 +22,8 @@ func FetchFormSubmission(id string, user *User) (*FormSubmission, error) {
 		return nil, ErrNoUser
 	}
 	// database fetch
-	res, err := databaseFetch(FormSubmission{}, bson.M{"_id": id}, nil)
+	dbId := DatabaseIDFromString(id)
+	res, err := databaseFetch(FormSubmission{}, bson.M{"_id": dbId}, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -35,12 +36,13 @@ func FetchFormSubmission(id string, user *User) (*FormSubmission, error) {
 }
 
 // List all form submissions for given tree;
-func ListFormSubmission(treeId string, user *User, offset int) ([]*FormSubmission, int, error) {
+func ListFormSubmission(formId string, user *User, offset int) ([]*FormSubmission, int, error) {
 	if user == nil {
 		return nil, 0, ErrNoUser
 	}
-	// databse fetch
-	res, count, err := databaseList(FormSubmission{}, bson.M{"tree_id": treeId}, bson.M{"created": -1}, nil, offset)
+	// database fetch
+	formDbId := DatabaseIDFromString(formId)
+	res, count, err := databaseList(FormSubmission{}, bson.M{"form_id": formDbId}, bson.M{"created": -1}, nil, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -58,7 +60,7 @@ func ListFormSubmission(treeId string, user *User, offset int) ([]*FormSubmissio
 
 // Store the form submission.
 func (s *FormSubmission) Store(user *User) error {
-	if s.TreeID.IsEmpty() || s.TreeVersion <= 0 {
+	if s.FormID.IsEmpty() || s.FormVersion <= 0 {
 		return ErrNoData
 	}
 	if err := checkStorePermission(s, user); err != nil {

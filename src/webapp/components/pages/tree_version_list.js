@@ -2,12 +2,13 @@ import React from 'react';
 import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import FormListPageComponent from './form_list';
 import EditTitleComponent from '../helper/edit_title';
-import { ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_LOADING } from '../../config';
+import { BTN_BACK, BTN_DELETE, ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_LOADING, TREE_DOCUMENT, TREE_FORM } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import TreeVersionEditPageComponent from './team_version_edit';
 import { message as msgPopup } from 'react-message-popup';
+import FormDashboardPageComponent from './form_dashboard';
+import TreeListPageComponent from './tree_list';
 
 export default class TreeVersionListPageComponent extends BasePageComponent {
 
@@ -53,9 +54,9 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         if (this.handleErrorResponse(res)) { return; }
         this.setState({
             root: res.data,
-            title: res.data.label,
-            loading: false
+            title: res.data.label
         });
+        this.setLoaded();
     }
 
     /**
@@ -108,7 +109,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_DELETE_SUCCESS.replace('{name}', this.state.root.label), MSG_DISPLAY_TIME);
-        this.gotoPage(FormListPageComponent);
+        this.onClickBack();
     }
 
     /**
@@ -125,6 +126,22 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickBack(e) {
+        if (e) { e.preventDefault(); }
+        if (this.state.root.type == TREE_DOCUMENT) {
+            if (this.props.referer && this.props.referer.component == TreeListPageComponent) {
+                this.gotoPage(TreeListPageComponent, {id: this.state.root.parent, type: TREE_DOCUMENT});
+                return;
+            }
+            this.gotoPage(FormDashboardPageComponent, {id: this.state.root.parent});
+            return;
+        }
+        this.gotoPage(FormDashboardPageComponent, {id: this.state.root.id});
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -136,8 +153,8 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         return <div className='page tree-version-list'>
             <EditTitleComponent title={this.state.title} callback={this.onLabel} />
             <div className='options top'>
-                {this.renderPageButton('Back', FormListPageComponent, {}, faBackward)}
-                {this.renderCallbackButton('Delete', this.onClickDelete, faTrash)}
+                {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
+                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
             </div>
             <section>
                 <ApiTableComponent

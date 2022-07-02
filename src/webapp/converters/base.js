@@ -1,4 +1,4 @@
-import BaseNode from '../objects/base';
+import BaseNode from '../nodes/base';
 
 /**
  * Base class for decision node converter which allows import and export

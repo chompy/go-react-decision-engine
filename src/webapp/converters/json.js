@@ -1,11 +1,11 @@
-import AnswerNode from '../objects/answer';
-import GroupNode from '../objects/group';
-import QuestionNode from '../objects/question';
-import MatrixNode from '../objects/matrix';
-import RootNode from '../objects/root';
+import AnswerNode from '../nodes/answer';
+import GroupNode from '../nodes/group';
+import QuestionNode from '../nodes/question';
+import MatrixNode from '../nodes/matrix';
+import RootNode from '../nodes/root';
 import BaseConverter from './base';
-import RuleNode from '../objects/rule';
-import { KEY_TYPE } from '../objects/base';
+import RuleNode from '../nodes/rule';
+import { KEY_TYPE } from '../nodes/base';
 
 export default class JsonConverter extends BaseConverter {
 

@@ -1,6 +1,7 @@
 import ErrorPageComponent from "./components/pages/error";
-import FormListPageComponent from "./components/pages/form_list";
+import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import LoginPageComponent from "./components/pages/login";
+import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/team_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
@@ -54,7 +55,21 @@ export default class PathResolver {
                         return {component: LoginPageComponent, team: teamId};
                     }
                     case 'forms': {
-                        return {component: FormListPageComponent, team: teamId};
+                        return {component: TreeListPageComponent, team: teamId};
+                    }
+                    case 'docs': {
+                        if (path.length < 3) {
+                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                        }
+                        let formId = path[2];
+                        return {component: TreeListPageComponent, team: teamId, id: formId};
+                    }
+                    case 'form': {
+                        if (path.length < 3) {
+                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                        }
+                        let formId = path[2];
+                        return {component: FormDashboardPageComponent, team: teamId, id: formId};
                     }
                     case 'tree': {
                         if (path.length < 4) {
@@ -97,11 +112,11 @@ export default class PathResolver {
      * @param {string} title 
      */
     static setPath(path, title) {
-        window.title = title + ' - ' + APP_TITLE;
+        document.title = title + ' - ' + APP_TITLE;
         if (path[0] != '/') {
             path = '/' + path;
         }
-        history.pushState({}, window.title, path);
+        history.pushState({}, document.title, path);
     }
 
     /**
@@ -110,17 +125,24 @@ export default class PathResolver {
      */
     static setPathFromComponent(component, params) {
         let componentList = {
-            [LoginPageComponent]: '{team}/login',
-            [FormListPageComponent]: '{team}/forms',
-            [TreeVersionListPageComponent]: '{team}/tree/{id}/list',
-            [TreeVersionEditPageComponent]: '{team}/tree/{id}/edit/v{version}'
+            '{team}/login': LoginPageComponent,
+            '{team}/docs/{id}': TreeListPageComponent,
+            '{team}/forms': TreeListPageComponent,
+            '{team}/form/{id}': FormDashboardPageComponent,
+            '{team}/tree/{id}/list': TreeVersionListPageComponent,
+            '{team}/tree/{id}/edit/v{version}': TreeVersionEditPageComponent
         };
-        if (component in componentList) {
-            let path = componentList[component];
-            for (let k in params) {
-                path = path.replace('{' + k.toLowerCase() + '}', params[k]);
+        for (let path in componentList) {
+            let tComp = componentList[path];
+            if (component == tComp) {
+                for (let k in params) {
+                    path = path.replace('{' + k.toLowerCase() + '}', params[k]);
+                }
+                console.log(path);
+                if (path.includes('}') || path.includes('{')) { continue; }
+                PathResolver.setPath(path, component.getTitle());
+                return;
             }
-            PathResolver.setPath(path, component.getTitle());
         }
     }
 

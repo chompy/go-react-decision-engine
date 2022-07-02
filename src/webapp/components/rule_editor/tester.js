@@ -2,9 +2,9 @@ import React from 'react';
 
 import DecisionUserData from '../../user_data';
 import RuleEngine from '../../rule_engine';
-import RootNode from '../../objects/root';
-import QuestionNode, { DECISION_FORM_TYPE_TEXT } from '../../objects/question';
-import RuleNode, { RULE_TYPE_VISIBILITY } from '../../objects/rule';
+import RootNode from '../../nodes/root';
+import QuestionNode, { DECISION_FORM_TYPE_TEXT } from '../../nodes/question';
+import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 
 const TEST_QUESTION_UID = 'TEST_QUESTION';
 const TEST_RULE_UID = 'TEST_RULE';

@@ -1,7 +1,7 @@
 import React from 'react';
 import BaseNodeComponent from './base';
 import Renderer from '../../renderer';
-import BaseNode from '../../objects/base';
+import BaseNode from '../../nodes/base';
 
 export default class MatrixNodeComponent extends BaseNodeComponent {
 

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // TreeType is the type of decision tree.
@@ -76,10 +75,7 @@ func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, 
 		return nil, 0, ErrNoUser
 	}
 	// database fetch
-	pFormRootUid, err := primitive.ObjectIDFromHex(formRootUid)
-	if err != nil {
-		return nil, 0, err
-	}
+	pFormRootUid := DatabaseIDFromString(formRootUid)
 	res, count, err := databaseList(TreeRoot{}, bson.M{"type": string(TreeDocument), "parent": pFormRootUid}, bson.M{"created": -1}, nil, offset)
 	if err != nil {
 		return nil, 0, err
@@ -90,19 +86,10 @@ func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, 
 			return nil, 0, err
 		}
 	}
-	// format output + check permission
+	// format output
 	out := make([]*TreeRoot, 0)
-	hasCreator := false
 	for _, item := range res {
-		if item.(*TreeRoot).Creator == user.ID {
-			hasCreator = true
-		}
 		out = append(out, item.(*TreeRoot))
-	}
-	if !hasCreator {
-		if _, err := FetchTreeRoot(out[0].Parent.String(), user); err != nil {
-			return nil, 0, err
-		}
 	}
 	return out, count, nil
 }

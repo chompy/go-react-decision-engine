@@ -1,8 +1,8 @@
 import React from 'react';
 import Events from '../events';
 import JsonConverter from '../converters/json';
-import BaseNode from '../objects/base';
-import RootNode, {DECISION_TYPE_DOCUMENT} from '../objects/root';
+import BaseNode from '../nodes/base';
+import RootNode, {DECISION_TYPE_DOCUMENT} from '../nodes/root';
 import BuilderNodeComponent from './builder/node';
 
 export default class BuilderComponent extends React.Component {

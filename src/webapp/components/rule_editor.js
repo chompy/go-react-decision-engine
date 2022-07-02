@@ -10,7 +10,7 @@ import RuleTesterComponent from './rule_editor/tester';
 import DecisionUserData from '../user_data';
 import RuleFormField from '../rule_field';
 import RuleFormFieldComponent from './rule_editor/form_field';
-import RuleNode from '../objects/rule';
+import RuleNode from '../nodes/rule';
 
 export const RULE_MODE_NONE = '';
 export const RULE_MODE_BUILDER = 'builder';

@@ -1,0 +1,58 @@
+.page.form-dashboard {
+
+    .published {
+        span::after {
+            content: ' | ';
+            display: inline-block;
+            margin-left: 5px;
+            margin-right: 5px;
+            font-weight: normal;
+        }
+        span {
+            font-weight: bold;
+        }
+        span span {
+            display: inline-block;
+            margin-left: 3px;
+            font-weight: normal;
+            font-style: italic;
+        }
+        span span::after {
+            display: none;
+        }
+        span:last-of-type::after {
+            display: none;
+        }
+        .version {
+            font-weight: bold;
+        }
+        .options {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    }
+
+    .list .options {
+        margin-bottom: 10px;
+    }
+    .list.documents, .list.submissions {
+        display: inline-block;
+        width: 49%;
+    }
+    .list.documents {
+        margin-right: 1%;
+    }
+    .list table {
+        tr:nth-of-type(1n+5) {
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: 800px) {
+        .list.documents, .list.submissions {
+            display: block;
+            width: 100%;
+        }
+    }
+
+}

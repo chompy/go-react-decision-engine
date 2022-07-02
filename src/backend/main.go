@@ -13,6 +13,16 @@ func createTestObjects() {
 		panic(err)
 	}
 	if res > 0 {
+		if res == 1 {
+			teamList, _, err := databaseList(Team{}, bson.M{}, nil, nil, 0)
+			if err != nil {
+				panic(err)
+			}
+			log.Println("======= TEST TEAM FOUND ======")
+			log.Printf("TEST TEAM: %s\n", teamList[0].(*Team).ID.String())
+			log.Printf("LOGIN URL: http://localhost:3000/%s/login", teamList[0].(*Team).ID.String())
+			log.Println("==============================")
+		}
 		return
 	}
 	dummyUser := User{Permission: PermAdmin}

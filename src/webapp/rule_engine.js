@@ -1,9 +1,9 @@
 import {lua, lauxlib, lualib, to_luastring} from 'fengari-web';
 import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_OBJECT, RULE_FIELD_CHOICE } from './rule_field';
-import AnswerNode from './objects/answer';
-import QuestionNode from './objects/question';
-import BaseNode from './objects/base';
-import RuleNode from './objects/rule';
+import AnswerNode from './nodes/answer';
+import QuestionNode from './nodes/question';
+import BaseNode from './nodes/base';
+import RuleNode from './nodes/rule';
 import DecisionUserData from './user_data';
 
 const LUA_METATABLE = 'DecisionNodeMT';

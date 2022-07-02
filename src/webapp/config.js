@@ -10,6 +10,7 @@ export const TREE_DOCUMENT = 'document';
 export const ERR_NOT_FOUND = 'Not found.';
 export const ERR_NOT_IMPLEMENTED = 'Not yet implemented.';
 export const ERR_LOGIN_REQUIRED = 'Login required.';
+export const ERR_UNKNOWN = 'An unknown error has occured.';
 
 // button text
 export const BTN_COPY = 'Copy';
@@ -22,6 +23,8 @@ export const BTN_NEXT = 'Next';
 export const BTN_GO = 'Go';
 export const BTN_DELETE = 'Delete';
 export const BTN_PUBLISH = 'Publish';
+export const BTN_NEW = 'New';
+export const BTN_MORE = 'See All ({count})';
 
 // generic messages
 export const MSG_LOGIN_SUCCESS = 'Login successful.';
@@ -36,3 +39,4 @@ export const MSG_SAVING = 'Saving...';
 export const MSG_SAVED = 'Saved.';
 export const MSG_DELETE_SUCCESS = '{name} was deleted.';
 export const MSG_COPY_SUCCESS = 'v{version} was copied.';
+export const MSG_NO_PUBLISHED = 'No published version found.';

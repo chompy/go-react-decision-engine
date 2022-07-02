@@ -3,9 +3,9 @@ import React from 'react';
 import { faForward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent, { FIELD_TYPE_PASSWORD } from './base';
 import BackendAPI from '../../api';
-import { ERROR_UNKNOWN } from '../../errors';
 import Events from '../../events';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ERR_UNKNOWN } from '../../config';
 
 export default class LoginPageComponent extends BasePageComponent {
 
@@ -90,7 +90,7 @@ export default class LoginPageComponent extends BasePageComponent {
     onSubmitResponse(res) {
         this.setState({ disabled: false });
         if (!res) {
-            this.setState({ message: ERROR_UNKNOWN });
+            this.setState({ message: ERR_UNKNOWN });
             return;
         } else if (!res.success) {
             this.setState({ message: res.message });
@@ -105,7 +105,7 @@ export default class LoginPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         if (this.state.error) {
             return this.renderError();
         } else if (this.state.loading) {

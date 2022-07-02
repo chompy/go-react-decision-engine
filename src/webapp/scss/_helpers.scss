@@ -66,4 +66,22 @@
             margin-left: 5px;
         }
     }
+    .options {
+        margin-top: 8px;
+        text-align: right;
+        button {
+            margin-left: 5px;
+            margin-right: 0 !important;
+        }
+    }
+    @media screen and (max-width: 800px) {
+        .table-created {
+            display: none;
+        }
+    } 
+    @media screen and (max-width: 600px) {
+        .table-modified {
+            display: none;
+        }
+    }
 }

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_OBJECT } from '../../rule_field';
-import BaseNode from '../../objects/base';
+import BaseNode from '../../nodes/base';
 import { RULE_MODE_BUILDER } from '../rule_editor';
 import TypeaheadComponent from '../typeahead';
 

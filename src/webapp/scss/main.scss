@@ -5,6 +5,9 @@ table {
 .pure-form {
     input[type=text], input[type=password] { min-width: 300px; }
 }
+button svg {
+    pointer-events: none;
+}
 .hidden {
     display: none;
 }
@@ -15,3 +18,4 @@ table {
 @import 'alerts';
 @import 'header';
 @import 'helpers';
+@import 'page_form_dashboard';

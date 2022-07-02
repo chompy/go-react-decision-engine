@@ -1,11 +1,13 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons'
-import { BTN_BACK, BTN_GO, BTN_NEXT, MSG_NO_LIST_DATA } from "../../config";
+import { BTN_BACK, BTN_GO, BTN_MORE, BTN_NEXT, MSG_NO_LIST_DATA } from "../../config";
 import md5 from 'blueimp-md5';
 import BackendAPI from '../../api';
-import TruncateIdComponent from './truncate_id';
 import UserTimeComponent from './user_time';
+import Events from '../../events';
+
+const SEE_MORE_MAX = 5;
 
 // Display list data from backend API in a paginated table.
 export default class ApiTableComponent extends React.Component {
@@ -24,10 +26,13 @@ export default class ApiTableComponent extends React.Component {
         this.endpoint = typeof props.endpoint != 'undefined' ? props.endpoint : '';
         this.params = typeof props.params != 'undefined' ? props.params : '';
         this.callback = typeof props.callback != 'undefined' ? props.callback : null;
+        this.seeMore = typeof props.seeMore != 'undefined' ? props.seeMore : null;
+
         this.key = md5(this.endpoint + JSON.stringify(this.columns) + JSON.stringify(this.params));
         this.onBackendResponse = this.onBackendResponse.bind(this);
         this.onPagination = this.onPagination.bind(this);
         this.onSelectRow = this.onSelectRow.bind(this);
+        this.onClickMore = this.onClickMore.bind(this);
     }
 
     /**
@@ -91,12 +96,21 @@ export default class ApiTableComponent extends React.Component {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickMore(e) {
+        e.preventDefault();
+        if (!this.seeMore) { return; }
+        Events.dispatch('goto_page', {component: this.seeMore[0], params: this.seeMore[1]});
+    }
+
+    /**
      * Render header columns.
      */
     renderHead() {
         let out = [];
         for (let i in this.columns) {
-            out.push(<th key={this.key + '-head-' + i}>{this.columns[i]}</th>);
+            out.push(<th key={this.key + '-head-' + i} className={'table-'+i}>{this.columns[i]}</th>);
         }
         if (this.callback) {
             out.push(<th key={this.key + '-head-callback'}></th>);
@@ -112,9 +126,6 @@ export default class ApiTableComponent extends React.Component {
      */
     renderFieldValue(field, data) {
         switch(field) {
-            case 'id': {
-                return <TruncateIdComponent id={data[field]} />;
-            }
             case 'created': {
                 let user = typeof data.creator != 'undefined' ? data.creator : '';
                 return <UserTimeComponent time={data[field]} user={user} />;
@@ -138,16 +149,17 @@ export default class ApiTableComponent extends React.Component {
         }
         let out = [];
         for (let i in this.state.data) {
+            if (this.seeMore && i > SEE_MORE_MAX) { break; }
             let data = this.state.data[i];
             let key = md5(JSON.stringify(data));
             let cols = [];
             for (let field in this.columns) {
                 cols.push(
-                    <td key={this.key + '-' + key + '-' + field}>{this.renderFieldValue(field, data)}</td>
+                    <td key={this.key + '-' + key + '-' + field} className={'table-' + field}>{this.renderFieldValue(field, data)}</td>
                 );
             }
             if (this.callback) {
-                cols.push(<td key={this.key + '-' + key + '-callback'}>
+                cols.push(<td key={this.key + '-' + key + '-callback'} className='table-options'>
                     <button className='pure-button btn-go' onClick={this.onSelectRow} data-index={i}>
                         {BTN_GO} <FontAwesomeIcon icon={faForward} />
                     </button>
@@ -164,7 +176,14 @@ export default class ApiTableComponent extends React.Component {
      * Render pagination options.
      */
     renderPagination() {
-        if (this.state.count == 0) {
+        if (this.state.count == 0 || this.seeMore) {
+            if (this.seeMore && this.state.count >= 5) {
+                return <div className='options'>
+                    <button className='pure-button btn-more' onClick={this.onClickMore}>
+                        {BTN_MORE.replace('{count}', this.state.count)} <FontAwesomeIcon icon={faForward} />
+                    </button>
+                </div>
+            }
             return null;
         }
         let totalPages = Math.ceil(this.state.count / this.state.limit);

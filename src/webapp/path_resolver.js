@@ -2,7 +2,7 @@ import ErrorPageComponent from "./components/pages/error";
 import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import LoginPageComponent from "./components/pages/login";
 import TreeListPageComponent from "./components/pages/tree_list";
-import TreeVersionEditPageComponent from "./components/pages/team_version_edit";
+import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 
@@ -112,11 +112,10 @@ export default class PathResolver {
      * @param {string} title 
      */
     static setPath(path, title) {
-        document.title = title + ' - ' + APP_TITLE;
         if (path[0] != '/') {
             path = '/' + path;
         }
-        history.pushState({}, document.title, path);
+        history.pushState({}, '', path);
     }
 
     /**
@@ -138,7 +137,6 @@ export default class PathResolver {
                 for (let k in params) {
                     path = path.replace('{' + k.toLowerCase() + '}', params[k]);
                 }
-                console.log(path);
                 if (path.includes('}') || path.includes('{')) { continue; }
                 PathResolver.setPath(path, component.getTitle());
                 return;

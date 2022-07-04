@@ -5,7 +5,7 @@ import BackendAPI from '../../api';
 import EditTitleComponent from '../helper/edit_title';
 import { BTN_BACK, BTN_DELETE, ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_LOADING, TREE_DOCUMENT, TREE_FORM } from '../../config';
 import ApiTableComponent from '../helper/api_table';
-import TreeVersionEditPageComponent from './team_version_edit';
+import TreeVersionEditPageComponent from './tree_version_edit';
 import { message as msgPopup } from 'react-message-popup';
 import FormDashboardPageComponent from './form_dashboard';
 import TreeListPageComponent from './tree_list';
@@ -24,13 +24,6 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      */
     static getName() {
         return 'tree-version-list';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    static getTitle() {
-        return 'Version List';
     }
 
     /**
@@ -57,6 +50,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
             title: res.data.label
         });
         this.setLoaded();
+        this.setTitle(res.data.label + ' Version List');
     }
 
     /**

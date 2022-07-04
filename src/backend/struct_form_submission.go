@@ -47,8 +47,10 @@ func ListFormSubmission(formId string, user *User, offset int) ([]*FormSubmissio
 		return nil, 0, err
 	}
 	// check permission
-	if err := checkFetchPermission(res[0], user); err != nil {
-		return nil, 0, err
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, 0, err
+		}
 	}
 	// format output
 	out := make([]*FormSubmission, 0)

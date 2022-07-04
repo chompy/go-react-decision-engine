@@ -8,6 +8,7 @@ import BuilderComponent from '../builder';
 import JsonConverter from '../../converters/json';
 import Events from '../../events';
 import { message as msgPopup } from 'react-message-popup';
+import TreeVersionInfoComponent from '../helper/tree_version_info';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -101,6 +102,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             tree: jc.import(res.data.tree)
         });
         this.setLoaded();
+        this.setTitle(this.state.root.label + ' v' + res.data.version);
     }
 
     /**
@@ -248,7 +250,8 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             return this.renderLoader();
         }
         return <div className='page tree-version-edit'>
-            <h1 className='title'>{this.state.root.label} - v{this.state.object.version}</h1>
+            <h1 className='title'>{this.state.root.label}</h1>
+            <TreeVersionInfoComponent treeversion={this.state.object} />
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}

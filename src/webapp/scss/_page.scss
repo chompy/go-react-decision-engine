@@ -1,50 +1,53 @@
-.decision-engine {
-    .page {
+.page {
+    h1 {
+        margin: 20px;
+    }
+    section {
+        padding: 20px;
+        .section-name {
+            border-bottom: 1px solid $page-section-divide;
+            span {
+                font-size: 16px;
+                font-style: italic;
+            }
+        }
+    }
+    .options {
+        &.top {
+            margin-top: 20px;
+            margin-left: 20px;
+        }
+        button {
+            margin-right: 5px;
+        }
+    }
+    &.login section {
+        max-width: 300px;
+        margin: auto;
+    }
+    &.loading {
+        margin-top: 25px;
+        text-align: center;
+        svg {
+            width: 64px;
+            height: 64px;
+            animation: loading-spin 4s infinite linear;
+            color: $header-bg;
+            @keyframes loading-spin {
+                0%  {-webkit-transform: rotate(0deg);}
+                100% {-webkit-transform: rotate(360deg);}   
+            }
+        }
+    }
+    .edit-title {
+        margin: 20px;
+    }
+    &.tree-version-edit {
         h1 {
-            margin: 20px;
+            margin-bottom: 0;
         }
-        section {
-            padding: 20px;
-            .section-name {
-                border-bottom: 1px solid $page-section-divide;
-                span {
-                    font-size: 16px;
-                    font-style: italic;
-                }
-            }
+        .tree-version-info {
+            margin-left: 22px;
         }
-        .options {
-            &.top {
-                margin-top: 20px;
-                margin-left: 20px;
-            }
-            button {
-                margin-right: 5px;
-            }
-        }
-        &.login section {
-            max-width: 300px;
-            margin: auto;
-        }
-
-        &.loading {
-            margin-top: 25px;
-            text-align: center;
-            svg {
-                width: 64px;
-                height: 64px;
-                animation: loading-spin 4s infinite linear;
-                color: $header-bg;
-                @keyframes loading-spin {
-                    0%  {-webkit-transform: rotate(0deg);}
-                    100% {-webkit-transform: rotate(360deg);}   
-                }
-            }
-        }
-        .edit-title {
-            margin: 20px;
-        }
-
-        @import 'page_team';
     }
 }

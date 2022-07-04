@@ -1,15 +1,16 @@
 import React from 'react';
-import { faBackward, faCirclePlus, faForward } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faCirclePlus, faForward, faTrash } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_GO, BTN_NEW, ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_NO_PUBLISHED, TREE_DOCUMENT, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_DELETE, BTN_GO, BTN_NEW, ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_NO_PUBLISHED, TREE_DOCUMENT, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import ApiTableComponent from '../helper/api_table';
 import { message as msgPopup } from 'react-message-popup';
 import EditTitleComponent from '../helper/edit_title';
-import TreeVersionEditPageComponent from './team_version_edit';
+import TreeVersionEditPageComponent from './tree_version_edit';
 import TreeListPageComponent from './tree_list';
-import UserTimeComponent from '../helper/user_time';
+import TreeVersionInfoComponent from '../helper/tree_version_info';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default class FormDashboardPageComponent extends BasePageComponent {
 
@@ -25,13 +26,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
      */
     static getName() {
         return 'form-dashboard';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    static getTitle() {
-        return 'Form Dashboard';
     }
 
     /**
@@ -63,6 +57,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
             title: res.data.label
         });
         BackendAPI.get('tree/version/fetch', {id: res.data.id}, this.onPublishedVersionResponse)
+        this.setTitle(res.data.label);
     }
 
     onPublishedVersionResponse(res) {
@@ -94,6 +89,33 @@ export default class FormDashboardPageComponent extends BasePageComponent {
      */
     onLabelResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
+    }
+
+    /**
+     * @param {Event} e 
+     */
+     onClickDelete(e) {
+        e.preventDefault();
+        // TODO really make sure the user wants to delete this
+        if (!confirm('Are you sure you want to delete this?')) {
+            return;
+        }
+        this.msgLoadPromise = msgPopup.loading(MSG_LOADING, 10000);
+        BackendAPI.post(
+            'tree/delete', null,
+            { id: this.state.form.id },
+            this.onDeleteResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onDeleteResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
+        if (this.handleErrorResponse(res)) { return; }
+        msgPopup.success(MSG_DELETE_SUCCESS.replace('{name}', this.state.form.label), MSG_DISPLAY_TIME);
+        this.gotoPage(TreeListPageComponent);
     }
 
     /**
@@ -138,10 +160,22 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         );
     }
 
+    /**
+     * @param {Object} data 
+     */
     onSelectDocument(data) {
-        console.log(data);
         this.gotoPage(
             TreeVersionListPageComponent, {id: data.id, version: data.version}
+        );
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onGotoPublished(e) {
+        e.preventDefault();
+        this.gotoPage(
+            TreeVersionEditPageComponent, {id: this.state.published.root_id, version: this.state.published.version}
         );
     }
 
@@ -157,24 +191,19 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         let publishedSection = <em>{MSG_NO_PUBLISHED}</em>;
         if (this.state.published) {
             publishedSection = <div>
-                <span className='version'>Version {this.state.published.version}</span>
-                <span className='created'>
-                    Created
-                    <UserTimeComponent user={this.state.published.creator} time={this.state.published.created} />
-                </span>
-                <span className='modified'>
-                    Modified
-                    <UserTimeComponent user={this.state.published.modifier} time={this.state.published.modified} />
-                </span>
+                <TreeVersionInfoComponent showstate={false} treeversion={this.state.published} />
                 <div className='options'>
-                    {this.renderCallbackButton(BTN_GO, null, faForward)}
+                    <button className='pure-button' onClick={this.onGotoPublished}>
+                        {BTN_GO} <FontAwesomeIcon icon={faForward} />
+                    </button>
                 </div>
-            </div>
+            </div>;
         }
         return <div className='page form-dashboard'>
             <EditTitleComponent title={this.state.title} callback={this.onLabel} />
             <div className='options top'>
                 {this.renderPageButton(BTN_BACK, TreeListPageComponent, {}, faBackward)}
+                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
             </div>
 
             <section>
@@ -222,10 +251,10 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                     <ApiTableComponent
                         columns={{
                             'id': 'ID',
-                            'label': 'Name'
+                            'created': 'Created'
                         }}
-                        endpoint='tree/list'
-                        params={{form: this.state.form.id, team: this.state.user.team, type: TREE_DOCUMENT}}
+                        endpoint='submission/list'
+                        params={{form: this.state.form.id}}
                         callback={this.onSelectFormVersion}
                         seeMore={[TreeVersionListPageComponent, {form: this.state.form.id, type: TREE_DOCUMENT}]}
                     />

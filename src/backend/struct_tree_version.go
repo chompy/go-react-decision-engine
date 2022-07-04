@@ -121,7 +121,21 @@ func (t *TreeVersion) Store(user *User) error {
 		if latestVersion != nil {
 			t.Version = latestVersion.Version + 1
 		}
+	} else if t.Version > 0 {
+		// check if not already existing
+		existingVersion, err := FetchTreeVersion(t.RootID.String(), t.Version, user)
+		if err != nil {
+			if !errors.Is(err, mongo.ErrNoDocuments) {
+				return err
+			}
+			t.Created = t.Modified
+			t.Creator = user.ID
+		} else {
+			t.Created = existingVersion.Created
+			t.Creator = existingVersion.Creator
+		}
 	}
+
 	return databaseStoreOne(t)
 }
 

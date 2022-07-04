@@ -4,7 +4,7 @@ import { faCircleExclamation, faCog } from '@fortawesome/free-solid-svg-icons';
 import Events from '../../events';
 import md5 from 'blueimp-md5';
 import { message as msgPopup } from 'react-message-popup';
-import { MSG_DISPLAY_TIME } from '../../config';
+import { APP_TITLE, MSG_DISPLAY_TIME } from '../../config';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
@@ -152,6 +152,14 @@ export default class BasePageComponent extends React.Component {
             return;
         }
         this.setState({loading: false});
+    }
+
+    /**
+     * Set title of page.
+     * @param {String} title 
+     */
+    setTitle(title) {
+        document.title = (title ? (title + ' - ') : '') + APP_TITLE;
     }
 
     /**

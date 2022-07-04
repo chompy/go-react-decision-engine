@@ -6,14 +6,14 @@
 }
 
 // TruncateIdComponent
-.object-id {
+.helper.object-id {
     a {
         margin-left: 5px;
     }
 }
 
 // EditTitleComponent
-.edit-title {
+.helper.edit-title {
     h1 {
         display: inline-block;
         vertical-align: middle;
@@ -41,7 +41,7 @@
 }
 
 // UserTimeComponent
-.user-time {
+.helper.user-time {
     .user {
         margin-left: 5px;
         font-size: 14px;
@@ -49,7 +49,10 @@
 }
 
 // ApiTableComponent
-.api-table {
+.helper.api-table {
+    .table-state {
+        text-transform: capitalize;
+    }
     .pagination {
         text-align: right;
         margin-top: 10px;
@@ -83,5 +86,37 @@
         .table-modified {
             display: none;
         }
+    }
+}
+
+// TreeVersionInfoComponent
+.helper.tree-version-info {
+    span::after {
+        content: ' | ';
+        display: inline-block;
+        margin-left: 5px;
+        margin-right: 5px;
+        font-weight: normal;
+    }
+    span {
+        font-weight: bold;
+    }
+    span span {
+        display: inline-block;
+        margin-left: 3px;
+        font-weight: normal;
+        font-style: italic;
+    }
+    span span::after {
+        display: none;
+    }
+    span:last-of-type::after {
+        display: none;
+    }
+    .version {
+        font-weight: bold;
+    }  
+    .state {
+        text-transform: capitalize;
     }
 }

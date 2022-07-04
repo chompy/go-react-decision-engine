@@ -42,8 +42,9 @@ export default class LoginPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-    static getTitle() {
-        return 'Login';
+    onReady() {
+        super.onReady();
+        this.setTitle('Login');
     }
 
     /**

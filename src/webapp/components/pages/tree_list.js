@@ -27,13 +27,6 @@ export default class TreeListPageComponent extends BasePageComponent {
     /**
      * {@inheritdoc}
      */
-    static getTitle() {
-        return 'Tree List';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     onReady() {
         if (typeof this.props.path.id != 'undefined' && this.props.path.id) {
             this.mode = TREE_DOCUMENT;
@@ -45,8 +38,9 @@ export default class TreeListPageComponent extends BasePageComponent {
                 return;
             }
             BackendAPI.get('tree/fetch', {id: this.props.path.id}, this.onTreeResponse);  
-
+            return;
         }
+        this.setTitle(this.title);
         super.onReady();
     }
 
@@ -57,6 +51,7 @@ export default class TreeListPageComponent extends BasePageComponent {
         if (this.handleErrorResponse(res)) { return; }
         this.title = 'Documents for "' + res.data.label + '"';
         this.setLoaded();
+        this.setTitle(this.title);
     }
 
     /**

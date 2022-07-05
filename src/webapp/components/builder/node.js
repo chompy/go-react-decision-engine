@@ -294,6 +294,7 @@ export default class BuilderNodeComponent extends React.Component {
         e.stopPropagation();
         e.preventDefault();
         let target = e.target;
+        let rect = target.getBoundingClientRect();
         while (target.nodeName != 'LI' || target.id != 'node-' + this.node.uid) {
             target = target.parentNode;
             if (target.id != 'node-' + this.node.uid) {
@@ -303,7 +304,7 @@ export default class BuilderNodeComponent extends React.Component {
                 return;
             }
         }
-        let asChild = this.node.children.length == 0 && e.clientX - target.offsetLeft > 80;
+        let asChild = this.node.children.length == 0 && e.clientX - rect.left > 80;
         if (!this.canDrop(this.currentDragNode, asChild)) {
             return;
         }
@@ -312,7 +313,7 @@ export default class BuilderNodeComponent extends React.Component {
                 dropState: DROP_STATE_CHILD
             });
             return;
-        } else if (e.clientY - target.offsetTop < 50) {
+        } else if (e.clientY - rect.top < 50) {
             this.setState({
                 dropState: DROP_STATE_UP
             });
@@ -356,12 +357,13 @@ export default class BuilderNodeComponent extends React.Component {
         });
         // find target element
         let target = e.target;
+        let rect = target.getBoundingClientRect();
         while (target.nodeName != 'LI' || target.id != 'node-' + this.node.uid) {
             target = target.parentNode;
         }
         // if mouse over element is offset by more then 80 pixels assume user
         // wants to add element as child instead of above/below
-        let asChild = this.node.children.length == 0 && e.clientX - target.offsetLeft > 80;
+        let asChild = this.node.children.length == 0 && e.clientX - rect.left > 80;
         // check to ensure this node can be placed here
         if (!this.canDrop(this.currentDragNode, asChild)) {
             return;
@@ -386,7 +388,7 @@ export default class BuilderNodeComponent extends React.Component {
         }
         // check dropping above or below
         let direction = 1;
-        if (e.clientY - target.offsetTop < 50) {
+        if (e.clientY - rect.top < 50) {
             direction = 0;
         }
         // insert

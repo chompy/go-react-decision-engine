@@ -1,5 +1,6 @@
 import ErrorPageComponent from "./components/pages/error";
 import FormDashboardPageComponent from "./components/pages/form_dashboard";
+import FormSubmissionEditPageComponent from "./components/pages/form_submission_edit";
 import LoginPageComponent from "./components/pages/login";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
@@ -54,37 +55,54 @@ export default class PathResolver {
                     case 'login': {
                         return {component: LoginPageComponent, team: teamId};
                     }
-                    case 'forms': {
-                        return {component: TreeListPageComponent, team: teamId};
-                    }
-                    case 'docs': {
-                        if (path.length < 3) {
-                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
-                        }
-                        let formId = path[2];
-                        return {component: TreeListPageComponent, team: teamId, id: formId};
-                    }
                     case 'form': {
-                        if (path.length < 3) {
+                        if (path.length == 2) {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                         }
-                        let formId = path[2];
-                        return {component: FormDashboardPageComponent, team: teamId, id: formId};
+                        let formId = path[2].trim();
+                        if (!formId) {
+                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                        }
+                        if (path.length == 3) {
+                            return {component: FormSubmissionEditPageComponent, team: teamId, id: formId};
+                        }
+                        let submissionId = path[3].trim();
+                        return {component: FormSubmissionEditPageComponent, team: teamId, id: formId, submission: submissionId};                        
                     }
-                    case 'tree': {
-                        if (path.length < 4) {
+                    case 'edit': {
+                        if (path.length == 2) {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                         }
-                        let treeId = path[2];
-                        switch (path[3]) {
-                            case 'list': {
-                                return {component: TreeVersionListPageComponent, team: teamId, id: treeId};
+                        switch (path[2]) {
+                            case 'forms': {
+                                return {component: TreeListPageComponent, team: teamId};
                             }
-                            case 'edit': {
-                                if (path.length < 5) {
+                            case 'docs': {
+                                if (path.length < 4) {
                                     return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                                 }
+                                let formId = path[3];
+                                return {component: TreeListPageComponent, team: teamId, id: formId};
+                            }
+                            case 'form': {
+                                if (path.length < 4) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
+                                let formId = path[3];
+                                return {component: FormDashboardPageComponent, team: teamId, id: formId};
+                            }
+                            case 'tree': {
+                                if (path.length < 4) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
+                                let treeId = path[3];
+                                if (path.length == 4) {
+                                    return {component: TreeVersionListPageComponent, team: teamId, id: treeId};
+                                }
                                 let versionNo = parseInt(path[4].substring(1));
+                                if (!versionNo) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
                                 return {component: TreeVersionEditPageComponent, team: teamId, id: treeId, version: versionNo};
                             }
                             default: {
@@ -92,12 +110,10 @@ export default class PathResolver {
                             }
                         }
                     }
-                    default: {
-                        return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
-                    }
                 }
             }
         }
+        return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
     }
 
     /**
@@ -125,11 +141,13 @@ export default class PathResolver {
     static setPathFromComponent(component, params) {
         let componentList = {
             '{team}/login': LoginPageComponent,
-            '{team}/docs/{id}': TreeListPageComponent,
-            '{team}/forms': TreeListPageComponent,
-            '{team}/form/{id}': FormDashboardPageComponent,
-            '{team}/tree/{id}/list': TreeVersionListPageComponent,
-            '{team}/tree/{id}/edit/v{version}': TreeVersionEditPageComponent
+            '{team}/edit/docs/{id}': TreeListPageComponent,
+            '{team}/edit/forms': TreeListPageComponent,
+            '{team}/edit/form/{id}': FormDashboardPageComponent,
+            '{team}/edit/tree/{id}/v{version}': TreeVersionEditPageComponent,
+            '{team}/edit/tree/{id}': TreeVersionListPageComponent,
+            '{team}/form/{id}/{submission}': FormSubmissionEditPageComponent,
+            '{team}/form/{id}': FormSubmissionEditPageComponent
         };
         for (let path in componentList) {
             let tComp = componentList[path];

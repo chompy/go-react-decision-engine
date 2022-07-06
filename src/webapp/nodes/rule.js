@@ -1,4 +1,4 @@
-import BaseNode, { KEY_DATA } from './base.js';
+import BaseNode from './base.js';
 
 export const RULE_TYPE_VISIBILITY = 'visibility';
 export const RULE_TYPE_VALIDATION = 'validation';

@@ -25,6 +25,7 @@ export const BTN_DELETE = 'Delete';
 export const BTN_PUBLISH = 'Publish';
 export const BTN_NEW = 'New';
 export const BTN_MORE = 'See All ({count})';
+export const BTN_SAVE = 'Save';
 
 // generic messages
 export const MSG_LOGIN_SUCCESS = 'Login successful.';

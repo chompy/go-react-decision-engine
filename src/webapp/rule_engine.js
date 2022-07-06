@@ -4,7 +4,7 @@ import AnswerNode from './nodes/answer';
 import QuestionNode from './nodes/question';
 import BaseNode from './nodes/base';
 import RuleNode from './nodes/rule';
-import DecisionUserData from './user_data';
+import UserData from './user_data';
 
 const LUA_METATABLE = 'DecisionNodeMT';
 
@@ -83,11 +83,11 @@ export default class RuleEngine {
 
     /**
      * Set user data.
-     * @param {DecisionUserData} userData 
+     * @param {UserData} userData 
      */
     setUserData(userData) {
         this.userData = null;
-        if (userData instanceof DecisionUserData) {
+        if (userData instanceof UserData) {
             this.userData = userData;
         }
     }

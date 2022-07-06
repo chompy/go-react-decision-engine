@@ -1,5 +1,4 @@
-import BaseNode, { KEY_DATA } from './base';
-import GroupNodeComponent from '../components/nodes/group';
+import BaseNode from './base';
 
 export default class GroupNode extends BaseNode {
 
@@ -14,13 +13,6 @@ export default class GroupNode extends BaseNode {
      */
     static getTypeName() {
         return 'group';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    getComponent() {
-        return GroupNodeComponent;
     }
 
     /**

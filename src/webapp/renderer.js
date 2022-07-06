@@ -17,7 +17,7 @@ export default class Renderer {
         return React.createElement(component, 
             Object.assign(
                 {
-                    key: object.uid,
+                    key: node.uid,
                     node: node
                 },
                 params

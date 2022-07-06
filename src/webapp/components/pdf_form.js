@@ -2,7 +2,6 @@ import React from 'react';
 import Events from '../events';
 import JsonConverter from '../converters/json';
 import BaseNode from '../objects/base';
-import RootNode, {DECISION_TYPE_DOCUMENT} from '../objects/root';
 import BuilderNodeComponent from './builder_node';
 
 export default class PdfFormComponent extends React.Component {

@@ -3,13 +3,14 @@ import shortcode from '../../lib/shortcode-parser';
 import Events from '../../events';
 import NodeRule, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 import BaseNode from '../../nodes/base';
+import UserData from '../../user_data';
 
 export default class BaseNodeComponent extends React.Component {
 
     constructor(props) {
         super(props);
         this.node = props.node;
-        this.userData = typeof props.userData == 'undefined' ? null : props.userData;
+        this.userData = typeof props.userData == 'undefined' ? new UserData : props.userData;
         this.readOnly = typeof props.readOnly == 'undefined' ? false : props.readOnly;
         this.matrix = props.matrix;
         this.state = {

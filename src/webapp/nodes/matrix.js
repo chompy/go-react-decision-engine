@@ -1,5 +1,4 @@
-import BaseNode, { KEY_DATA } from './base';
-import MatrixNodeComponent from '../components/nodes/matrix';
+import BaseNode from './base';
 
 export default class MatrixNode extends BaseNode {
 
@@ -14,13 +13,6 @@ export default class MatrixNode extends BaseNode {
         return 'matrix';
     }
 
-    /**
-     * @inheritdoc
-     */
-    getComponent() {
-        return MatrixNodeComponent;
-    }
-    
     /**
      * @inheritdoc
      */

@@ -1,10 +1,10 @@
 import React from 'react';
-import DecisionUserData from '../../user_data';
+import UserData from '../../user_data';
 import Events from '../../events'
-import AnswerNode from '../../objects/answer';
-import BaseNode from '../../objects/base';
-import RuleNode, { RULE_TYPE_VALIDATION } from '../../objects/rule';
-import QuestionNode, {DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_UPLOAD} from '../../objects/question';
+import AnswerNode from '../../nodes/answer';
+import BaseNode from '../../nodes/base';
+import RuleNode, { RULE_TYPE_VALIDATION } from '../../nodes/rule';
+import QuestionNode, {DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_UPLOAD} from '../../nodes/question';
 import QuestionFileComponent from '../question_file';
 import BaseNodeComponent from './base';
 
@@ -59,7 +59,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
 
     /**
      * Get answer values from user data.
-     * @param {DecisionUserData} userData 
+     * @param {UserData} userData 
      */
     getAnswerValues(userData) {
         let values = userData.getQuestionAnswers(this.node, this.matrix);

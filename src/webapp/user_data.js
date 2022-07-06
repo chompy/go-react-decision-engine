@@ -6,7 +6,7 @@ import AnswerNode from './nodes/answer.js';
  * User specific decision engine data. Contains answers
  * to questions.
  */
-export default class DecisionUserData {
+export default class UserData {
 
     constructor(uid) {
         this.uid = uid;
@@ -310,10 +310,10 @@ export default class DecisionUserData {
     /**
      * Build user data from object.
      * @param {object} data 
-     * @return {DecisionUserData}
+     * @return {UserData}
      */
     static importJSON(data) {
-        let u = new DecisionUserData(data.uid);
+        let u = new UserData(data.uid);
         for (let quid in data.answers) {
             u.answers[quid] = data.answers[quid];
         }

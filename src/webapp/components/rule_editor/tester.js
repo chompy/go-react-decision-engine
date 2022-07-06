@@ -1,6 +1,6 @@
 import React from 'react';
 
-import DecisionUserData from '../../user_data';
+import UserData from '../../user_data';
 import RuleEngine from '../../rule_engine';
 import RootNode from '../../nodes/root';
 import QuestionNode, { DECISION_FORM_TYPE_TEXT } from '../../nodes/question';
@@ -76,7 +76,7 @@ export default class RuleTesterComponent extends React.Component {
         }
         let node = this.getTestNode();
         this.ruleEngine.setRootNode(node);
-        let userData = new DecisionUserData;
+        let userData = new UserData;
         for (let i in answers) {
             userData.addAnswer(this.ruleEngine.root.getChild(TEST_QUESTION_UID), answers[i]);
         }

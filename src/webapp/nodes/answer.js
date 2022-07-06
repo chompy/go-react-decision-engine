@@ -1,4 +1,4 @@
-import BaseNode, { KEY_DATA } from './base.js';
+import BaseNode from './base.js';
 
 /**
  * Decision answer node.

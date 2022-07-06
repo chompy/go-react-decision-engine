@@ -23,6 +23,8 @@ export default class GroupNodeComponent extends BaseNodeComponent {
         if (!this.state.visible) {
             return null;
         }
+        return null;
+        /*
         // prepare content html
         if (!this.contentHtml) {
             // parse shortcode
@@ -47,7 +49,7 @@ export default class GroupNodeComponent extends BaseNodeComponent {
             <div className='children'>
                 {Renderer.renderChildren(this.node, renderParams)}
             </div>
-        </div>;
+        </div>;*/
     }
 
 }

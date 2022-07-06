@@ -11,6 +11,7 @@ import TreeVersionEditPageComponent from './tree_version_edit';
 import TreeListPageComponent from './tree_list';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import FormSubmissionEditPageComponent from './form_submission_edit';
 
 export default class FormDashboardPageComponent extends BasePageComponent {
 
@@ -150,6 +151,14 @@ export default class FormDashboardPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickNewSubmission(e) {
+        e.preventDefault();
+        this.gotoPage(FormSubmissionEditPageComponent, {id: this.state.form.id});
+    }
+
+    /**
      * @param {Object} res 
      */
     onNewDocumentResponse(res) {
@@ -246,7 +255,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                 <div className='list submissions'>
                     <h2>Submissions</h2>
                     <div className='options'>
-                        {this.renderCallbackButton(BTN_NEW, null, faCirclePlus)}
+                        {this.renderCallbackButton(BTN_NEW, this.onClickNewSubmission, faCirclePlus)}
                     </div>
                     <ApiTableComponent
                         columns={{

@@ -4,7 +4,7 @@ import BasePageComponent from './base';
 import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
-import BuilderComponent from '../builder';
+import BuilderComponent from '../builder/builder';
 import JsonConverter from '../../converters/json';
 import Events from '../../events';
 import { message as msgPopup } from 'react-message-popup';

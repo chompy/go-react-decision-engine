@@ -1,9 +1,10 @@
 import React from 'react';
-import Events from '../events';
-import JsonConverter from '../converters/json';
-import BaseNode from '../nodes/base';
-import RootNode, {DECISION_TYPE_DOCUMENT} from '../nodes/root';
-import BuilderNodeComponent from './builder/node';
+import Events from '../../events';
+import JsonConverter from '../../converters/json';
+import BaseNode from '../../nodes/base';
+import RootNode from '../../nodes/root';
+import BuilderNodeComponent from './node';
+import { TREE_DOCUMENT } from '../../config';
 
 export default class BuilderComponent extends React.Component {
 
@@ -13,7 +14,7 @@ export default class BuilderComponent extends React.Component {
         if (!this.node) {
             this.node = new RootNode(BaseNode.generateUid());
             this.node.name = 'TOP';
-            this.node.type = DECISION_TYPE_DOCUMENT;
+            this.node.type = TREE_DOCUMENT;
         }
         this.ruleEditorTemplates = typeof props.ruleEditorTemplates == 'undefined' ? {} : props.ruleEditorTemplates;
         this.setNodeCallback = this.setNodeCallback.bind(this);

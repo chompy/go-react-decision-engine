@@ -7,7 +7,7 @@ import Events from '../events';
 import RuleEngine from '../rule_engine';
 import RuleTemplateSelectComponent from './rule_editor/template_select';
 import RuleTesterComponent from './rule_editor/tester';
-import DecisionUserData from '../user_data';
+import UserData from '../user_data';
 import RuleFormField from '../rule_field';
 import RuleFormFieldComponent from './rule_editor/form_field';
 import RuleNode from '../nodes/rule';
@@ -167,7 +167,7 @@ export default class RuleEditorComponent extends React.Component {
         }
         let rule = new RuleNode('_TEST');
         rule.script = script;
-        this.ruleEngine.setUserData(new DecisionUserData);
+        this.ruleEngine.setUserData(new UserData);
         try { this.ruleEngine.setRuleNode(rule); } catch {};
     }
 

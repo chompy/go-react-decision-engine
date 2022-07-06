@@ -2,16 +2,16 @@ import React from 'react';
 import md5 from 'blueimp-md5';
 import Renderer from '../../renderer';
 import Events from '../../events';
-import {DECISION_TYPE_FORM, DECISION_TYPE_DOCUMENT} from '../../nodes/root';
-//import {DECISION_STATE_NO_CHANGE, DECISION_STATE_NEXT, DECISION_STATE_PREVIOUS} from '../decision_manager';
 import BaseNodeComponent from './base';
 import GroupNode from '../../nodes/group';
 import SectionNavigationComponent from '../section_navigation';
+import { TREE_DOCUMENT, TREE_FORM } from '../../config';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 
     constructor(props) {
         super(props);
+        this.callback = typeof props.callback != 'undefined' ? props.callback : null;
         this.state.message = '';
         this.state.disabled = this.readOnly;
         this.state.section = null;
@@ -32,7 +32,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
     componentDidMount() {
         super.componentDidMount();
         Events.listen('post_submit', this.onPostSubmit);
-        Events.listen('do_refresh', this.onDoRefresh);
         Events.listen('error', this.onError);
     }
 
@@ -42,7 +41,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
     componentWillUnmount() {
         super.componentWillUnmount();
         Events.remove('post_submit', this.onPostSubmit);
-        Events.remove('do_refresh', this.onDoRefresh);
         Events.remove('error', this.onError);
     }
 
@@ -165,8 +163,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
             });
             return;
         }
-        // if no previous section then return to previous form/document (if available)
-        //this.submit(DECISION_STATE_PREVIOUS);
     }
 
     /**
@@ -202,13 +198,13 @@ export default class RootNodeComponent extends BaseNodeComponent {
      * @return 
      */
     getCurrentSection() {
-        if (this.node.type != DECISION_TYPE_FORM) {
+        if (this.node.type != TREE_FORM) {
             return null;
         }
         if (!this.state.section) {
             for (let i in this.node.children) {
                 let node = this.node.children[i];
-                if (node instanceof DecisionGroup) {
+                if (node instanceof GroupNode) {
                     return node;
                 }
             }
@@ -218,20 +214,20 @@ export default class RootNodeComponent extends BaseNodeComponent {
 
     /**
      * Get decision group for next section.
-     * @return {DecisionGroup|null}
+     * @return {GroupNode|null}
      */
     getNextSection() {
-        if (this.node.type != DECISION_TYPE_FORM) {
+        if (this.node.type != TREE_FORM) {
             return null;
         }
         let currentSection = this.getCurrentSection();
         let hasCurrent = false;
-        for (let i in this.node) {
+        for (let i in this.node.children) {
             let node = this.node.children[i];
             if (node.uid == currentSection.uid) {
                 hasCurrent = true;
                 continue;
-            } else if (hasCurrent && node instanceof DecisionGroup && !this.userData.isHidden(node, this.node)) {
+            } else if (hasCurrent && node instanceof GroupNode && !this.userData.isHidden(node, this.node)) {
                 return node;
             }
         }
@@ -243,7 +239,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
      * @return {GroupNode|null}
      */
     getPreviousSection() {
-        if (this.node.type != DECISION_TYPE_FORM) {
+        if (this.node.type != TREE_FORM) {
             return null;
         }
         let currentSection = this.getCurrentSection();
@@ -251,11 +247,11 @@ export default class RootNodeComponent extends BaseNodeComponent {
             return null;
         }
         let lastSection = null;
-        for (let i in this. ode.children) {
+        for (let i in this.node.children) {
             let node = this.node.children[i];
             if (node.uid == currentSection.uid) {
                 return lastSection;
-            } else if (node instanceof DecisionGroup && !this.userData.isHidden(node, this.node)) {
+            } else if (node instanceof GroupNode && !this.userData.isHidden(node, this.node)) {
                 lastSection = node;
             }
         }
@@ -273,13 +269,13 @@ export default class RootNodeComponent extends BaseNodeComponent {
             <input key={this.node.uid + '-opt-next'} type='button' disabled={this.state.disabled} value='Next' className={nextBtnClass} onClick={this.onNext} />
         );
         switch (this.node.type.toLowerCase()) {
-            case DECISION_TYPE_DOCUMENT: {
+            case TREE_DOCUMENT: {
                 out.push(
                     <input key={this.node.uid + '-opt-pdf'} type='button' value='Download PDF' disabled={this.state.disabled} className='btn-pdf' onClick={this.onPdf} />
                 );
                 break;
             }
-            case DECISION_TYPE_FORM: {
+            case TREE_FORM: {
                 out.push(
                     <input key={this.node.uid + '-opt-submit'} type='submit' disabled={this.state.disabled} value='Save' />
                 );
@@ -303,6 +299,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
      * {@inheritdoc}
      */
     render() {
+        return null;
         // render current section only
         let renderSection = null;
         let renderParams = {
@@ -319,7 +316,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
             }
         }
         switch (this.node.type.toLowerCase()) {
-            case DECISION_TYPE_DOCUMENT: {
+            case TREE_DOCUMENT: {
                 return <div className={this.getClass()} id={this.getId()}>
                     <div className='head'>
                         <SectionNavigationComponent root={this.node} userData={this.userData} callback={this.onSection} />

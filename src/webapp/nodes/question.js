@@ -1,4 +1,4 @@
-import BaseNode, { KEY_DATA } from './base.js';
+import BaseNode from './base.js';
 
 export const DECISION_FORM_TYPE_TEXT = 'text';
 export const DECISION_FORM_TYPE_CHOICE = 'choice';
@@ -20,13 +20,6 @@ export default class QuestionNode extends BaseNode {
      */
     static getTypeName() {
         return 'question';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    getComponent() {
-        return QuestionNode;
     }
 
     /**

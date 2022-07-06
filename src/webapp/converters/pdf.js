@@ -2,7 +2,7 @@
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import Logger from '../logger.js';
-import DecisionUserData from '../user_data.js';
+import UserData from '../user_data.js';
 import Events from '../events';
 import BaseNode from '../objects/base.js';
 import BaseConverter from './base.js';
@@ -347,7 +347,7 @@ export default class PdfConverter extends BaseConverter {
     /**
      * Build and download PDF.
      * @param {BaseNode} node
-     * @param {DecisionUserData} userData
+     * @param {UserData} userData
      */
     static build(node, userData) {
         Logger.resetTimer('ccde_pdf');
@@ -532,7 +532,7 @@ export default class PdfConverter extends BaseConverter {
      * {@inheritdoc}
      */
     export(node) {
-        return PdfConverter.build(node, this.userData ? this.userData : new DecisionUserData(''));
+        return PdfConverter.build(node, this.userData ? this.userData : new UserData(''));
     }
 
 }

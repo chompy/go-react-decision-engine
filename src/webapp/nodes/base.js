@@ -161,7 +161,6 @@ export default class BaseNode {
             return null;
         }
         let obj = new this(data[KEY_UID]);
-        obj.type = typeof data[KEY_TYPE] == 'undefined' ? null : data[KEY_TYPE];
         obj.parent = typeof data[KEY_PARENT] == 'undefined' ? '' : data[KEY_PARENT];
         obj.tags = typeof data[KEY_TAGS] == 'undefined' ? [] : data[KEY_TAGS];
         obj.label = data[KEY_LABEL];

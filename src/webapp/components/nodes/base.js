@@ -1,88 +1,117 @@
 import React from 'react';
 import shortcode from '../../lib/shortcode-parser';
-import Events from '../../events';
-import NodeRule, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
+import NodeRule, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 import BaseNode from '../../nodes/base';
 import UserData from '../../user_data';
+import RootNode from '../../nodes/root';
+import RuleEngine from '../../rule_engine';
+import RuleNode from '../../nodes/rule';
+import Events from '../../events';
 
 export default class BaseNodeComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.node = props.node;
-        this.userData = typeof props.userData == 'undefined' ? new UserData : props.userData;
-        this.readOnly = typeof props.readOnly == 'undefined' ? false : props.readOnly;
-        this.matrix = props.matrix;
+        this.callback = props?.callback;
+        this.node = props?.node ? props?.node : new RootNode;
+        this.root = props?.root ? props?.root : this.node;
+        this.userData = props?.userData ? props?.userData : new UserData;
+        this.readOnly = props?.readOnly;
+        this.matrix = props?.matrix;
+        this.level = props?.level ? props?.level : 1;
         this.state = {
-            visible: this.userData ? !this.userData.isHidden(this.node, null, this.matrix) : !this.node.hasRuleOfType(RULE_TYPE_VISIBILITY)
+            visible: !this.userData.isHidden(this.node, null, this.matrix)
         };
-        this.onUpdate = this.onUpdate.bind(this);
-        this.onPreRuleEvaluation = this.onPreRuleEvaluation.bind(this);
-        this.onRuleEvaluation = this.onRuleEvaluation.bind(this);
+        this.rules = [];
+        this.onUpdateCallback = this.onUpdateCallback.bind(this);
+        this.onRootUpdate = this.onRootUpdate.bind(this);
     }
 
     /**
      * {@inheritdoc}
      */
     componentDidMount() {
-        Events.listen('update', this.onUpdate);
-        Events.listen('pre_rule_evaluation', this.onPreRuleEvaluation);
-        Events.listen('rule_evaluation', this.onRuleEvaluation);
+        // compile rules
+        if (this.rules.length == 0) {
+            for (let i in this.node.children) {
+                let child = this.node.children[i];
+                if (child instanceof RuleNode) {
+                    let rule = new RuleEngine;
+                    rule.matrixId = this.matrix;
+                    rule.setRootNode(this.root);
+                    rule.setUserData(this.userData);
+                    rule.setRuleNode(child);
+                    this.rules.push(rule);
+                }
+            }
+            if (this.rules.length > 0) {
+                this.evaluateRules();
+            }
+        }
+        Events.listen('tree-root-update', this.onRootUpdate);
     }
 
     /**
      * {@inheritdoc}
      */
     componentWillUnmount() {
-        Events.remove('update', this.onUpdate);
-        Events.remove('pre_rule_evaluation', this.onPreRuleEvaluation);
-        Events.remove('rule_evaluation', this.onRuleEvaluation);
+        Events.remove('tree-root-update', this.onRootUpdate);
     }
 
     /**
-     * Fires when a decision node is updated.
-     * @param {Event} e 
+     * @param {BaseNode} node 
+     * @param {String} matrix
      */
-    onUpdate(e) {
-        this.userData = e.detail.userData;
+    onUpdateCallback(node, matrix) {
+        if (this.callback) { this.callback(node, matrix); }
     }
 
     /**
-     * Fires before rules are evaluated.
      * @param {Event} e 
      */
-    onPreRuleEvaluation(e) {
-        for (let i in this.node.children) {
-            let child = this.node.children[i];
-            if (child instanceof NodeRule && (!child.type || child.type == RULE_TYPE_VISIBILITY)) {
-                this.setState({visible: false});
-                return;
+    onRootUpdate(e) {
+        this.evaluateRules();
+    }
+
+    /**
+     * Evaluate all child rules.
+     */
+    evaluateRules() {
+        // reset validation
+        this.userData.resetValidationState(this.node);
+        // if there are visibility rules then this node should be hidden by default
+        if (this.node.hasRuleOfType(RULE_TYPE_VISIBILITY)) {
+            this.userData.setHidden(this.node, true, this.matrix);
+        }
+        // evaluate rules
+        for (let i in this.rules) {
+            let ruleEngine = this.rules[i];
+            let res = ruleEngine.evaluate();
+            switch (ruleEngine.rule.type) {
+                case RULE_TYPE_VALIDATION: {
+                    if (!res.results) {
+                        this.userData.addValidationMessage(
+                            res.parent, res.message, res.matrixId
+                        )
+                    }
+                    break;
+                }
+                default: {
+                    if (res.results) {
+                        this.userData.setHidden(res.parent, false, res.matrixId);
+                    }
+                    break;
+                }
             }
-        } 
+        }
+        this.setState({visible: !this.userData.isHidden(this.node, this.root, this.matrix)});
     }
 
     /**
-     * Fires when a rule is evaluated.
-     * @param {Event} e 
+     * Get node type name.
+     * @return {String}
      */
-    onRuleEvaluation(e) {
-        if (
-            !(e.detail.node instanceof BaseNode) ||
-            !(e.detail.rule instanceof RuleNode) ||
-            e.detail.node.uid != this.node.uid
-        ) {
-            return;
-        }
-        if ((!e.detail.rule.type || e.detail.rule.type == RULE_TYPE_VISIBILITY) && e.detail.results) {
-            this.setState({visible: true});
-        }
-    }
-
-    /**
-     * Get decision node type name.
-     * @return string
-     */
-    getTypeName() {
+    static getTypeName() {
         return 'base';
     }
 
@@ -99,16 +128,13 @@ export default class BaseNodeComponent extends React.Component {
      * @return string
      */
     getClass() {
-        let out = this.getTypeName() + 
-            ' decision-node ' + 
-            this.getTypeName() + '-uid-' + this.node.uid + 
-            ' priority-' + this.node.priority +
-            ' level-' + this.node.level + 
-            (this.readOnly ? ' read-only' : '') +
-            (this.node.tags.length > 0 ? ' tag-' + this.node.tags.join(' tag-') : '') +
-            (this.state.visible ? '' : ' hidden')
-        ;
-        out = out.replaceAll('_', '-');
+        let out = 'tree-node tree-' + this.constructor.getTypeName() + ' tree-level-' + this.level;
+        if (this.node?.tags && this.node.tags.length > 0) {
+            out += ' tag-' + this.node.tags.join(' tag-');
+        }
+        if (!this.state.visible) {
+            out += ' hidden';
+        }
         return out;
     }
 
@@ -125,40 +151,42 @@ export default class BaseNodeComponent extends React.Component {
     }
 
     /**
-     * Get list of option buttons to include with this node.
+     * List of available child node types.
      * @return {Array}
      */
-    getOptions() {
-        let options = [];
-        let addOption = function(name, label, callback) {
-            options.push([name, label, callback]);
-        };
-        Events.dispatch(
-            'node_options',
-            {
-                node: this.node,
-                call: addOption                
-            }
-        );
-        return options;
+    availableChildTypes() {
+        return [];
     }
 
     /**
-     * Render additional options.
-     * @returns 
+     * Render child nodes.
+     * @return {Array}
      */
-    renderOptions() {
-        let options = this.getOptions();
-        let optionElements = [];
-        for (let i in options) {
-            optionElements.push(
-                <a key={options[i][0]} href='#' className={'node-option node-option-' + options[i][0]} onClick={options[i][2]}>{options[i][1]}</a>
-            );
+    renderChildren() {
+        let out = [];
+        let childTypes = this.availableChildTypes();
+        for (let i in this.node.children) {
+            let child = this.node.children[i];
+            for (let j in childTypes) {
+                let Component = childTypes[j];
+                if (Component.getTypeName() == child.constructor.getTypeName()) {
+                    out.push(
+                        <Component 
+                            key={this.userData.uid + '_' + child.uid} 
+                            node={child}
+                            root={this.root}
+                            callback={this.onUpdateCallback}
+                            userData={this.userData}
+                            readOnly={this.readOnly}
+                            matrix={this.matrix}
+                            level={this.level+1}
+                        />
+                    );
+                    break;
+                }
+            }
         }
-        if (optionElements.length == 0) {
-            return null;
-        }
-        return <div className='options'>{optionElements}</div>;
+        return out;
     }
 
     /**

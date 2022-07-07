@@ -1,15 +1,15 @@
 import BaseNode from './base.js';
 
-export const DECISION_FORM_TYPE_TEXT = 'text';
-export const DECISION_FORM_TYPE_CHOICE = 'choice';
-export const DECISION_FORM_TYPE_DROPDOWN = 'dropdown';
-export const DECISION_FORM_TYPE_UPLOAD = 'upload';
+export const FIELD_TEXT = 'text';
+export const FIELD_CHOICE = 'choice';
+export const FIELD_DROPDOWN = 'dropdown';
+export const FIELD_UPLOAD = 'upload';
 
 export default class QuestionNode extends BaseNode {
 
     constructor(uid) {
         super(uid);
-        this.type = DECISION_FORM_TYPE_TEXT;
+        this.type = FIELD_TEXT;
         this.textLines = 1;
         this.defaultAnswer = '';
         this.multiple = false;
@@ -39,13 +39,13 @@ export default class QuestionNode extends BaseNode {
             ['label', 'Label', 'text'],
         ];
         switch (this.type) {
-            case DECISION_FORM_TYPE_TEXT: {
+            case FIELD_TEXT: {
                 out.push(['textLines', 'Text Lines', 'number']);
                 out.push(['defaultAnswer', 'Default Answer', 'textarea']);
                 break;
             }
-            case DECISION_FORM_TYPE_CHOICE:
-            case DECISION_FORM_TYPE_DROPDOWN: {
+            case FIELD_CHOICE:
+            case FIELD_DROPDOWN: {
                 out.push(['multiple', 'Multiple', 'checkbox'])
                 break;
             }

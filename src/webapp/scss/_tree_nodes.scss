@@ -1,0 +1,76 @@
+.tree-node.tree-root {
+
+    border-bottom: 1px solid $page-section-divide;
+    margin-bottom: 15px;
+    min-height: 350px;
+
+    .section-navigation {
+        text-align: center;
+        border-top: 1px solid $page-section-divide;
+        border-bottom: 1px solid $page-section-divide;
+        padding: 15px 0;
+        counter-reset: number;
+        .section-nav-item {
+            display: inline-block;
+            margin: 0 25px;
+            counter-increment: number;
+            &.active {
+                font-weight: bold;
+            }
+            &::before {
+                display: block;
+                content: counter(number)" ";
+                background: $header-bg;
+                padding: 5px;
+                border-radius: 22px;
+                width: 22px;
+                height: 20px;
+                margin: 0 auto 5px auto;
+                line-height: 22px;
+                font-weight: bold;
+                font-size: 18px;
+            }
+        }
+    }
+
+    .tree-question {
+        margin-bottom: 20px;
+        .tree-content > label {
+            font-weight: bold;
+        }
+        fieldset {
+            margin: 0;
+            padding: 0;
+        }
+        textarea {
+            width: 90%;
+        }
+        select {
+            min-width: 250px;
+            max-width: 100%;
+        }
+        .file {
+            &:first-of-type { 
+                margin-top: 10px;
+            }
+            svg {
+                color: #000;
+                margin-right: 5px;
+            }
+        }
+        input[type=file] {
+            margin-top: 10px;
+        }
+    }
+
+}
+
+.page.submission-edit {
+    .version {
+        margin-left: 23px;
+    }
+    section .options {
+        text-align: right;
+    }
+
+}

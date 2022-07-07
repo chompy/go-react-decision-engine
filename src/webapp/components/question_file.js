@@ -1,7 +1,7 @@
-
+import { faX } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
-import Events from '../events';
-
+import { BTN_DELETE } from '../config';
 export default class QuestionFileComponent extends React.Component {
 
     constructor(props) {
@@ -10,8 +10,7 @@ export default class QuestionFileComponent extends React.Component {
         this.name = data[0];
         this.type = data[1];
         this.data = data[2];
-        this.isPdf = (typeof(props.isPdf) != 'undefined' && props.isPdf);
-        this.uri = (typeof(props.uri) != 'undefined' ? props.uri : '');
+        this.deleteCallback = props?.onDelete;
         this.onDelete = this.onDelete.bind(this);
     }
 
@@ -21,15 +20,9 @@ export default class QuestionFileComponent extends React.Component {
      */
     onDelete(e) {
         e.preventDefault();
-        Events.dispatch(
-            'change',
-            {
-                question: this.props.node,
-                answer: this.props.data,
-                multiple: true,
-                delete: true
-            }
-        );
+        if (this.deleteCallback) {
+            this.deleteCallback(this.props.data);
+        }
     }
 
     /**
@@ -37,15 +30,11 @@ export default class QuestionFileComponent extends React.Component {
      */
     render() {
         let typeClass = this.type.split('/')[1];
-        if (this.isPdf) {
-            return <span className={'file type-' + typeClass}>
-                <a className='file-name' href={this.uri}>{this.name}</a>
-                <a className='file-uri' href={this.uri}> ({this.uri})</a>
-            </span>;
-        }
         let dataUri = 'data:' + this.type + ';base64,' + this.data;
         return <div className={'file type-' + typeClass}>
-            <a href='#' onClick={this.onDelete} className='delete'>x</a>
+            <a href='#' onClick={this.onDelete} className='delete' alt={BTN_DELETE} title={BTN_DELETE}>
+                <FontAwesomeIcon icon={faX} />
+            </a>
             <a target='_blank' href={dataUri}>{this.name}</a>
         </div>;
     }

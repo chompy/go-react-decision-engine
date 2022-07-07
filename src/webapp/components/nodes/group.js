@@ -1,6 +1,7 @@
 import React from 'react';
-import Renderer from '../../renderer';
+import GroupNode from '../../nodes/group';
 import BaseNodeComponent from './base';
+import QuestionNodeComponent from './question';
 
 export default class GroupNodeComponent extends BaseNodeComponent {
 
@@ -10,46 +11,35 @@ export default class GroupNodeComponent extends BaseNodeComponent {
     }
 
     /**
-     * {@inheritdoc}
+     * Get node type name.
+     * @return {String}
      */
-    getTypeName() {
+    static getTypeName() {
         return 'group';
     }
 
     /**
      * {@inheritdoc}
      */
+    availableChildTypes() {
+        return [
+            GroupNodeComponent,
+            QuestionNodeComponent
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     render() {
-        if (!this.state.visible) {
-            return null;
-        }
-        return null;
-        /*
-        // prepare content html
+        if (!(this.node instanceof GroupNode) || !this.state.visible) { return null; }
         if (!this.contentHtml) {
-            // parse shortcode
-            this.contentHtml = this.parseShortcode(this.node.content);
-            // inject embeds
-            if (typeof this.props.embeds != 'undefined') {
-                for (let key in this.props.embeds) {
-                    this.contentHtml = this.contentHtml.replaceAll(key, this.props.embeds[key]);
-                }
-            }
+            this.contentHtml = this.parseShortcode(this.node.contentEdit);
         }
-        let renderParams = {
-            userData: this.userData,
-            checkValidation: typeof this.props.checkValidation != 'undefined' && this.props.checkValidation,
-            embeds: typeof this.props.embeds != 'undefined' ? this.props.embeds : null,
-            readOnly: this.readOnly,
-            matrix: this.matrix
-        };
-        return <div className={this.getClass()} id={this.getId()}>
-            {this.renderOptions()}
-            <div className='content' dangerouslySetInnerHTML={{ __html: this.contentHtml }} />
-            <div className='children'>
-                {Renderer.renderChildren(this.node, renderParams)}
-            </div>
-        </div>;*/
+        return <div className={this.getClass()}>
+            <div className='tree-content' dangerouslySetInnerHTML={{ __html: this.contentHtml }} />
+            <div className='tree-children'>{this.renderChildren()}</div>
+        </div>;
     }
 
 }

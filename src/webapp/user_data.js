@@ -12,6 +12,7 @@ export default class UserData {
         this.uid = uid;
         this.answers = {};
         this.hidden = [];
+        
         this.saveCount = 0;
         this.valid = true;
         this.questionValidationMessages = {};
@@ -165,11 +166,12 @@ export default class UserData {
      * @param {*} answer
      * @return boolean
      */
-    hasAnswer(answer) {
+    hasAnswer(answer, matrix) {
         if (answer instanceof AnswerNode) {
             answer = answer.uid;
         }
         for (let i in this.answers) {
+            if (matrix && !i.endsWith('_' + matrix)) { continue; }
             if (this.answers[i] == answer || this.answers[i].indexOf(answer) != -1) {
                 return true;
             }

@@ -4,7 +4,7 @@ import AnswerNode from '../../nodes/answer';
 import BaseNode from '../../nodes/base';
 import GroupNode from '../../nodes/group';
 import MatrixNode from '../../nodes/matrix';
-import QuestionNode, { DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN, DECISION_FORM_TYPE_TEXT, DECISION_FORM_TYPE_UPLOAD } from '../../nodes/question';
+import QuestionNode, { FIELD_CHOICE, FIELD_DROPDOWN, FIELD_TEXT, FIELD_UPLOAD } from '../../nodes/question';
 import RootNode from '../../nodes/root';
 import RuleNode, { RULE_TYPE_VALIDATION, RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 import BuilderFormComponent from './form';
@@ -434,8 +434,8 @@ export default class BuilderNodeComponent extends React.Component {
                 };
             case QuestionNode:
                 switch (this.node.type) {
-                    case DECISION_FORM_TYPE_TEXT:
-                    case DECISION_FORM_TYPE_UPLOAD: {
+                    case FIELD_TEXT:
+                    case FIELD_UPLOAD: {
                         return {
                             'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY],
                             'Validation Rule': [RuleNode, RULE_TYPE_VALIDATION]
@@ -459,10 +459,10 @@ export default class BuilderNodeComponent extends React.Component {
         return {
             'Content/Group': [GroupNode],
             'Matrix': [MatrixNode],
-            'Text Input': [QuestionNode, DECISION_FORM_TYPE_TEXT],
-            'Multiple Choice': [QuestionNode, DECISION_FORM_TYPE_CHOICE],
-            'Dropdown': [QuestionNode, DECISION_FORM_TYPE_DROPDOWN],
-            'File Upload': [QuestionNode, DECISION_FORM_TYPE_UPLOAD],
+            'Text Input': [QuestionNode, FIELD_TEXT],
+            'Multiple Choice': [QuestionNode, FIELD_CHOICE],
+            'Dropdown': [QuestionNode, FIELD_DROPDOWN],
+            'File Upload': [QuestionNode, FIELD_UPLOAD],
             'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
         };
     }
@@ -498,7 +498,7 @@ export default class BuilderNodeComponent extends React.Component {
         }
         let availableTypes = this.availableTypes();
         let addOptions = [];
-        if (this.node instanceof QuestionNode && [DECISION_FORM_TYPE_CHOICE, DECISION_FORM_TYPE_DROPDOWN].indexOf(this.node.type) > -1) {
+        if (this.node instanceof QuestionNode && [FIELD_CHOICE, FIELD_DROPDOWN].indexOf(this.node.type) > -1) {
             addOptions.push(
                 <li key={this.node.uid + '_addbulk'} className='pure-menu-item'>
                     <a href="#" className='pure-menu-link' onClick={this.onBulkAddButton}>Bulk Answers</a>

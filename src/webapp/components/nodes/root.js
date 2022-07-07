@@ -1,210 +1,119 @@
 import React from 'react';
-import md5 from 'blueimp-md5';
-import Renderer from '../../renderer';
-import Events from '../../events';
-import BaseNodeComponent from './base';
+import { TREE_FORM } from '../../config';
 import GroupNode from '../../nodes/group';
-import SectionNavigationComponent from '../section_navigation';
-import { TREE_DOCUMENT, TREE_FORM } from '../../config';
+import RootNode from '../../nodes/root';
+import BaseNodeComponent from './base';
+import GroupNodeComponent from './group';
+import RuleEngine from '../../rule_engine';
+import Events from '../../events';
+import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 
     constructor(props) {
         super(props);
-        this.callback = typeof props.callback != 'undefined' ? props.callback : null;
-        this.state.message = '';
-        this.state.disabled = this.readOnly;
         this.state.section = null;
-        this.checkValidation = false;
-        this.onSubmit = this.onSubmit.bind(this);
-        this.onPostSubmit = this.onPostSubmit.bind(this);
-        this.onNext = this.onNext.bind(this);
-        this.onBack = this.onBack.bind(this);
-        this.onPdf = this.onPdf.bind(this);
         this.onSection = this.onSection.bind(this);
-        this.onDoRefresh = this.onDoRefresh.bind(this);
-        this.onError = this.onError.bind(this);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     componentDidMount() {
+        let hasCompiledRules = this.rules.length > 0;
         super.componentDidMount();
-        Events.listen('post_submit', this.onPostSubmit);
-        Events.listen('error', this.onError);
+        // compile rules for sections
+        if (!hasCompiledRules) {
+            for (let i in this.node.children) {
+                let child = this.node.children[i];
+                if (child instanceof GroupNode) {
+                    for (let j in child.children) {
+                        let rule = child.children[j];
+                        if (rule instanceof RuleNode) {
+                            let ruleEngine = new RuleEngine;
+                            ruleEngine.matrixId = this.matrix;
+                            ruleEngine.setRootNode(this.node);
+                            ruleEngine.setUserData(this.userData);
+                            ruleEngine.setRuleNode(rule);
+                            this.rules.push(ruleEngine);
+                        }
+                    }
+                }
+            }
+            if (this.rules.length > 0) {
+                this.evaluateRules();
+            }
+        }
     }
 
     /**
-     * {@inheritdoc}
+     * Get node type name.
+     * @return {String}
      */
-    componentWillUnmount() {
-        super.componentWillUnmount();
-        Events.remove('post_submit', this.onPostSubmit);
-        Events.remove('error', this.onError);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidUpdate() {
-        Events.dispatch('root_component_update', {
-            node: this.node
-        })
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    getTypeName() {
+    static getTypeName() {
         return 'root';
     }
-
+    
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
-    getClass() {
-        let out = super.getClass() + ' ' + this.node.type;
-        if (this.userData && this.userData.saveCount > 0) {
-            out += ' saved';
-        }
-        if (this.state.disabled) {
-            out += ' disabled';
-        }
-        return out;
+    availableChildTypes() {
+        return [
+            GroupNodeComponent
+        ];
     }
 
     /**
-     * Submit form.
-     * @param {Number} state 
+     * {@inheritdoc}
      */
-    submit(state) {
-        this.setState({
-            message: '',
-            disabled: true
-        });
-        Events.dispatch(
-            'do_submit',
-            {
-                node: this.node,
-                state: state,
-                isDisabled: this.state.disabled
+    evaluateRules() {
+        for (let i in this.node.children) {
+            let child = this.node.children[i];
+            if (
+                child instanceof GroupNode &&
+                child.hasRuleOfType(RULE_TYPE_VISIBILITY)
+            ) {
+                this.userData.setHidden(child, true, this.matrix);
+                console.log("TEST");
             }
-        )
-    }
-
-    /**
-     * Do a full refresh(render).
-     */
-    onDoRefresh() {
-        this.setState({});
-    }
-
-    /**
-     * Fires on form submit.
-     * @param {Event} e 
-     */
-    onSubmit(e) {
-        e.preventDefault();
-        //this.submit(DECISION_STATE_NO_CHANGE);
-        this.checkValidation = true;
-    }
-
-    /**
-     * Fires when form was successfully submitted.
-     * @param {Event} e 
-     */
-    onPostSubmit(e) {
-        this.checkValidation = true;
-        if (!e.detail.valid) {
-            window.scrollTo(0,99999);
-            this.setState({
-                message: 'One or more fields are invalid.',
-                disabled: false
-            });
-            return;
         }
-        this.setState({message: '', disabled: false});
+        super.evaluateRules();
     }
 
     /**
-     * Fires when 'next' button is pressed.
-     * @param {Event} e 
+     * {@inheritdoc}
      */
-    onNext(e) {
-        e.preventDefault();
-        window.scrollTo(0,0);
-        let nextSection = this.getNextSection();
-        if (nextSection) {
-            this.setState({section: nextSection.uid});
-            Events.dispatch('section', {
-                node: this.node,
-                section: nextSection.uid
-            });
-            return;
-        }
-        // if no more sections then submit form
-        //this.submit(DECISION_STATE_NEXT);
-    }
-
-    /**
-     * Fires when 'previous' / 'back' button is pressed.
-     * @param {Event} e 
-     */
-    onBack(e) {
-        e.preventDefault();
-        window.scrollTo(0,0);
-        let previousSection = this.getPreviousSection();
-        if (previousSection) {
-            this.setState({section: previousSection.uid});
-            Events.dispatch('section', {
-                node: this.node,
-                section: previousSection.uid
-            });
-            return;
-        }
-    }
-
-    /**
-     * Fires when download PDF is button is pressed.
-     * @param {Event} e 
-     */
-    onPdf(e) {
-        e.preventDefault()
-        //let c = new PdfConverter;
-        //c.userData = this.userData;
-        //c.export(this.node);
-        alert('TODO: PDF');
-    }
-
-    /**
-     * @param {Event} e 
-     */
-    onError(e) {
-        this.setState({
-            message: e.detail.message
+    onUpdateCallback(node, matrix) {
+        super.onUpdateCallback(node, matrix);
+        Events.dispatch('tree-root-update', {
+            node: node,
+            matrix: matrix
         });
     }
 
     /**
-     * Callback for section navigation component.
-     * @param {string} uid
+     * @param {Event} e 
      */
-    onSection(uid) {
-        this.setState({ section: uid });
+    onSection(e) {
+        e.preventDefault();
+        let value = e.target.getAttribute('data-section'); 
+        let child = this.node.getChild(value);
+        if (!child || this.userData.isHidden(child, this.node, this.matrix)) {
+            this.setState({section: null});    
+            return;
+        }
+        this.setState({section: value});
     }
 
     /**
-     * @return 
+     * @return {GroupNode|null}
      */
     getCurrentSection() {
-        if (this.node.type != TREE_FORM) {
-            return null;
-        }
+        if (this.node.type != TREE_FORM) { return null; }
         if (!this.state.section) {
             for (let i in this.node.children) {
                 let node = this.node.children[i];
-                if (node instanceof GroupNode) {
+                if (node instanceof GroupNode && !this.userData.isHidden(node, this.node)) {
                     return node;
                 }
             }
@@ -212,133 +121,80 @@ export default class RootNodeComponent extends BaseNodeComponent {
         return this.node.getChild(this.state.section);
     }
 
-    /**
-     * Get decision group for next section.
-     * @return {GroupNode|null}
-     */
-    getNextSection() {
-        if (this.node.type != TREE_FORM) {
-            return null;
-        }
-        let currentSection = this.getCurrentSection();
-        let hasCurrent = false;
+    getSections() {
+        if (this.node.type != TREE_FORM) { return null; }
+        let out = [];
         for (let i in this.node.children) {
-            let node = this.node.children[i];
-            if (node.uid == currentSection.uid) {
-                hasCurrent = true;
+            let child = this.node.children[i];
+            if (!(child instanceof GroupNode) || this.userData.isHidden(child, this.node)) {
                 continue;
-            } else if (hasCurrent && node instanceof GroupNode && !this.userData.isHidden(node, this.node)) {
-                return node;
             }
+            out.push(child);
+        }
+        return out;
+    }
+
+    getCurrentSection() {
+        let sections = this.getSections();
+        if (sections && sections.length > 0 && !this.state.section) {
+            return sections[0];
+        }
+        for (let i in sections) {
+            if (sections[i].uid == this.state.section) { return sections[i]; }
         }
         return null;
     }
 
-    /**
-     * Get decision group for previous section.
-     * @return {GroupNode|null}
-     */
-    getPreviousSection() {
-        if (this.node.type != TREE_FORM) {
-            return null;
+    renderSectionNavigation() {
+        let sections = this.getSections();
+        if (!sections || sections.length < 2) { return null; }
+        let out = [];
+        for (let i in sections) {
+            let section = sections[i];
+            out.push(
+                <div
+                    key={this.node.uid + '-section-' + section.uid}
+                    className={'section-nav-item' + (section.uid == this.getCurrentSection()?.uid ? ' active' : '')}
+                >
+                    <a href='#' data-section={section.uid} onClick={this.onSection}>{section.label}</a>
+                </div>
+            )
         }
-        let currentSection = this.getCurrentSection();
-        if (!currentSection) {
-            return null;
-        }
-        let lastSection = null;
-        for (let i in this.node.children) {
-            let node = this.node.children[i];
-            if (node.uid == currentSection.uid) {
-                return lastSection;
-            } else if (node instanceof GroupNode && !this.userData.isHidden(node, this.node)) {
-                lastSection = node;
-            }
-        }
-        return lastSection;
+        return out;
     }
 
-    renderOptions() {
-        let out = [];
-        let backBtnClass = `btn-back${(this.node.previous || this.getPreviousSection()) ? '' : ' hidden'}`
-        out.push(
-            <input key={this.node.uid + '-opt-back'} type='button' value='Back' disabled={this.state.disabled} className={backBtnClass} onClick={this.onBack} />
-        );
-        let nextBtnClass = `btn-next${(this.node.next || this.getNextSection()) ? '' : ' hidden'}${(this.node.next && !this.getNextSection()) ? ' btn-submit' : ''}`;
-        out.push(
-            <input key={this.node.uid + '-opt-next'} type='button' disabled={this.state.disabled} value='Next' className={nextBtnClass} onClick={this.onNext} />
-        );
-        switch (this.node.type.toLowerCase()) {
-            case TREE_DOCUMENT: {
-                out.push(
-                    <input key={this.node.uid + '-opt-pdf'} type='button' value='Download PDF' disabled={this.state.disabled} className='btn-pdf' onClick={this.onPdf} />
-                );
-                break;
-            }
-            case TREE_FORM: {
-                out.push(
-                    <input key={this.node.uid + '-opt-submit'} type='submit' disabled={this.state.disabled} value='Save' />
-                );
-                break;
+    renderSectionChildren() {
+        let currentSection = this.getCurrentSection();
+        if (!currentSection) { return this.renderChildren(); }
+        let childTypes = this.availableChildTypes();
+        for (let i in childTypes) {
+            let Component = childTypes[i];
+            if (Component.getTypeName() == currentSection.constructor.getTypeName()) {
+                return <Component
+                    key={this.userData.uid + '_' + currentSection.uid} 
+                    node={currentSection}
+                    root={this.node}
+                    callback={this.onUpdateCallback}
+                    userData={this.userData}
+                    readOnly={this.readOnly}
+                    matrix={this.matrix}
+                    level={this.level+1}
+                />;
             }
         }
-        let addOpt = function(label, callback) {
-            out.push(
-                <input key={this.node.uid + '-opt-custom-' + md5(label)} type='button' value={label} disabled={this.state.disabled} className='btn-custom' onClick={callback} />
-            );
-        };
-        addOpt = addOpt.bind(this);
-        Events.dispatch('render_options', {
-            node: this.node,
-            add: addOpt
-        });
-        return out;
     }
 
     /**
      * {@inheritdoc}
      */
-    render() {
-        return null;
-        // render current section only
-        let renderSection = null;
-        let renderParams = {
-            userData: this.userData,
-            checkValidation: this.checkValidation,
-            readOnly: this.readOnly,
-            embeds: typeof this.node.embeds != 'undefined' ? this.node.embeds : null
-        }
-        for (let i in this.node.children) {
-            let obj = this.node.children[i];
-            if (!this.state.section || this.state.section == obj.uid) {
-                renderSection = Renderer.render(obj, renderParams);
-                break;
-            }
-        }
-        switch (this.node.type.toLowerCase()) {
-            case TREE_DOCUMENT: {
-                return <div className={this.getClass()} id={this.getId()}>
-                    <div className='head'>
-                        <SectionNavigationComponent root={this.node} userData={this.userData} callback={this.onSection} />
-                    </div>
-                    {renderSection}
-                    <div className='options'>{this.renderOptions()}</div>
-                </div>;
-            }
-            default: {
-                let msgClass = 'message' + (this.state.message ? '' : ' hidden');
-                return <div className={this.getClass()} id={this.getId()}>
-                    <div className='head'>
-                        <SectionNavigationComponent root={this.node} userData={this.userData} callback={this.onSection} />
-                    </div>
-                    <form action='' method='POST' encType='multipart/form-data' onSubmit={this.onSubmit}>
-                        {renderSection}
-                        <div className={msgClass}>{this.state.message}</div>
-                        <div className='options'>{this.renderOptions()}</div>
-                    </form>
-                </div>;                
-            }
-        }
+     render() {
+        if (!(this.node instanceof RootNode)) { return null; }
+        return <div className={'tree-node tree-' + this.constructor.getTypeName()}>
+            <div className='tree-content'>
+                <div className='section-navigation'>{this.renderSectionNavigation()}</div>
+            </div>
+            <div className='tree-children pure-form pure-form-stacked'>{this.renderSectionChildren()}</div>
+        </div>;
     }
 
 }

@@ -1,8 +1,9 @@
-import { faBackward } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_BACK, ERR_NOT_FOUND, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEXT, ERR_NOT_FOUND, TREE_FORM } from '../../config';
 import JsonConverter from '../../converters/json';
+import UserData from '../../user_data';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
 import RootNodeComponent from '../nodes/root';
 import BasePageComponent from './base';
@@ -11,6 +12,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
+        this.userData = new UserData;
         this.state.root = null;
         this.state.version = null;
         this.state.tree = null;
@@ -79,12 +81,15 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         }
         return <div className='page submission-edit'>
             <h1 className='title'>{this.state.root.label}</h1>
-            <TreeVersionInfoComponent treeversion={this.state.version} />
+            <TreeVersionInfoComponent treeversion={this.state.version} showstate={false} />
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
             </div>
             <section>
-                
+                <RootNodeComponent node={this.state.tree} userData={this.userData} />
+                <div className='options'>
+                    {this.renderCallbackButton(BTN_NEXT, null, faForward)}
+                </div>
             </section>
         </div>;
     }

@@ -3,7 +3,7 @@ import React from 'react';
 import UserData from '../../user_data';
 import RuleEngine from '../../rule_engine';
 import RootNode from '../../nodes/root';
-import QuestionNode, { DECISION_FORM_TYPE_TEXT } from '../../nodes/question';
+import QuestionNode, { FIELD_TEXT } from '../../nodes/question';
 import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 
 const TEST_QUESTION_UID = 'TEST_QUESTION';
@@ -49,7 +49,7 @@ export default class RuleTesterComponent extends React.Component {
         root.uid = RootNode.generateUid();
         let question = new QuestionNode;
         question.uid = TEST_QUESTION_UID;
-        question.type = DECISION_FORM_TYPE_TEXT;
+        question.type = FIELD_TEXT;
         root.addChild(question);
         let rule = new RuleNode;
         rule.uid = TEST_RULE_UID;

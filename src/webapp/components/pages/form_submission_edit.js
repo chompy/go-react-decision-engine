@@ -71,6 +71,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
      */
     onClickBack(e) {
         e.preventDefault();
+        window.history.back();
     }
 
     render() {
@@ -87,9 +88,6 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             </div>
             <section>
                 <RootNodeComponent node={this.state.tree} userData={this.userData} />
-                <div className='options'>
-                    {this.renderCallbackButton(BTN_NEXT, null, faForward)}
-                </div>
             </section>
         </div>;
     }

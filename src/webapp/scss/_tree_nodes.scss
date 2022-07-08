@@ -1,7 +1,5 @@
 .tree-node.tree-root {
 
-    border-bottom: 1px solid $page-section-divide;
-    margin-bottom: 15px;
     min-height: 350px;
 
     .section-navigation {
@@ -13,7 +11,9 @@
         .section-nav-item {
             display: inline-block;
             margin: 0 25px;
+            color: #fff;
             counter-increment: number;
+            cursor: pointer;
             &.active {
                 font-weight: bold;
             }
@@ -61,6 +61,25 @@
         input[type=file] {
             margin-top: 10px;
         }
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            li {
+                background-color: $alert-err-bg;
+                color: $alert-err-fg;
+                padding: 10px;
+                margin-top: 10px;
+                &:first-of-type {
+                    margin-top: 0;
+                }
+            }
+        }
+    }
+
+    .options {
+        border-top: 1px solid $page-section-divide;
+        padding-top: 15px;        
     }
 
 }

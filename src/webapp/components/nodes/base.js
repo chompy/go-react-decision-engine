@@ -23,6 +23,7 @@ export default class BaseNodeComponent extends React.Component {
             visible: !this.userData.isHidden(this.node, null, this.matrix)
         };
         this.rules = [];
+        this.checkValidation = false;
         this.onUpdateCallback = this.onUpdateCallback.bind(this);
         this.onRootUpdate = this.onRootUpdate.bind(this);
     }
@@ -83,16 +84,28 @@ export default class BaseNodeComponent extends React.Component {
         if (this.node.hasRuleOfType(RULE_TYPE_VISIBILITY)) {
             this.userData.setHidden(this.node, true, this.matrix);
         }
+        if (this.node.hasRuleOfType(RULE_TYPE_VALIDATION)) {
+            this.setState({messages: []});
+        }
         // evaluate rules
         for (let i in this.rules) {
             let ruleEngine = this.rules[i];
+            if (!this.checkValidation && ruleEngine.rule.type == RULE_TYPE_VALIDATION) {
+                continue;
+            }
             let res = ruleEngine.evaluate();
             switch (ruleEngine.rule.type) {
                 case RULE_TYPE_VALIDATION: {
                     if (!res.results) {
                         this.userData.addValidationMessage(
                             res.parent, res.message, res.matrixId
-                        )
+                        );
+                        this.setState(function(state, props) {
+                            let newValue = [ ...state.messages, res.message];
+                            return {
+                                messages: newValue
+                            };
+                        });
                     }
                     break;
                 }

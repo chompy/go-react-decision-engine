@@ -13,6 +13,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         this.state.disabled = false;
         this.state.answers = this.userData.getQuestionAnswers(this.node, this.matrix);
         this.state.messages = [];
+        this.checkValidation = this.state.answers.length > 0;
         this.onChange = this.onChange.bind(this);
         this.onFileDelete = this.onFileDelete.bind(this);
     }
@@ -82,6 +83,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
      * @param {Event} e 
      */
     onChange(e) {
+        this.checkValidation = true;
         switch (this.node.type) {
             case FIELD_TEXT: {
                 this.userData.resetAnswers(this.node, this.matrix);
@@ -329,7 +331,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
             <div className='tree-content pure-control-group'>
                 <label>{this.node?.label}</label>
                 {this.renderField()}
-                <div className={'messages' + (messages.length > 0 ? '' : ' hidden')}>{messages}</div>
+                <ul className={'messages' + (messages.length > 0 ? '' : ' hidden')}>{messages}</ul>
             </div>
         </div>;
     }

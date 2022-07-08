@@ -15,6 +15,8 @@ type FormSubmission struct {
 	FormID      DatabaseID          `bson:"form_id" json:"form_id"`
 	FormVersion int                 `bson:"form_version" json:"form_version"`
 	Answers     map[string][]string `bson:"answers" json:"answers"`
+	Valid       bool                `bson:"valid" json:"valid"`
+	SaveCount   int                 `bson:"save_count" json:"save_count"`
 }
 
 func FetchFormSubmission(id string, user *User) (*FormSubmission, error) {

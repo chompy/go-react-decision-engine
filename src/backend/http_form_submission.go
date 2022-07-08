@@ -10,6 +10,7 @@ type HTTPFormSubmissionPayload struct {
 	FormID      string              `json:"form_id"`
 	FormVersion int                 `json:"form_version"`
 	Answers     map[string][]string `json:"answers"`
+	Valid       bool                `json:"valid"`
 }
 
 func HTTPFormSubmissionFetch(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +86,16 @@ func HTTPFormSubmissionStore(w http.ResponseWriter, r *http.Request) {
 		FormID:      DatabaseIDFromString(payload.FormID),
 		FormVersion: payload.FormVersion,
 		Answers:     payload.Answers,
+	}
+	if payload.ID != "" {
+		prevSubmission, err := FetchFormSubmission(payload.ID, user)
+		if err != nil {
+			HTTPSendError(w, err)
+			return
+		}
+		submission.SaveCount = prevSubmission.SaveCount + 1
+		submission.Creator = prevSubmission.Creator
+		submission.Created = prevSubmission.Created
 	}
 	// store
 	if err := submission.Store(user); err != nil {

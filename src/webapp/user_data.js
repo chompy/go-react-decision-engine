@@ -12,7 +12,6 @@ export default class UserData {
         this.uid = uid;
         this.answers = {};
         this.hidden = [];
-        
         this.saveCount = 0;
         this.valid = true;
         this.questionValidationMessages = {};
@@ -319,8 +318,9 @@ export default class UserData {
         for (let quid in data.answers) {
             u.answers[quid] = data.answers[quid];
         }
-        u.saveCount = typeof data.saveCount != 'undefined' ? data.saveCount : 1;
-        u.extra = typeof data.extra != 'undefined' ? data.extra : {};
+        u.saveCount = data?.save_count ? data.save_count : 0;
+        u.extra = data?.extra ? data.extra : {};
+        u.valid = data?.valid ? data.valid : false;
         u.loaded = true;
         return u
     }

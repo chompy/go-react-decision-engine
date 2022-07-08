@@ -1,5 +1,6 @@
 import React from 'react';
-import { TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEXT, TREE_FORM } from '../../config';
+import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
 import GroupNode from '../../nodes/group';
 import RootNode from '../../nodes/root';
 import BaseNodeComponent from './base';
@@ -7,6 +8,7 @@ import GroupNodeComponent from './group';
 import RuleEngine from '../../rule_engine';
 import Events from '../../events';
 import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 
@@ -74,7 +76,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
                 child.hasRuleOfType(RULE_TYPE_VISIBILITY)
             ) {
                 this.userData.setHidden(child, true, this.matrix);
-                console.log("TEST");
             }
         }
         super.evaluateRules();
@@ -155,6 +156,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
                 <div
                     key={this.node.uid + '-section-' + section.uid}
                     className={'section-nav-item' + (section.uid == this.getCurrentSection()?.uid ? ' active' : '')}
+                    data-section={section.uid} onClick={this.onSection}
                 >
                     <a href='#' data-section={section.uid} onClick={this.onSection}>{section.label}</a>
                 </div>
@@ -189,11 +191,47 @@ export default class RootNodeComponent extends BaseNodeComponent {
      */
      render() {
         if (!(this.node instanceof RootNode)) { return null; }
+
+        let options = [];
+        let sections = this.getSections();
+        let currentSection = this.getCurrentSection();
+        for (let i in sections) {
+            let thisSection = sections[i];
+            if (thisSection.uid == currentSection.uid) {
+                if (i > 0) {
+                    options.push(
+                        <button
+                            key='tree-btn-back'
+                            className='pure-button'
+                            onClick={this.onSection}
+                            data-section={sections[parseInt(i)-1].uid}
+                        >
+                            <FontAwesomeIcon icon={faBackward} /> {BTN_BACK} 
+                        </button>
+                    );
+                }
+                if (i < sections.length-1) {
+                    options.push(
+                        <button
+                            key='tree-btn-next'
+                            className='pure-button'
+                            onClick={this.onSection}
+                            data-section={sections[parseInt(i)+1].uid}
+                        >
+                            {BTN_NEXT} <FontAwesomeIcon icon={faForward} />
+                        </button>
+                    );
+                }
+                break;
+            }
+        }
+
         return <div className={'tree-node tree-' + this.constructor.getTypeName()}>
             <div className='tree-content'>
                 <div className='section-navigation'>{this.renderSectionNavigation()}</div>
             </div>
             <div className='tree-children pure-form pure-form-stacked'>{this.renderSectionChildren()}</div>
+            <div className='options'>{options}</div>            
         </div>;
     }
 

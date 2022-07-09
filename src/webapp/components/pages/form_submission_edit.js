@@ -66,6 +66,15 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         this.setTitle(this.state.root.label);
     }
 
+    onUpdate() {
+        console.log('update');
+
+    }
+
+    onSave() {
+        console.log('save');
+    }
+
     /**
      * @param {Event} e 
      */
@@ -87,7 +96,12 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
             </div>
             <section>
-                <RootNodeComponent node={this.state.tree} userData={this.userData} />
+                <RootNodeComponent
+                    node={this.state.tree}
+                    userData={this.userData} 
+                    onUpdate={this.onUpdate}
+                    onSave={this.onSave}
+                />
             </section>
         </div>;
     }

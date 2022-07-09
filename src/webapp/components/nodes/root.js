@@ -1,51 +1,32 @@
 import React from 'react';
-import { BTN_BACK, BTN_NEXT, TREE_FORM } from '../../config';
-import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons';
+import { BTN_BACK, BTN_NEXT, BTN_SAVE, TREE_FORM } from '../../config';
+import { faBackward, faFloppyDisk, faForward, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import GroupNode from '../../nodes/group';
 import RootNode from '../../nodes/root';
 import BaseNodeComponent from './base';
 import GroupNodeComponent from './group';
-import RuleEngine from '../../rule_engine';
 import Events from '../../events';
-import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { RULE_TYPE_VALIDATION } from '../../nodes/rule';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 
     constructor(props) {
         super(props);
+        this.saveCallback = props?.onSave;
         this.state.section = null;
+        this.state.validationErrorCount = 0;
         this.onSection = this.onSection.bind(this);
+        this.onSave = this.onSave.bind(this);
     }
 
     /**
      * {@inheritDoc}
      */
     componentDidMount() {
-        let hasCompiledRules = this.rules.length > 0;
         super.componentDidMount();
-        // compile rules for sections
-        if (!hasCompiledRules) {
-            for (let i in this.node.children) {
-                let child = this.node.children[i];
-                if (child instanceof GroupNode) {
-                    for (let j in child.children) {
-                        let rule = child.children[j];
-                        if (rule instanceof RuleNode) {
-                            let ruleEngine = new RuleEngine;
-                            ruleEngine.matrixId = this.matrix;
-                            ruleEngine.setRootNode(this.node);
-                            ruleEngine.setUserData(this.userData);
-                            ruleEngine.setRuleNode(rule);
-                            this.rules.push(ruleEngine);
-                        }
-                    }
-                }
-            }
-            if (this.rules.length > 0) {
-                this.evaluateRules();
-            }
-        }
+        this.rules = this.compileRules();
+        this.evaluateRules();
     }
 
     /**
@@ -68,28 +49,38 @@ export default class RootNodeComponent extends BaseNodeComponent {
     /**
      * {@inheritdoc}
      */
-    evaluateRules() {
-        for (let i in this.node.children) {
-            let child = this.node.children[i];
-            if (
-                child instanceof GroupNode &&
-                child.hasRuleOfType(RULE_TYPE_VISIBILITY)
-            ) {
-                this.userData.setHidden(child, true, this.matrix);
-            }
-        }
-        super.evaluateRules();
+    onUpdateCallback(node, matrix) {
+        this.evaluateRules();
+        super.onUpdateCallback(node, matrix);
     }
 
     /**
      * {@inheritdoc}
      */
-    onUpdateCallback(node, matrix) {
-        super.onUpdateCallback(node, matrix);
-        Events.dispatch('tree-root-update', {
-            node: node,
-            matrix: matrix
-        });
+    onPreRuleEvaluation(e) {
+        super.onPreRuleEvaluation(e);
+        // reset the validation error counter before rule evaluation
+        this.setState({validationErrorCount: 0});
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    onRuleEvaluation(e) {
+        super.onRuleEvaluation(e);
+        // check for all invalid fields that have input and increment the
+        // validation error counter
+        let results = e.detail;
+        if (
+            results.rule.type == RULE_TYPE_VALIDATION &&
+            !results.results &&
+            this.userData.hasInput(results.parent, results.matrixId)
+        ) {
+            this.setState(function(state, props) {
+                let newValue = state.validationErrorCount + 1;
+                return { validationErrorCount: newValue };
+            });
+        }
     }
 
     /**
@@ -103,7 +94,24 @@ export default class RootNodeComponent extends BaseNodeComponent {
             this.setState({section: null});    
             return;
         }
-        this.setState({section: value});
+        let stateUpdateCallback = function() {
+            this.evaluateRules();
+        };
+        stateUpdateCallback = stateUpdateCallback.bind(this);
+        this.setState({section: value}, stateUpdateCallback);
+    }
+
+    /**
+     * Fires when save button is clicked. (Re)enable form validation and
+     * fire save callback.
+     * @param {Event} e 
+     */
+    onSave(e) {
+        e.preventDefault();
+        // flag all questions as have user input
+        this.userData.setUserInputAll();
+        this.evaluateRules();
+        if (this.saveCallback) { this.saveCallback(this.node, this.userData); }
     }
 
     /**
@@ -176,7 +184,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
                     key={this.userData.uid + '_' + currentSection.uid} 
                     node={currentSection}
                     root={this.node}
-                    callback={this.onUpdateCallback}
+                    onUpdate={this.onUpdateCallback}
                     userData={this.userData}
                     readOnly={this.readOnly}
                     matrix={this.matrix}
@@ -189,10 +197,20 @@ export default class RootNodeComponent extends BaseNodeComponent {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         if (!(this.node instanceof RootNode)) { return null; }
-
         let options = [];
+        if (this.saveCallback) {
+            options.push(
+                <button
+                    key='tree-btn-save'
+                    className='pure-button'
+                    onClick={this.onSave}
+                >
+                    {BTN_SAVE} <FontAwesomeIcon icon={faFloppyDisk} />
+                </button>                
+            );       
+        }
         let sections = this.getSections();
         let currentSection = this.getCurrentSection();
         for (let i in sections) {
@@ -226,12 +244,24 @@ export default class RootNodeComponent extends BaseNodeComponent {
             }
         }
 
+        let validationMsg = null;
+        if (this.state.validationErrorCount) {
+            validationMsg = <span className='validation-count'>
+                <FontAwesomeIcon icon={faCircleXmark} />&nbsp;
+                {this.state.validationErrorCount}
+                &nbsp;issue(s) found.
+            </span>;
+        }
+
         return <div className={'tree-node tree-' + this.constructor.getTypeName()}>
             <div className='tree-content'>
                 <div className='section-navigation'>{this.renderSectionNavigation()}</div>
             </div>
             <div className='tree-children pure-form pure-form-stacked'>{this.renderSectionChildren()}</div>
-            <div className='options'>{options}</div>            
+            <div className='options'>
+                <div className='left'>{validationMsg}</div>
+                <div className='right'>{options}</div>
+            </div>
         </div>;
     }
 

@@ -3,8 +3,7 @@ import AnswerNode from '../../nodes/answer';
 import QuestionNode, { FIELD_CHOICE, FIELD_DROPDOWN, FIELD_TEXT, FIELD_UPLOAD } from '../../nodes/question';
 import BaseNodeComponent from './base';
 import QuestionFileComponent from '../question_file';
-import RuleEngine from '../../rule_engine';
-import RuleNode, { RULE_TYPE_VISIBILITY } from '../../nodes/rule';
+import Events from '../../events';
 
 export default class QuestionNodeComponent extends BaseNodeComponent {
 
@@ -13,39 +12,9 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         this.state.disabled = false;
         this.state.answers = this.userData.getQuestionAnswers(this.node, this.matrix);
         this.state.messages = [];
-        this.checkValidation = this.state.answers.length > 0;
+        this.state.showValidation = this.userData.hasInput(this.node, this.matrix);
         this.onChange = this.onChange.bind(this);
         this.onFileDelete = this.onFileDelete.bind(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    componentDidMount() {
-        let hasCompiledRules = this.rules.length > 0;
-        super.componentDidMount();
-        // compile rules for answers
-        if (!hasCompiledRules) {
-            for (let i in this.node.children) {
-                let child = this.node.children[i];
-                if (child instanceof AnswerNode) {
-                    for (let j in child.children) {
-                        let rule = child.children[j];
-                        if (rule instanceof RuleNode) {
-                            let ruleEngine = new RuleEngine;
-                            ruleEngine.matrixId = this.matrix;
-                            ruleEngine.setRootNode(this.root);
-                            ruleEngine.setUserData(this.userData);
-                            ruleEngine.setRuleNode(rule);
-                            this.rules.push(ruleEngine);
-                        }
-                    }
-                }
-            }
-            if (this.rules.length > 0) {
-                this.evaluateRules();
-            }
-        }
     }
 
     /**
@@ -66,28 +35,22 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
     /**
      * {@inheritdoc}
      */
-    evaluateRules() {
-        for (let i in this.node.children) {
-            let child = this.node.children[i];
-            if (
-                child instanceof AnswerNode &&
-                child.hasRuleOfType(RULE_TYPE_VISIBILITY)
-            ) {
-                this.userData.setHidden(child, true, this.matrix);
-            }
+    onRuleEvaluation(e) {
+        if (this.userData.hasInput(this.node, this.matrix)) {
+            this.setState({showValidation: true});
         }
-        super.evaluateRules();
+        super.onRuleEvaluation(e);
     }
 
     /**
      * @param {Event} e 
      */
     onChange(e) {
-        this.checkValidation = true;
         switch (this.node.type) {
             case FIELD_TEXT: {
                 this.userData.resetAnswers(this.node, this.matrix);
                 this.userData.addAnswer(this.node, e.target.value, this.matrix);
+                this.setState({ answers: [e.target.value], showValidation: true });
                 break;
             }
             case FIELD_CHOICE: {
@@ -101,7 +64,8 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                     );
                 }
                 this.setState({
-                    answers: this.userData.getQuestionAnswers(this.node, this.matrix)
+                    answers: this.userData.getQuestionAnswers(this.node, this.matrix),
+                    showValidation: true
                 });
                 break;
             }
@@ -113,7 +77,8 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                     }
                 }
                 this.setState({
-                    answers: this.userData.getQuestionAnswers(this.node, this.matrix)
+                    answers: this.userData.getQuestionAnswers(this.node, this.matrix),
+                    showValidation: true
                 });
                 break;                
             }
@@ -128,7 +93,8 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                         let answer = fileName + '|' + fileType + '|' + data;
                         this.userData.addAnswer(this.node, answer, this.matrix);
                         this.setState({
-                            answers: this.userData.getQuestionAnswers(this.node, this.matrix)
+                            answers: this.userData.getQuestionAnswers(this.node, this.matrix),
+                            showValidation: true
                         });
                     };
                     reader.onload = reader.onload.bind(this);
@@ -140,7 +106,8 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                 break;
             }
         }
-        if (this.callback) { this.callback(this.node, this.matrix); }
+        this.userData.setUserInput(this.node, true, this.matrix);
+        if (this.updateCallback) { this.updateCallback(this.node, this.matrix); }
     }
 
     /**
@@ -152,6 +119,13 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         this.setState({
             answers: this.userData.getQuestionAnswers(this.node, this.matrix)
         });
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onFormSave(e) {
+        this.setState({ showValidation: true });
     }
 
     /**
@@ -252,7 +226,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                         disabled={this.state.disabled}
                         rows={this.node.textLines}
                         onChange={this.onChange}
-                        value={this.state.textInput}
+                        value={this.state.answers.length > 0 ? this.state.answers[0] : ''}
                     />;
                 }
                 return <input
@@ -261,7 +235,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                     id={fieldId}
                     name={this.node.uid}
                     disabled={this.state.disabled}
-                    value={this.state.textInput}
+                    value={this.state.answers.length > 0 ? this.state.answers[0] : ''}
                     onChange={this.onChange}
                 />;
             }
@@ -321,11 +295,15 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
             this.contentHtml = this.parseShortcode(this.node.contentEdit);
         }
         let messages = [];
-        for (let i in this.state.messages) {
-            let message = this.state.messages[i];
-            messages.push(
-                <li key={this.node.uid + '_' + message}>{message}</li>
-            );
+        if (this.state.showValidation) {
+            for (let i in this.state.messages) {
+                let message = this.state.messages[i];
+                if (message) {
+                    messages.push(
+                        <li key={this.node.uid + '_' + message}>{message}</li>
+                    );
+                }
+            }
         }
         return <div className={this.getClass()}>
             <div className='tree-content pure-control-group'>

@@ -2,6 +2,10 @@ import BaseNode from './nodes/base.js';
 import QuestionNode from './nodes/question.js';
 import AnswerNode from './nodes/answer.js';
 
+const FLAG_HIDDEN = 'hidden';
+const FLAG_USER_INPUT = 'user_input';
+const FLAG_USER_INPUT_ALL = '__ALL';
+
 /**
  * User specific decision engine data. Contains answers
  * to questions.
@@ -15,6 +19,7 @@ export default class UserData {
         this.saveCount = 0;
         this.valid = true;
         this.questionValidationMessages = {};
+        this.flags = {};
         this.loaded = false;
         this.extra = {};
     }
@@ -201,26 +206,49 @@ export default class UserData {
     }
 
     /**
-     * Flag node as hidden.
-     * @param {BaseNode} node 
-     * @param {boolean} state 
-     * @returns 
+     * Set a flag.
+     * @param {String} name 
+     * @param {String} id 
+     * @param {Boolean} state 
      */
-    setHidden(node, state, matrixId) {
-        if (!(node instanceof BaseNode)) {
-            return;
-        }
-        let key = node.uid + '_' + (matrixId ? matrixId : '');
+    setFlag(name, id, state) {
+        if (id instanceof BaseNode) { id = id.uid; }
+        if (!(name in this.flags)) { this.flags[name] = []; }
         if (state) {
-            if (this.hidden.indexOf(key) == -1) {
-                this.hidden.push(key);
+            if (this.flags[name].indexOf(id) == -1) {
+                this.flags[name].push(id);
             }
             return;
         }
-        let index = this.hidden.indexOf(key);
+        let index = this.flags[name].indexOf(id);
         if (index > -1) {
-            this.hidden.splice(index, 1);
+            this.flags[name].splice(index, 1);
         }
+    }
+
+    /**
+     * Check a flag.
+     * @param {String} name 
+     * @param {String} id 
+     * @returns {Boolean}
+     */
+    hasFlag(name, id) {
+        if (id instanceof BaseNode) { id = id.uid; }
+        if (!(name in this.flags)) { this.flags[name] = []; }  
+        if (this.flags[name].indexOf(id) != -1) {
+            return true;
+        }
+    }
+
+    /**
+     * Flag node as hidden.
+     * @param {BaseNode} node 
+     * @param {boolean} state 
+     */
+    setHidden(node, state, matrixId) {
+        if (!(node instanceof BaseNode)) { return; }
+        let key = node.uid + '_' + (matrixId ? matrixId : '');
+        this.setFlag(FLAG_HIDDEN, key, state);
     }
 
     /**
@@ -231,19 +259,15 @@ export default class UserData {
      * @returns {boolean}
      */
     isHidden(node, root, matrixId) {
-        if (!(node instanceof BaseNode)) {
-            return false;
-        }
+        if (!(node instanceof BaseNode)) { return false; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
-        if (this.hidden.indexOf(key) != -1) {
-            return true;
-        }
+        if (this.hasFlag(FLAG_HIDDEN, key)) { return true; }
         if (root && root instanceof BaseNode) {
             let parent = node;
             while (parent = parent.getParent(root)) {
                 if (
-                    this.hidden.indexOf(parent.uid + '_' + (matrixId ? matrixId : '')) != -1 || 
-                    this.hidden.indexOf(parent.uid + '_') != -1
+                    this.hasFlag(FLAG_HIDDEN, parent.uid + '_' + (matrixId ? matrixId : '')) ||
+                    this.hasFlag(FLAG_HIDDEN, parent.uid + '_')
                 ) {
                     return true;
                 }
@@ -252,6 +276,39 @@ export default class UserData {
         return false;
     }
     
+    /**
+     * Flag question as having user input.
+     * @param {QuestionNode} node 
+     * @param {boolean} state 
+     * @returns 
+     */
+    setUserInput(node, state, matrixId) {
+        if (!(node instanceof QuestionNode)) { return; }
+        let key = node.uid + '_' + (matrixId ? matrixId : '');
+        this.setFlag(FLAG_USER_INPUT, key, state);
+    }
+
+    /**
+     * Flag all questions as having user input.
+     */
+    setUserInputAll() {
+        this.setFlag(FLAG_USER_INPUT, FLAG_USER_INPUT_ALL, true);
+    }
+
+    /**
+     * Check if node is flagged as having user input.
+     * @param {BaseNode} node 
+     * @param {string} matrixId
+     * @returns {boolean}
+     */
+    hasInput(node, matrixId) {
+        if (!(node instanceof QuestionNode)) { return false; }
+        let key = node.uid + '_' + (matrixId ? matrixId : '');
+        if (this.hasFlag(FLAG_USER_INPUT, key)) { return true; }
+        if (this.hasFlag(FLAG_USER_INPUT, FLAG_USER_INPUT_ALL)) { return true; }
+        return this.saveCount > 0 || this.getQuestionAnswers(node, matrixId).length > 0;
+    }
+
     /**
      * @param {QuestionNode} question 
      * @param {string} matrixId

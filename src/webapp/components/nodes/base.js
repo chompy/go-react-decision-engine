@@ -6,13 +6,14 @@ import UserData from '../../user_data';
 import RootNode from '../../nodes/root';
 import RuleEngine from '../../rule_engine';
 import RuleNode from '../../nodes/rule';
+import MatrixNode from '../../nodes/matrix';
 import Events from '../../events';
 
 export default class BaseNodeComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.callback = props?.callback;
+        this.updateCallback = props?.onUpdate;
         this.node = props?.node ? props?.node : new RootNode;
         this.root = props?.root ? props?.root : this.node;
         this.userData = props?.userData ? props?.userData : new UserData;
@@ -25,38 +26,24 @@ export default class BaseNodeComponent extends React.Component {
         this.rules = [];
         this.checkValidation = false;
         this.onUpdateCallback = this.onUpdateCallback.bind(this);
-        this.onRootUpdate = this.onRootUpdate.bind(this);
+        this.onPreRuleEvaluation = this.onPreRuleEvaluation.bind(this);
+        this.onRuleEvaluation = this.onRuleEvaluation.bind(this);
     }
 
     /**
      * {@inheritdoc}
      */
     componentDidMount() {
-        // compile rules
-        if (this.rules.length == 0) {
-            for (let i in this.node.children) {
-                let child = this.node.children[i];
-                if (child instanceof RuleNode) {
-                    let rule = new RuleEngine;
-                    rule.matrixId = this.matrix;
-                    rule.setRootNode(this.root);
-                    rule.setUserData(this.userData);
-                    rule.setRuleNode(child);
-                    this.rules.push(rule);
-                }
-            }
-            if (this.rules.length > 0) {
-                this.evaluateRules();
-            }
-        }
-        Events.listen('tree-root-update', this.onRootUpdate);
+        Events.listen('pre-rule-evaluation', this.onPreRuleEvaluation);
+        Events.listen('rule-evaluation', this.onRuleEvaluation);
     }
 
     /**
      * {@inheritdoc}
      */
     componentWillUnmount() {
-        Events.remove('tree-root-update', this.onRootUpdate);
+        Events.remove('pre-rule-evaluation', this.onPreRuleEvaluation);
+        Events.remove('rule-evaluation', this.onRuleEvaluation);
     }
 
     /**
@@ -64,14 +51,84 @@ export default class BaseNodeComponent extends React.Component {
      * @param {String} matrix
      */
     onUpdateCallback(node, matrix) {
-        if (this.callback) { this.callback(node, matrix); }
+        if (this.updateCallback) { this.updateCallback(node, matrix); }
     }
 
     /**
      * @param {Event} e 
      */
-    onRootUpdate(e) {
-        this.evaluateRules();
+    onPreRuleEvaluation(e) {
+        this.setState({
+            messages: [],
+            visible: !this.userData.isHidden(this.node, null, this.matrix)
+        });
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onRuleEvaluation(e) {
+        let results = e.detail;
+        if (
+            !results?.rule || !results?.parent ||
+            this.node.uid != results.parent.uid || this.matrix != results.matridId
+        ) {
+            return;
+        }
+        switch (results.rule.type) {
+            case RULE_TYPE_VALIDATION: {
+                if (!results.results && results.message) {
+                    this.setState(function(state, props) {
+                        let newValue = [ ...state.messages, results.message];
+                        return { messages: newValue };
+                    });
+                }           
+                break;
+            }
+            default: {
+                this.setState({
+                    visible: !this.userData.isHidden(this.node, null, this.matrix)
+                });
+                break;
+            }
+        }
+    }
+
+    /**
+     * Compile all rules.
+     * @returns {Array}
+     */
+    compileRules() {
+        let compileChildRules = function(node, matrixId) {
+            let out = [];
+            // handle matrix
+            if (node instanceof MatrixNode) {
+                let matrixIds = this.userData.findMatrixIds(node);
+                for (let i in matrixIds) {
+                    let matrixId = matrixIds[i];
+                    for (let j in node.children) {
+                        out = out.concat(compileChildRules(node.children[j], matrixId));
+                    }
+                }
+                return out;
+            }
+            for (let i in node.children) {
+                let child = node.children[i];
+                if (child instanceof RuleNode) {
+                    let ruleEngine = new RuleEngine;
+                    ruleEngine.matrixId = matrixId;
+                    ruleEngine.setUserData(this.userData);
+                    ruleEngine.setRootNode(this.root);
+                    ruleEngine.setRuleNode(child);
+                    out.push(ruleEngine);
+                    continue;
+                }
+                out = out.concat(compileChildRules(child));
+            }
+            return out;
+        };
+        compileChildRules = compileChildRules.bind(this);
+        return compileChildRules(this.node);
     }
 
     /**
@@ -79,20 +136,23 @@ export default class BaseNodeComponent extends React.Component {
      */
     evaluateRules() {
         // reset validation
-        this.userData.resetValidationState(this.node);
-        // if there are visibility rules then this node should be hidden by default
-        if (this.node.hasRuleOfType(RULE_TYPE_VISIBILITY)) {
-            this.userData.setHidden(this.node, true, this.matrix);
+        this.userData.questionValidationMessages = {};
+        // hide nodes with visibility rules
+        for (let i in this.rules) {
+            /** @var RuleEngine */
+            let ruleEngine = this.rules[i];
+            if (!ruleEngine.rule.type || ruleEngine.rule.type == RULE_TYPE_VISIBILITY) {
+                let parent = ruleEngine.rule.getParent(this.root);
+                if (!parent) { continue; }
+                this.userData.setHidden(parent, true, ruleEngine.matrixId);
+            }
         }
-        if (this.node.hasRuleOfType(RULE_TYPE_VALIDATION)) {
-            this.setState({messages: []});
-        }
+        // fire 'pre' event
+        Events.dispatch('pre-rule-evaluation');
         // evaluate rules
         for (let i in this.rules) {
+            /** @var RuleEngine */
             let ruleEngine = this.rules[i];
-            if (!this.checkValidation && ruleEngine.rule.type == RULE_TYPE_VALIDATION) {
-                continue;
-            }
             let res = ruleEngine.evaluate();
             switch (ruleEngine.rule.type) {
                 case RULE_TYPE_VALIDATION: {
@@ -100,12 +160,7 @@ export default class BaseNodeComponent extends React.Component {
                         this.userData.addValidationMessage(
                             res.parent, res.message, res.matrixId
                         );
-                        this.setState(function(state, props) {
-                            let newValue = [ ...state.messages, res.message];
-                            return {
-                                messages: newValue
-                            };
-                        });
+                        this.userData.valid = false;
                     }
                     break;
                 }
@@ -116,6 +171,7 @@ export default class BaseNodeComponent extends React.Component {
                     break;
                 }
             }
+            Events.dispatch('rule-evaluation', res);
         }
         this.setState({visible: !this.userData.isHidden(this.node, this.root, this.matrix)});
     }
@@ -188,7 +244,7 @@ export default class BaseNodeComponent extends React.Component {
                             key={this.userData.uid + '_' + child.uid} 
                             node={child}
                             root={this.root}
-                            callback={this.onUpdateCallback}
+                            onUpdate={this.onUpdateCallback}
                             userData={this.userData}
                             readOnly={this.readOnly}
                             matrix={this.matrix}

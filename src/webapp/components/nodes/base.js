@@ -137,6 +137,7 @@ export default class BaseNodeComponent extends React.Component {
     evaluateRules() {
         // reset validation
         this.userData.questionValidationMessages = {};
+        this.userData.valid = true;
         // hide nodes with visibility rules
         for (let i in this.rules) {
             /** @var RuleEngine */

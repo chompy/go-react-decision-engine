@@ -1,11 +1,10 @@
 import React from 'react';
-import { BTN_BACK, BTN_NEXT, BTN_SAVE, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEXT, BTN_SAVE, MSG_ISSUES_FOUND, MSG_ISSUE_FOUND, TREE_FORM } from '../../config';
 import { faBackward, faFloppyDisk, faForward, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import GroupNode from '../../nodes/group';
 import RootNode from '../../nodes/root';
 import BaseNodeComponent from './base';
 import GroupNodeComponent from './group';
-import Events from '../../events';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RULE_TYPE_VALIDATION } from '../../nodes/rule';
 
@@ -243,16 +242,14 @@ export default class RootNodeComponent extends BaseNodeComponent {
                 break;
             }
         }
-
         let validationMsg = null;
         if (this.state.validationErrorCount) {
             validationMsg = <span className='validation-count'>
                 <FontAwesomeIcon icon={faCircleXmark} />&nbsp;
                 {this.state.validationErrorCount}
-                &nbsp;issue(s) found.
+                &nbsp;{this.state.validationErrorCount == 1 ? MSG_ISSUE_FOUND : MSG_ISSUES_FOUND}
             </span>;
         }
-
         return <div className={'tree-node tree-' + this.constructor.getTypeName()}>
             <div className='tree-content'>
                 <div className='section-navigation'>{this.renderSectionNavigation()}</div>

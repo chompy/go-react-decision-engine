@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBackward, faForward } from '@fortawesome/free-solid-svg-icons'
-import { BTN_BACK, BTN_GO, BTN_MORE, BTN_NEXT, MSG_NO_LIST_DATA } from "../../config";
+import { BTN_BACK, BTN_GO, BTN_MORE, BTN_NEXT, MSG_NO, MSG_NO_LIST_DATA, MSG_YES } from "../../config";
 import md5 from 'blueimp-md5';
 import BackendAPI from '../../api';
 import UserTimeComponent from './user_time';
@@ -133,6 +133,10 @@ export default class ApiTableComponent extends React.Component {
             case 'modified': {
                 let user = typeof data.modifier != 'undefined' ? data.modifier : '';
                 return <UserTimeComponent time={data[field]} user={user} />;
+            }
+            case 'valid': {
+                let valid = data?.valid;
+                return valid ? MSG_YES : MSG_NO;
             }
             default: {
                 return data[field];

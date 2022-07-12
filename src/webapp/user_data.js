@@ -12,12 +12,12 @@ const FLAG_USER_INPUT_ALL = '__ALL';
  */
 export default class UserData {
 
-    constructor(uid) {
-        this.uid = uid;
+    constructor(id) {
+        this.id = id;
         this.answers = {};
         this.hidden = [];
         this.saveCount = 0;
-        this.valid = true;
+        this.valid = false;
         this.questionValidationMessages = {};
         this.flags = {};
         this.loaded = false;
@@ -371,7 +371,7 @@ export default class UserData {
      * @return {UserData}
      */
     static importJSON(data) {
-        let u = new UserData(data.uid);
+        let u = new UserData(data.id);
         for (let quid in data.answers) {
             u.answers[quid] = data.answers[quid];
         }

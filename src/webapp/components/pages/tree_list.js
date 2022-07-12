@@ -2,7 +2,7 @@ import React from 'react';
 import { faBackward, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_NEW, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TREE_DOCUMENT, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEW, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TITLE_DOC_LIST, TREE_DOCUMENT, TREE_FORM } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import { message as msgPopup } from 'react-message-popup';
 import FormDashboardPageComponent from './form_dashboard';
@@ -49,7 +49,7 @@ export default class TreeListPageComponent extends BasePageComponent {
      */
     onTreeResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
-        this.title = 'Documents for "' + res.data.label + '"';
+        this.title = TITLE_DOC_LIST.replace('{label}', res.data.label);
         this.setLoaded();
         this.setTitle(this.title);
     }

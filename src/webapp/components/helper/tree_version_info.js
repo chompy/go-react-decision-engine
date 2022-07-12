@@ -10,24 +10,19 @@ export default class TreeVersionInfoComponent extends React.Component {
     }
 
     render() {
-        let verNo = typeof this.object.version != 'undefined' ? this.object.version : '?';
-        let state = typeof this.object.state != 'undefined' ? this.object.state : '?';
-        let created = typeof this.object.created != 'undefined' ? this.object.created : null;
-        let creator = typeof this.object.creator != 'undefined' ? this.object.creator : '';
-        let modified = typeof this.object.modified != 'undefined' ? this.object.modified : null;
-        let modifier = typeof this.object.modifier != 'undefined' ? this.object.modifier : '';
+        let verNo = this.object?.version ? this.object.version : '';
         return <div className='tree-version-info helper'>
-            <span className='version'>Version {verNo}</span>
+            <span className={'version' + (verNo ? '' : ' hidden')}>Version {verNo}</span>
             <span className={'state' + (this.showState ? '' : ' hidden')}>
-                {state}
+                {this.object?.state}
             </span>
             <span className='created'>
                 Created
-                <UserTimeComponent user={creator} time={created} />
+                <UserTimeComponent user={this.object?.creator} time={this.object?.created} />
             </span>
             <span className='modified'>
                 Modified
-                <UserTimeComponent user={modifier} time={modified} />
+                <UserTimeComponent user={this.object?.modifier} time={this.object?.modified} />
             </span>
         </div>;
     }

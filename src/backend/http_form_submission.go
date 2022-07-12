@@ -86,6 +86,7 @@ func HTTPFormSubmissionStore(w http.ResponseWriter, r *http.Request) {
 		FormID:      DatabaseIDFromString(payload.FormID),
 		FormVersion: payload.FormVersion,
 		Answers:     payload.Answers,
+		Valid:       payload.Valid,
 	}
 	if payload.ID != "" {
 		prevSubmission, err := FetchFormSubmission(payload.ID, user)

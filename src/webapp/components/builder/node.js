@@ -11,7 +11,7 @@ import BuilderFormComponent from './form';
 import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { MSG_CLIPBOARD } from '../../config';
+import { MSG_CLIPBOARD, TREE_DOCUMENT } from '../../config';
 
 const DROP_STATE_NONE = 0;
 const DROP_STATE_UP = 1;
@@ -455,6 +455,12 @@ export default class BuilderNodeComponent extends React.Component {
                 return {
                     'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
                 };
+        }
+        if (this.root.type == TREE_DOCUMENT) {
+            return {
+                'Content/Group': [GroupNode],
+                'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
+            };  
         }
         return {
             'Content/Group': [GroupNode],

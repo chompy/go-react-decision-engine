@@ -85,5 +85,5 @@ func (s *FormSubmission) Delete(user *User) error {
 	if err := checkDeletePermission(s, user); err != nil {
 		return err
 	}
-	return databaseDelete(TreeRoot{}, bson.M{"_id": s.ID})
+	return databaseDelete(FormSubmission{}, bson.M{"_id": s.ID})
 }

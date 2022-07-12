@@ -1,25 +1,12 @@
 import ErrorPageComponent from "./components/pages/error";
 import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import FormSubmissionEditPageComponent from "./components/pages/form_submission_edit";
+import FormSubmissionListPageComponent from "./components/pages/form_submission_list";
 import LoginPageComponent from "./components/pages/login";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
-
-
-/**
- * /login/{teamId}
- * /forms                           | List all forms for team.
- * /form/{id}/{version}             | Create submission of given version of form.
- * /documents/{id}                  | List documents for given form.
- * /tree/{id}                       | List versions for given tree.
- * /tree/{id}/{version}             | Edit given tree version.
- * /f/{id}
- * 
- * /form/{id}/v{version}
- */
-
 
 
 // Determines pages and page parameters from current URL path.
@@ -69,7 +56,7 @@ export default class PathResolver {
                         let submissionId = path[3].trim();
                         return {component: FormSubmissionEditPageComponent, team: teamId, id: formId, submission: submissionId};                        
                     }
-                    case 'edit': {
+                    case 'admin': {
                         if (path.length == 2) {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                         }
@@ -89,6 +76,16 @@ export default class PathResolver {
                                     return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                                 }
                                 let formId = path[3];
+                                if (path.length >= 5) {
+                                    switch (path[4]) {
+                                        case 'submissions': {
+                                            return {component: FormSubmissionListPageComponent, team: teamId, id: formId};
+                                        }
+                                        default: {
+                                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                        }
+                                    }
+                                }
                                 return {component: FormDashboardPageComponent, team: teamId, id: formId};
                             }
                             case 'tree': {
@@ -140,14 +137,17 @@ export default class PathResolver {
      */
     static setPathFromComponent(component, params) {
         let componentList = {
+            // public pages
             '{team}/login': LoginPageComponent,
-            '{team}/edit/docs/{id}': TreeListPageComponent,
-            '{team}/edit/forms': TreeListPageComponent,
-            '{team}/edit/form/{id}': FormDashboardPageComponent,
-            '{team}/edit/tree/{id}/v{version}': TreeVersionEditPageComponent,
-            '{team}/edit/tree/{id}': TreeVersionListPageComponent,
-            '{team}/form/{id}/{submission}': FormSubmissionEditPageComponent,
-            '{team}/form/{id}': FormSubmissionEditPageComponent
+            // normal user pages
+            '{team}/form/{id}': FormSubmissionEditPageComponent,            
+            // admin pages
+            '{team}/admin/docs/{id}': TreeListPageComponent,
+            '{team}/admin/forms': TreeListPageComponent,
+            '{team}/admin/form/{id}/submissions': FormSubmissionListPageComponent,
+            '{team}/admin/form/{id}': FormDashboardPageComponent,
+            '{team}/admin/tree/{id}/v{version}': TreeVersionEditPageComponent,
+            '{team}/admin/tree/{id}': TreeVersionListPageComponent
         };
         for (let path in componentList) {
             let tComp = componentList[path];

@@ -12,6 +12,7 @@ import TreeListPageComponent from './tree_list';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import FormSubmissionEditPageComponent from './form_submission_edit';
+import FormSubmissionListPageComponent from './form_submission_list';
 
 export default class FormDashboardPageComponent extends BasePageComponent {
 
@@ -150,13 +151,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         );
     }
 
-    /**
-     * @param {Event} e 
-     */
-    onClickNewSubmission(e) {
-        e.preventDefault();
-        this.gotoPage(FormSubmissionEditPageComponent, {id: this.state.form.id});
-    }
 
     /**
      * @param {Object} res 
@@ -186,6 +180,38 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         this.gotoPage(
             TreeVersionEditPageComponent, {id: this.state.published.root_id, version: this.state.published.version}
         );
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickNewSubmission(e) {
+        e.preventDefault();
+        BackendAPI.post(
+            'submission/store', {},
+            {
+                form_id: this.state.form.id,
+                form_version: this.state.published.version,
+                valid: false
+            },
+            this.onNewSubmissionResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onNewSubmissionResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
+        if (this.handleErrorResponse(res)) { return; }
+        this.gotoPage(FormSubmissionEditPageComponent, {id: res.data.id});
+    }
+
+    /**
+     * @param {Object} data 
+     */
+    onSelectSubmission(data) {
+        this.gotoPage(FormSubmissionEditPageComponent, {id: data.id});
     }
 
     /**
@@ -264,8 +290,8 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                         }}
                         endpoint='submission/list'
                         params={{form: this.state.form.id}}
-                        callback={this.onSelectFormVersion}
-                        seeMore={[TreeVersionListPageComponent, {form: this.state.form.id, type: TREE_DOCUMENT}]}
+                        callback={this.onSelectSubmission}
+                        seeMore={[FormSubmissionListPageComponent, {id: this.state.form.id}]}
                     />
                 </div>
 

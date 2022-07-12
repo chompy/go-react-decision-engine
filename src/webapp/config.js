@@ -27,6 +27,10 @@ export const BTN_NEW = 'New';
 export const BTN_MORE = 'See All ({count})';
 export const BTN_SAVE = 'Save';
 
+// page titles
+export const TITLE_DOC_LIST = 'Documents For "{label}'
+export const TITLE_FORM_SUBMISSION_LIST = 'Submissions For "{label}"';
+
 // generic messages
 export const MSG_LOGIN_SUCCESS = 'Login successful.';
 export const MSG_LOGOUT_SUCCESS = 'You have been logged out.';
@@ -41,3 +45,8 @@ export const MSG_SAVED = 'Saved.';
 export const MSG_DELETE_SUCCESS = '{name} was deleted.';
 export const MSG_COPY_SUCCESS = 'v{version} was copied.';
 export const MSG_NO_PUBLISHED = 'No published version found.';
+export const MSG_ISSUE_FOUND = 'issue found.';
+export const MSG_ISSUES_FOUND = 'issues found.';
+export const MSG_SUBMISSION_DELETED = 'Form submission was deleted.';
+export const MSG_YES = 'Yes';
+export const MSG_NO = 'No';

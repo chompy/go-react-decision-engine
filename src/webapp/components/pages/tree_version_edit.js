@@ -1,7 +1,7 @@
 import React from 'react';
-import { faBackward, faTrash, faEdit, faCopy, faCirclePlus, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faTrash, faCopy, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder/builder';
@@ -259,7 +259,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
             </div>
             <section>
-                <BuilderComponent node={this.state.tree} />
+                <BuilderComponent node={this.state.tree} type={this.state.root.type} />
             </section>
         </div>;
     }

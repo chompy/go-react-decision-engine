@@ -27,9 +27,10 @@ export default class BuilderNodeComponent extends React.Component {
             dropState: DROP_STATE_NONE,
             showAll: false
         }
-        this.root = typeof props.root == 'undefined' ? null : props.root;
-        this.parent = typeof props.parent == 'undefined' ? null : props.parent;
-        this.node = typeof props.node == 'undefined' ? null : props.node;
+        this.root = props?.root;
+        this.parent = props?.parent;
+        this.node = props?.node;
+        this.ruleNode = props?.ruleNode ? props.ruleNode : this.root;
         this.currentDragNode = null;
         this.onAddButton = this.onAddButton.bind(this);
         this.onBulkAddButton = this.onBulkAddButton.bind(this);
@@ -456,7 +457,7 @@ export default class BuilderNodeComponent extends React.Component {
                     'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
                 };
         }
-        if (this.root.type == TREE_DOCUMENT) {
+        if (this.root && this.root.type == TREE_DOCUMENT) {
             return {
                 'Content/Group': [GroupNode],
                 'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
@@ -497,7 +498,15 @@ export default class BuilderNodeComponent extends React.Component {
                 break;
             }
             let child = this.node.children[i];
-            children.push(<BuilderNodeComponent key={child.uid} root={this.root} node={child} parent={this.node} />);
+            children.push(
+                <BuilderNodeComponent
+                    key={child.uid}
+                    root={this.root}
+                    node={child}
+                    parent={this.node}
+                    ruleNode={this.ruleNode}
+                />
+            );
         }
         if (children.length > DEFAULT_SHOW_COUNT && this.state.showAll) {
             children.push(this.renderShowMore());
@@ -543,7 +552,7 @@ export default class BuilderNodeComponent extends React.Component {
                     </div>
                 </div>
                 <BuilderNodeTitleComponent node={this.node} />
-                <BuilderFormComponent node={this.node} root={this.root} />
+                <BuilderFormComponent node={this.node} root={this.root} ruleNode={this.ruleNode} />
             </div>
             <ul>{children}</ul>
         </li>;

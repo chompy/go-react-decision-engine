@@ -1,0 +1,13 @@
+.pdf-form {
+    .viewer {
+        display: inline-block;
+        width: 48%;
+        border: 1px solid $header-bg;
+        margin-right: 1%;
+    }
+    .editor {
+        display: inline-block;
+        width: 49%;
+        vertical-align: top;
+    }
+}

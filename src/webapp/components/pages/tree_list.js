@@ -127,7 +127,7 @@ export default class TreeListPageComponent extends BasePageComponent {
             backBtn = this.renderPageButton(BTN_BACK, FormDashboardPageComponent, {id: this.props.path.id}, faBackward);
         }
         return <div className='page form-list'>
-            <h1 className='page-title'>{this.title}</h1>
+            <h1 className='title'>{this.title}</h1>
             <div className='options top'>
                 {backBtn}
                 {this.renderCallbackButton(BTN_NEW, this.onClickNew, faCirclePlus)}

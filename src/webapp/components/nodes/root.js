@@ -250,7 +250,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
                 &nbsp;{this.state.validationErrorCount == 1 ? MSG_ISSUE_FOUND : MSG_ISSUES_FOUND}
             </span>;
         }
-        return <div className={'tree-node tree-' + this.constructor.getTypeName()}>
+        return <div className={'tree-node tree-' + this.constructor.getTypeName() + ' tree-' + this.node.type}>
             <div className='tree-content'>
                 <div className='section-navigation'>{this.renderSectionNavigation()}</div>
             </div>

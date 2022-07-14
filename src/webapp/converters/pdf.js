@@ -4,9 +4,10 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import Logger from '../logger.js';
 import UserData from '../user_data.js';
 import Events from '../events';
-import BaseNode from '../objects/base.js';
+import BaseNode from '../nodes/base.js';
 import BaseConverter from './base.js';
-import GroupNode from '../objects/group.js';
+import GroupNode from '../nodes/group.js';
+import shortcodeParser from '../lib/shortcode-parser.js';
 
 const PDF_FONT_SIZE_MULTIPLIER = .6;
 const PDF_BORDER_WIDTH_MULTIPLIER = .25;
@@ -325,9 +326,9 @@ export default class PdfConverter extends BaseConverter {
             innerElement.className = 'group_content' +
                 ' level-' + this.level + 
                 ' priority-' + this.priority +
-                (this.tags.length > 0 ? ' tag-' + this.tags.join(' tag-') : '')
+                (node.tags.length > 0 ? ' tag-' + node.tags.join(' tag-') : '')
             ;
-            innerElement.innerHTML = shortcode.parse(this.content);
+            innerElement.innerHTML = shortcodeParser.parse(node.content);
             element.appendChild(innerElement);
             Events.dispatch('to_pdf_make', {
                 node: this,
@@ -395,7 +396,7 @@ export default class PdfConverter extends BaseConverter {
             null,
             fonts,
             vfs
-        ).getBlob();
+        ).open();
         Logger.infoTime(`Generated PDF. [UID=${node.uid}]`, 'ccde_pdf');
         return out;
     }

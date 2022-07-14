@@ -6,8 +6,9 @@ export default class BuilderFormComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.node = props.node;
-        this.root = props.root;
+        this.node = props?.node;
+        this.root = props?.root;
+        this.ruleNode = props?.ruleNode ? props.ruleNode : this.node;
         this.state = {
             active: false
         }
@@ -47,7 +48,13 @@ export default class BuilderFormComponent extends React.Component {
         let fieldDefs = this.node.builderFields();
         for (let i in fieldDefs) {
             fields.push(
-                <BuilderFormField key={this.node.uid + '_field_' + i} node={this.node} root={this.root} field={fieldDefs[i]} />
+                <BuilderFormField
+                    key={this.node.uid + '_field_' + i}
+                    node={this.node}
+                    root={this.root}
+                    field={fieldDefs[i]}
+                    ruleNode={this.ruleNode}
+                />
             );
         }
         return <form className='active pure-form pure-form-stacked'>{fields}</form>;

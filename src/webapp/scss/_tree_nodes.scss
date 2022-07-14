@@ -1,7 +1,5 @@
 .tree-node.tree-root {
-
     min-height: 350px;
-
     .section-navigation {
         text-align: center;
         border-top: 1px solid $page-section-divide;
@@ -32,7 +30,6 @@
             }
         }
     }
-
     .tree-question {
         margin-bottom: 20px;
         .tree-content > label {
@@ -76,7 +73,6 @@
             }
         }
     }
-
     .options {
         border-top: 1px solid $page-section-divide;
         padding-top: 15px;
@@ -93,7 +89,16 @@
             text-align: right;
         }
     }
+}
 
+.tree-node.tree-root.tree-document {
+    .section-navigation {
+        border-top: none;
+        padding: 0;
+    }
+    .options {
+        border: none;
+    }
 }
 
 .page.submission-edit {

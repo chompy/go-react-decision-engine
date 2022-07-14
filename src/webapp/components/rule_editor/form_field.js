@@ -1,6 +1,6 @@
 
 import React from 'react';
-import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_OBJECT } from '../../rule_field';
+import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_NODE } from '../../rule_field';
 import BaseNode from '../../nodes/base';
 import { RULE_MODE_BUILDER } from '../rule_editor';
 import TypeaheadComponent from '../typeahead';
@@ -42,7 +42,7 @@ export default class RuleEditorFormFieldComponent extends React.Component {
      */
     onChange(e) {
         switch (this.field.type) {
-            case RULE_FIELD_OBJECT:
+            case RULE_FIELD_NODE:
             case RULE_FIELD_ANSWER: {
                 this.setState({value: e});
                 if (this.externalOnChange) {
@@ -62,7 +62,7 @@ export default class RuleEditorFormFieldComponent extends React.Component {
 
     renderField() {
         switch (this.field.type) {
-            case RULE_FIELD_OBJECT:
+            case RULE_FIELD_NODE:
             case RULE_FIELD_ANSWER: {
                 switch (this.mode) {
                     case RULE_MODE_BUILDER: {

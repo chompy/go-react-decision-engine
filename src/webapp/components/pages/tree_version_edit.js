@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faCopy, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder/builder';
@@ -9,6 +9,7 @@ import JsonConverter from '../../converters/json';
 import Events from '../../events';
 import { message as msgPopup } from 'react-message-popup';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
+import PdfFormComponent from '../pdf_form/pdf_form';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -18,6 +19,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         this.state.root = null;
         this.state.object = null;
         this.state.tree = null;
+        this.state.formTree = null;
         this.storeTimeout = null;
     }
 
@@ -77,7 +79,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             return;
         }
         this.setState({root: res.data});
-        BackendAPI.get('tree/version/fetch', {team: this.state.user.team, id: res.data.id, version: version}, this.onTreeVersionResponse);    
+        BackendAPI.get('tree/version/fetch', {id: res.data.id, version: version}, this.onTreeVersionResponse);    
     }
 
     /**
@@ -101,8 +103,30 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             object: res.data,
             tree: jc.import(res.data.tree)
         });
-        this.setLoaded();
         this.setTitle(this.state.root.label + ' v' + res.data.version);
+        if (this.state.root.type == TREE_DOCUMENT) {
+            BackendAPI.get(
+                'tree/version/fetch', 
+                {id: this.state.root.parent}, this.onFormTreeVersionResponse
+            );
+            return;
+        }
+        this.setLoaded();
+    }
+
+    /**
+     * @param {Object} res 
+     * @returns 
+     */
+    onFormTreeVersionResponse(res)
+    {
+        if (res.success) {
+            let jc = new JsonConverter;
+            this.setState({
+                formTree: jc.import(res.data.tree)
+            });
+        }
+        this.setLoaded();
     }
 
     /**
@@ -249,6 +273,18 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
+
+        let builder = <BuilderComponent
+            node={this.state.tree}
+            type={this.state.root.type}
+            ruleNode={this.state.formTree ? this.state.formTree : this.state.tree} 
+        />;
+        if (this.state.root.type == TREE_DOCUMENT) {
+            builder = <PdfFormComponent
+                node={this.state.tree}
+                ruleNode={this.state.formTree ? this.state.formTree : this.state.tree} 
+            />;
+        }
         return <div className='page tree-version-edit'>
             <h1 className='title'>{this.state.root.label}</h1>
             <TreeVersionInfoComponent treeversion={this.state.object} />
@@ -258,9 +294,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk, this.state.object.state == 'published')}
                 {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
             </div>
-            <section>
-                <BuilderComponent node={this.state.tree} type={this.state.root.type} />
-            </section>
+            <section>{builder}</section>
         </div>;
     }
 

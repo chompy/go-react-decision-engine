@@ -5,7 +5,6 @@ export default class GroupNode extends BaseNode {
     constructor(uid) {
         super(uid);
         this.content = '';
-        this.contentEdit = '';
     }
 
     /**
@@ -20,7 +19,6 @@ export default class GroupNode extends BaseNode {
      */
     getData() {
         return {
-            'contentEdit' : this.contentEdit,
             'content' : this.content
         };
     }
@@ -31,7 +29,7 @@ export default class GroupNode extends BaseNode {
     builderFields() {
         return [
             ['label', 'Label', 'text'],
-            ['contentEdit', 'Content', 'richtext']
+            ['content', 'Content', 'richtext']
         ];
     }
 

@@ -10,13 +10,14 @@ export default class BuilderComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.node = typeof props.node == 'undefined' ? null : props.node
+        this.node = props?.node;
         if (!this.node) {
             this.node = new RootNode(BaseNode.generateUid());
             this.node.name = 'TOP';
         }
         this.node.type = props?.type ? props.type : TREE_DOCUMENT;
-        this.ruleEditorTemplates = typeof props.ruleEditorTemplates == 'undefined' ? {} : props.ruleEditorTemplates;
+        this.ruleNode = props?.ruleNode ? props.ruleNode : this.node;
+        this.ruleEditorTemplates = props?.ruleEditorTemplates ? props.ruleEditorTemplates : {};
         this.setNodeCallback = this.setNodeCallback.bind(this);
         Events.dispatch('builder_set_node', {
             set: this.setNodeCallback
@@ -51,7 +52,9 @@ export default class BuilderComponent extends React.Component {
      */
     render() {
         return <div className='decision-engine-builder'>
-            <ul className='top builder'><BuilderNodeComponent root={this.node} node={this.node} /></ul>
+            <ul className='top builder'>
+                <BuilderNodeComponent root={this.node} node={this.node} ruleNode={this.ruleNode} />
+            </ul>
         </div>;
     }
 

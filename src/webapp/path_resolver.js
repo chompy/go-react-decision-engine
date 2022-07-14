@@ -1,3 +1,5 @@
+import DocumentViewComponent from "./components/pages/document_view";
+import DocumentViewListComponent from "./components/pages/document_view_list";
 import ErrorPageComponent from "./components/pages/error";
 import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import FormSubmissionEditPageComponent from "./components/pages/form_submission_edit";
@@ -55,6 +57,17 @@ export default class PathResolver {
                         }
                         let submissionId = path[3].trim();
                         return {component: FormSubmissionEditPageComponent, team: teamId, id: formId, submission: submissionId};                        
+                    }
+                    case 'view': {
+                        if (path.length == 2) {
+                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                        }
+                        let submissionId = path[2].trim();
+                        if (path.length == 4) {
+                            let documentId = path[3].trim();
+                            return {component: DocumentViewComponent, team: teamId, submission: submissionId, document: documentId};    
+                        }
+                        return {component: DocumentViewListComponent, team: teamId, id: submissionId};
                     }
                     case 'admin': {
                         if (path.length == 2) {
@@ -140,7 +153,9 @@ export default class PathResolver {
             // public pages
             '{team}/login': LoginPageComponent,
             // normal user pages
-            '{team}/form/{id}': FormSubmissionEditPageComponent,            
+            '{team}/form/{id}': FormSubmissionEditPageComponent,
+            '{team}/view/{id}': DocumentViewListComponent,
+            '{team}/view/{submission}/{document}': DocumentViewComponent,
             // admin pages
             '{team}/admin/docs/{id}': TreeListPageComponent,
             '{team}/admin/forms': TreeListPageComponent,

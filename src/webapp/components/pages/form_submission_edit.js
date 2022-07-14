@@ -1,13 +1,14 @@
-import { faBackward, faForward, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faEye, faForward, faTrash } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_DELETE, BTN_NEXT, ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING, MSG_SUBMISSION_DELETED, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_DELETE, BTN_NEXT, BTN_VIEW, ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING, MSG_SUBMISSION_DELETED, TREE_FORM } from '../../config';
 import JsonConverter from '../../converters/json';
 import UserData from '../../user_data';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
 import RootNodeComponent from '../nodes/root';
 import BasePageComponent from './base';
 import { message as msgPopup } from 'react-message-popup';
+import DocumentViewListComponent from './document_view_list';
 
 export default class FormSubmissionEditPageComponent extends BasePageComponent {
 
@@ -138,6 +139,15 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         window.history.back();
     }
 
+    /**
+     * @param {Event} e 
+     */
+    onClickView(e) {
+        e.preventDefault();
+        this.onSave();
+        this.gotoPage(DocumentViewListComponent, {id: this.userData.id});
+    }
+
     render() {
         if (this.state.error) {
             return this.renderError();
@@ -151,6 +161,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
+                {this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye)}
             </div>
             <section>
                 <RootNodeComponent

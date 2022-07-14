@@ -58,6 +58,7 @@ export default class RuleNode extends BaseNode {
     getRuleFieldValues() {
         try {
             let scriptData = JSON.parse(this.script);
+            console.log(scriptData);
             return scriptData.fields;
         } catch {}
         return {};

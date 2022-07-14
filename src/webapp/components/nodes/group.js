@@ -34,7 +34,7 @@ export default class GroupNodeComponent extends BaseNodeComponent {
     render() {
         if (!(this.node instanceof GroupNode) || !this.state.visible) { return null; }
         if (!this.contentHtml) {
-            this.contentHtml = this.parseShortcode(this.node.contentEdit);
+            this.contentHtml = this.parseShortcode(this.node.content);
         }
         return <div className={this.getClass()}>
             <div className='tree-content' dangerouslySetInnerHTML={{ __html: this.contentHtml }} />

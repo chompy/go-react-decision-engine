@@ -1,5 +1,5 @@
 import {lua, lauxlib, lualib, to_luastring} from 'fengari-web';
-import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_OBJECT, RULE_FIELD_CHOICE } from './rule_field';
+import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_NODE, RULE_FIELD_CHOICE } from './rule_field';
 import AnswerNode from './nodes/answer';
 import QuestionNode from './nodes/question';
 import BaseNode from './nodes/base';
@@ -340,7 +340,7 @@ export default class RuleEngine {
                 break;
             }
             case RULE_FIELD_ANSWER:
-            case RULE_FIELD_OBJECT: {
+            case RULE_FIELD_NODE: {
                 // TODO
                 defaultValue = [];
                 break;
@@ -367,7 +367,7 @@ export default class RuleEngine {
                 }
                 switch (this.fields[i].type) {
                     case RULE_FIELD_ANSWER:
-                    case RULE_FIELD_OBJECT: {
+                    case RULE_FIELD_NODE: {
                         lua.lua_createtable(L, 0, 
                             this.fieldValues ? this.fieldValues[name].length : 0
                         );

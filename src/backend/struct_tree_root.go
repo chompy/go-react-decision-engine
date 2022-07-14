@@ -142,5 +142,30 @@ func (t *TreeRoot) Delete(user *User) error {
 	if err := checkDeletePermission(t, user); err != nil {
 		return err
 	}
+	// delete tree versions
+	if err := databaseDelete(TreeVersion{}, bson.M{"root_id": t.ID}); err != nil {
+		return err
+	}
+	if t.Type == TreeForm {
+		// delete form submissions
+		if err := databaseDelete(FormSubmission{}, bson.M{"form_id": t.ID}); err != nil {
+			return err
+		}
+		// delete documents
+		for {
+			res, count, err := databaseList(TreeRoot{}, bson.M{"parent": t.ID, "type": TreeDocument}, nil, nil, 0)
+			if count == 0 {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			for _, doc := range res {
+				if err := doc.(*TreeRoot).Delete(user); err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return databaseDelete(TreeRoot{}, bson.M{"_id": t.ID})
 }

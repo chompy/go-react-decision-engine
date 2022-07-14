@@ -25,6 +25,9 @@
     "fengari-web": "^0.1.4",
     "font-awesome": "^4.7.0",
     "pdfform.js": "^1.0.14",
+    "pdfjs": "^2.4.7",
+    "pdfjs-dist": "^2.14.305",
+    "pdfmake": "^0.2.5",
     "process": "^0.11.10",
     "purecss-sass": "^2.1.0",
     "react": "^17.0.2",
@@ -34,7 +37,8 @@
     "react-quill": "^2.0.0-beta.4",
     "react-typeahead": "^2.0.0-alpha.8",
     "util": "^0.12.4",
-    "webpack": "^5.27.2"
+    "webpack": "^5.27.2",
+    "worker-loader": "^3.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",

@@ -15,6 +15,7 @@ export default class BuilderFormFieldComponent extends React.Component {
         this.node = props.node;
         this.root = props.root;
         this.field = props.field;
+        this.ruleNode = props?.ruleNode ? props.ruleNode : this.root;
         this.ruleTemplateInstanceId = '';
         this.state = {
             value: this.getValue()
@@ -216,7 +217,7 @@ export default class BuilderFormFieldComponent extends React.Component {
                         id={this.getId()}
                         onChange={this.onChange}
                         data={data}
-                        root={this.root}
+                        root={this.ruleNode}
                         mode={RULE_MODE_BUILDER}
                     />
                 </div>;
@@ -225,7 +226,7 @@ export default class BuilderFormFieldComponent extends React.Component {
                 return <div className='build-field typeahead'>
                     <label>{this.getLabel()}</label>
                     <TypeaheadComponent
-                        root={this.root}
+                        root={this.ruleNode}
                         value={this.node[this.field[0]]}
                         onChange={this.onChange}
                     />

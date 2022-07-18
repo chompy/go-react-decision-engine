@@ -23,4 +23,11 @@ export default class RootNode extends BaseNode {
         };
     }
 
+    /**
+     * @inheritDoc
+     */
+    builderCanDelete() {
+        return false;
+    }
+
 }

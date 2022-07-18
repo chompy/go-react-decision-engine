@@ -1,17 +1,18 @@
 import React from 'react';
 import { Tokenizer } from 'react-typeahead';
-import AnswerNode from '../nodes/answer';
-import QuestionNode from '../nodes/question';
+import { MSG_TYPEAHEAD_PLACEHOLDER } from '../../config';
+import AnswerNode from '../../nodes/answer';
+import QuestionNode from '../../nodes/question';
 
 export default class TypeaheadComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.root = typeof props.root != 'undefined' ? props.root : null;
+        this.root = props?.root;
         this.state = {
-            value: typeof props.value != 'undefined' && props.value ? props.value : []
+            value: props?.value ? props.value : []
         }
-        this.onChange = typeof props.onChange != 'undefined' ? props.onChange : null;
+        this.onChange = props?.onChange;
         this.onTokenAdd = this.onTokenAdd.bind(this);
         this.onTokenRemove = this.onTokenRemove.bind(this);
     }
@@ -153,13 +154,14 @@ export default class TypeaheadComponent extends React.Component {
                 values.push(name);
             }
         }
-        return <Tokenizer
+        return <div className='helper typeahead'><Tokenizer
             options={this.getTokens()}
             onTokenAdd={this.onTokenAdd}
             onTokenRemove={this.onTokenRemove}
             defaultSelected={values}
             maxVisible={10}
-        />;
+            placeholder={MSG_TYPEAHEAD_PLACEHOLDER}
+        /></div>;
     }
 
 }

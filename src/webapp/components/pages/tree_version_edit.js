@@ -91,7 +91,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (!res.data.tree || res.data.tree.length == 0) {
             res.data.tree = [{
                 uid: this.state.root.id,
-                type: "root",
+                type: 'root',
                 version: res.data.version,
                 created: new Date(),
                 modified: new Date()

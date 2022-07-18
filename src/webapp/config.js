@@ -5,6 +5,7 @@ export const MSG_DISPLAY_TIME = 4000;
 // tree types
 export const TREE_FORM = 'form';
 export const TREE_DOCUMENT = 'document';
+export const TREE_DOCUMENT_PDF_FORM = 'document-pdf-form';
 
 // error messages
 export const ERR_NOT_FOUND = 'Not found.';
@@ -52,3 +53,7 @@ export const MSG_ISSUES_FOUND = 'issues found.';
 export const MSG_SUBMISSION_DELETED = 'Form submission was deleted.';
 export const MSG_YES = 'Yes';
 export const MSG_NO = 'No';
+export const MSG_TYPEAHEAD_PLACEHOLDER = 'Enter question/answer label.';
+export const MSG_PDF_FORM_NO_FIELDS = 'This PDF has no form fields.';
+export const MSG_FILE_NOT_PDF = 'This file is not a PDF.';
+export const MSG_QUESTION_OR_ANSWER = 'Questions/Answer';

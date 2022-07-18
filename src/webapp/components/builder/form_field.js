@@ -4,10 +4,19 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
 import RuleEditorComponent, { RULE_MODE_BUILDER } from '../rule_editor';
-import TypeaheadComponent from '../typeahead';
+import TypeaheadComponent from '../helper/typeahead';
 import RuleNode from '../../nodes/rule';
 
 const UPDATE_TIMEOUT = 250; 
+
+export const FIELD_TYPE_TEXT = 'text';
+export const FIELD_TYPE_TEXTAREA = 'textarea';
+export const FIELD_TYPE_NUMBER = 'number';
+export const FIELD_TYPE_CHECKBOX = 'checkbox';
+export const FIELD_TYPE_CODE = 'code';
+export const FIELD_TYPE_TYPEAHEAD = 'typeahead';
+export const FIELD_TYPE_RICHTEXT = 'richtext';
+export const FIELD_TYPE_CHOICE = 'choice';
 export default class BuilderFormFieldComponent extends React.Component {
 
     constructor(props) {
@@ -75,21 +84,22 @@ export default class BuilderFormFieldComponent extends React.Component {
      */
     onChange(e) {
         switch (this.getFieldType()) {
-            case 'text':
-            case 'textarea':
-            case 'number': {
+            case FIELD_TYPE_TEXT:
+            case FIELD_TYPE_TEXTAREA:
+            case FIELD_TYPE_NUMBER:
+            case FIELD_TYPE_CHOICE: {
                 this.node[this.field[0]] = e.target.value;
                 break;
             }
-            case 'checkbox': {
+            case FIELD_TYPE_CHECKBOX: {
                 this.node[this.field[0]] = e.target.checked;
                 break;
             }
-            case 'code': {
+            case FIELD_TYPE_CODE: {
                 this.node[this.field[0]] = JSON.stringify(e);
                 break;
             }
-            case 'typeahead': {
+            case FIELD_TYPE_TYPEAHEAD: {
                 this.node[this.field[0]] = e;
                 break;
             }
@@ -152,31 +162,50 @@ export default class BuilderFormFieldComponent extends React.Component {
      */
      render() {
         switch (this.getFieldType()) {
-            case 'text': {
-                return <div className='build-field text'>
+            case FIELD_TYPE_TEXT: {
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label htmlFor={this.getId()}>{this.getLabel()}</label>
                     <input type='text' id={this.getId()} value={this.getValue()} onChange={this.onChange} />
                 </div>;
             }
-            case 'textarea': {
-                return <div className='build-field textarea'>
+            case FIELD_TYPE_TEXTAREA: {
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label htmlFor={this.getId()}>{this.getLabel()}</label>
                     <textarea id={this.getId()} onChange={this.onChange} value={this.getValue()} />
                 </div>;
             }
-            case 'checkbox': {
-                return <div className='build-field checkbox'>
+            case FIELD_TYPE_CHECKBOX: {
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label htmlFor={this.getId()}>{this.getLabel()}</label>
                     <input type='checkbox' id={this.getId()} checked={this.getValue()} onChange={this.onChange} />
                 </div>;
             }
-            case 'number': {
-                return <div className='build-field number'>
+            case FIELD_TYPE_NUMBER: {
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label htmlFor={this.getId()}>{this.getLabel()}</label>
                     <input type='number' id={this.getId()} value={this.getValue()} onChange={this.onChange} />
                 </div>;
             }
-            case 'richtext': {
+            case FIELD_TYPE_CHOICE: {
+                let items = [];
+                if (this.field.length >= 4) {
+                    for (let i in this.field[3]) {
+                        items.push(
+                            <option
+                                key={this.getId() + '-opt-' + this.field[3][i]}
+                                value={this.field[3][i]}
+                            >
+                                {this.field[3][i]}
+                            </option>
+                        );
+                    }
+                }
+                return <div className={'build-field ' + this.getFieldType()}>
+                    <label htmlFor={this.getId()}>{this.getLabel()}</label>
+                    <select id={this.getId()} value={this.getValue()} onChange={this.onChange}>{items}</select>
+                </div>;
+            }
+            case FIELD_TYPE_RICHTEXT: {
                 let buttons = {};
                 Events.dispatch(
                     'quill_custom_buttons',
@@ -199,7 +228,7 @@ export default class BuilderFormFieldComponent extends React.Component {
                         handlers: buttons
                     }
                 };
-                return <div className='build-field richtext'>
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label>{this.getLabel()}</label>
                     <ReactQuill
                         onChange={this.onRteChange}
@@ -208,10 +237,10 @@ export default class BuilderFormFieldComponent extends React.Component {
                     />
                 </div>;
             }
-            case 'code': {
+            case FIELD_TYPE_CODE: {
                 let data = {};
                 try { data = JSON.parse(this.getValue()) } catch {};
-                return <div className='build-field code'>
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label>{this.getLabel()}</label>
                     <RuleEditorComponent
                         id={this.getId()}
@@ -222,8 +251,8 @@ export default class BuilderFormFieldComponent extends React.Component {
                     />
                 </div>;
             }
-            case 'typeahead': {
-                return <div className='build-field typeahead'>
+            case FIELD_TYPE_TYPEAHEAD: {
+                return <div className={'build-field ' + this.getFieldType()}>
                     <label>{this.getLabel()}</label>
                     <TypeaheadComponent
                         root={this.ruleNode}

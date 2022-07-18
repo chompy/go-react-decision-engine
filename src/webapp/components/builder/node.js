@@ -11,13 +11,28 @@ import BuilderFormComponent from './form';
 import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { MSG_CLIPBOARD, TREE_DOCUMENT } from '../../config';
+import { BTN_DELETE, MSG_CLIPBOARD, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
+import PdfFieldNode from '../../nodes/pdf_field';
+import PdfFieldValueNode from '../../nodes/pdf_field_value';
+import PdfFieldMapNode from '../../nodes/pdf_field_map';
 
 const DROP_STATE_NONE = 0;
 const DROP_STATE_UP = 1;
 const DROP_STATE_DOWN = 2;
 const DROP_STATE_CHILD = 3;
 const DEFAULT_SHOW_COUNT = 10;
+
+const NAME_GROUP = 'Content/Group';
+const NAME_VISIBILITY_RULE = 'Visibility Rule';
+const NAME_VALIDATION_RULE = 'Validation Rule';
+const NAME_ANSWER = 'Answer';
+const NAME_MATRIX = 'Matrix';
+const NAME_TEXT = 'Text Input';
+const NAME_CHOICE = 'Multiple Choice';
+const NAME_DROPDOWN = 'Dropdown';
+const NAME_FILE_UPLOAD = 'File Upload';
+const NAME_PDF_FIELD_VALUE = 'PDF Field Value';
+const NAME_PDF_FIELD_MAP = 'PDF Field Map';
 
 export default class BuilderNodeComponent extends React.Component {
 
@@ -149,6 +164,14 @@ export default class BuilderNodeComponent extends React.Component {
                 child.type = type[1];
                 break;
             }
+            case PdfFieldValueNode: {
+                child.setField(this.node.field);
+                break;
+            }
+            case PdfFieldMapNode: {
+                child.ruleNode = this.ruleNode;
+                break;
+            }
         }
         this.node.children.push(child);
         Events.dispatch('update', this.root);
@@ -183,7 +206,7 @@ export default class BuilderNodeComponent extends React.Component {
      * Event that fires when delete button pressed.
      * @param {Event} e 
      */
-     onDelButton(e) {
+    onDelButton(e) {
         e.preventDefault();
         if (!this.node || this.node instanceof RootNode) {
             return;
@@ -216,7 +239,7 @@ export default class BuilderNodeComponent extends React.Component {
             return;
         }
         for (let i in this.node.children) {
-            if (this.node.children[i] == e.detail) {
+            if (this.node.children[i] == e.detail && this.node.children[i].builderCanDelete()) {
                 this.node.children.splice(i, 1);
                 Events.dispatch('update', this.root);
                 this.forceUpdate();
@@ -428,49 +451,76 @@ export default class BuilderNodeComponent extends React.Component {
      */
     availableTypes() {
         switch (this.node.constructor) {
-            case RootNode:
+            case RootNode: {
+                console.log(this.root.type);
+                if (this.root && this.root.type == TREE_DOCUMENT_PDF_FORM) {
+                    return {};
+                }
                 // should we enforce there having to be a group under the root?
                 return {
-                    'Content/Group': [GroupNode]
+                    [NAME_GROUP]: [GroupNode]
                 };
-            case QuestionNode:
+            }
+            case QuestionNode: {
                 switch (this.node.type) {
                     case FIELD_TEXT:
                     case FIELD_UPLOAD: {
                         return {
-                            'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY],
-                            'Validation Rule': [RuleNode, RULE_TYPE_VALIDATION]
+                            [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY],
+                            [NAME_VALIDATION_RULE]: [RuleNode, RULE_TYPE_VALIDATION]
                         };
                     }
                     default: {
                         return {
-                            'Answer': [AnswerNode],
-                            'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY],
-                            'Validation Rule': [RuleNode, RULE_TYPE_VALIDATION]
+                            [NAME_ANSWER]: [AnswerNode],
+                            [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY],
+                            [NAME_VALIDATION_RULE]: [RuleNode, RULE_TYPE_VALIDATION]
                         };
                     }
                 }
-            case RuleNode:
+            }
+            case RuleNode: {
                 return {};
-            case AnswerNode:
+            }
+            case AnswerNode: {
                 return {
-                    'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
+                    [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY]
                 };
+            }
+            case PdfFieldNode: {
+                return {
+                    [NAME_PDF_FIELD_VALUE]: [PdfFieldValueNode],
+                    [NAME_PDF_FIELD_MAP]: [PdfFieldMapNode]
+                }
+            }
+            case PdfFieldValueNode:
+            case PdfFieldMapNode: {
+                return {
+                    [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY]
+                };
+            }
         }
-        if (this.root && this.root.type == TREE_DOCUMENT) {
-            return {
-                'Content/Group': [GroupNode],
-                'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
-            };  
+        if (this.root) {
+            switch (this.root.type) {
+                case TREE_DOCUMENT: {
+                    return {
+                        [NAME_GROUP]: [GroupNode],
+                        [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY]
+                    }; 
+                }
+                case TREE_DOCUMENT_PDF_FORM: {
+                    return {};
+                }
+            }
         }
         return {
-            'Content/Group': [GroupNode],
-            'Matrix': [MatrixNode],
-            'Text Input': [QuestionNode, FIELD_TEXT],
-            'Multiple Choice': [QuestionNode, FIELD_CHOICE],
-            'Dropdown': [QuestionNode, FIELD_DROPDOWN],
-            'File Upload': [QuestionNode, FIELD_UPLOAD],
-            'Visibility Rule': [RuleNode, RULE_TYPE_VISIBILITY]
+            [NAME_GROUP]: [GroupNode],
+            [NAME_MATRIX]: [MatrixNode],
+            [NAME_TEXT]: [QuestionNode, FIELD_TEXT],
+            [NAME_CHOICE]: [QuestionNode, FIELD_CHOICE],
+            [NAME_DROPDOWN]: [QuestionNode, FIELD_DROPDOWN],
+            [NAME_FILE_UPLOAD]: [QuestionNode, FIELD_UPLOAD],
+            [NAME_VISIBILITY_RULE]: [RuleNode, RULE_TYPE_VISIBILITY]
         };
     }
 
@@ -487,7 +537,7 @@ export default class BuilderNodeComponent extends React.Component {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         if (!this.node) {
             return <li className={this.getClassName()}>(EMPTY)</li>;
         }
@@ -538,11 +588,16 @@ export default class BuilderNodeComponent extends React.Component {
                 <div className='options' role='group'>
                     <div className='pure-button-group'>
                         <button className='pure-button opt opt-uid' onClick={this.onUidButton} title='UID'><FontAwesomeIcon icon={faMagnifyingGlass} /></button>
-                        <button className='pure-button opt opt-del' onClick={this.onDelButton} title='Delete'><FontAwesomeIcon icon={faTrash} /></button>
+                        <button
+                            className={'pure-button opt opt-del' + (this.node.builderCanDelete() ? '' : ' hidden')}
+                            onClick={this.onDelButton}
+                            title={BTN_DELETE}>
+                                <FontAwesomeIcon icon={faTrash} />
+                            </button>
                     </div>
                     <div className='pure-menu custom-restricted-width'>
                         <ul className='pure-menu-list'>
-                            <li className='pure-menu-item pure-menu-has-children pure-menu-allow-hover'>
+                            <li className={'pure-menu-item pure-menu-has-children pure-menu-allow-hover' + (addOptions.length == 0 ? ' hidden' : '') }>
                                 <a href="#" className="pure-menu-link pure-button">
                                     <FontAwesomeIcon icon={faPlus} />
                                 </a>

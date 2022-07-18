@@ -120,3 +120,29 @@
         text-transform: capitalize;
     }
 }
+
+// TypeaheadComponent
+.helper.typeahead {
+    .typeahead-token {
+        .typeahead-token-close {
+            margin-left: 5px;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+    }
+    .typeahead-selector {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        li {
+            padding: 5px;
+            &.hover {
+                background-color: $header-bg;
+                a {
+                    color: $header-fg;
+                }
+            }
+        }
+    }
+}

@@ -42,6 +42,19 @@
         content: "Ma";
         background-color: $col-matrix;
     }
+    &.pdf-field > .object > .name::before {
+        content: "Fi";
+        background-color: $col-group;
+    }
+    &.pdf-field-value > .object > .name::before {
+        content: "Va";
+        background-color: $col-answer;
+    }
+    &.pdf-field-map > .object > .name::before {
+        content: "Mp";
+        background-color: $col-matrix;
+    }
+
     &.show-more > .name::before {
         display: none;
         background-color: $col-show-more;

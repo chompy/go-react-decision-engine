@@ -1,13 +1,24 @@
 .pdf-form {
+    input[type=file], .pdf-file-info {
+        margin-bottom: 15px;
+    }
+    .pdf-file-info {
+        a {
+            color: #000;
+            margin-right: 5px;
+        }
+    }
     .viewer {
-        display: inline-block;
-        width: 48%;
         border: 1px solid $header-bg;
         margin-right: 1%;
+        display: inline-block;
+        &.fixed {
+            position: fixed;
+            top: 10px;
+        }
     }
     .editor {
-        display: inline-block;
-        width: 49%;
+        float: right;
         vertical-align: top;
     }
 }

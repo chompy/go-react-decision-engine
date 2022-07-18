@@ -60,7 +60,7 @@ export default class BaseNode {
      * @param {BaseNode} object 
      */
     addChild(object) {
-        if (!(object instanceof BaseNode)) {
+        if (!(object instanceof BaseNode) || !object.uid) {
             return;
         }
         if (this.getChild(object.uid)) {
@@ -201,8 +201,15 @@ export default class BaseNode {
      * List form fields for builder.
      * @return {Array}
      */
-     builderFields() {
+    builderFields() {
         return [];
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    builderCanDelete() {
+        return true;
     }
 
 }

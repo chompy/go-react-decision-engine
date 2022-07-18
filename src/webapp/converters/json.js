@@ -59,7 +59,7 @@ export default class JsonConverter extends BaseConverter {
         let buildAll = function(node, level) {
             for(let i in flatNodeList) {
                 let child = flatNodeList[i];
-                if (child.parent == node.uid) {
+                if (node.uid && child.parent == node.uid) {
                     buildAll(child, level+1);
                     node.children.push(child);
                 }

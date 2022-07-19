@@ -66,6 +66,7 @@ export default class BaseNode {
         if (this.getChild(object.uid)) {
             return;
         }
+        object.parent = this.uid;
         this.children.push(object);
     }
 

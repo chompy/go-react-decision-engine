@@ -6,6 +6,9 @@ import RootNode from '../nodes/root';
 import BaseConverter from './base';
 import RuleNode from '../nodes/rule';
 import { KEY_TYPE } from '../nodes/base';
+import PdfFieldNode from '../nodes/pdf_field';
+import PdfFieldValueNode from '../nodes/pdf_field_value';
+import PdfFieldMapNode from '../nodes/pdf_field_map';
 
 export default class JsonConverter extends BaseConverter {
 
@@ -17,7 +20,10 @@ export default class JsonConverter extends BaseConverter {
             AnswerNode,
             GroupNode,
             MatrixNode,
-            RuleNode
+            RuleNode,
+            PdfFieldNode,
+            PdfFieldValueNode,
+            PdfFieldMapNode
         ];
     }
 

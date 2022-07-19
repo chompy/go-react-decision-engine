@@ -2,12 +2,6 @@
     input[type=file], .pdf-file-info {
         margin-bottom: 15px;
     }
-    .pdf-file-info {
-        a {
-            color: #000;
-            margin-right: 5px;
-        }
-    }
     .viewer {
         border: 1px solid $header-bg;
         margin-right: 1%;
@@ -20,5 +14,14 @@
     .editor {
         float: right;
         vertical-align: top;
+        .builder.top .node {
+            &.root {
+                & > .object {
+                    .opt-del {
+                        display: block;
+                    }
+                }
+            }            
+        }
     }
 }

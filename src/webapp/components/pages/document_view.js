@@ -2,7 +2,7 @@ import React from 'react';
 import { faBackward, faFilePdf } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_DOWNLOAD_PDF, ERR_NOT_FOUND, TREE_DOCUMENT } from '../../config';
+import { BTN_BACK, BTN_DOWNLOAD_PDF, ERR_NOT_FOUND, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
 import RootNodeComponent from '../nodes/root';
 import JsonConverter from '../../converters/json';
 import PdfConverter from '../../converters/pdf';
@@ -14,9 +14,12 @@ export default class DocumentViewComponent extends BasePageComponent {
         super(props);
         this.title = '';
         this.userData = null;
+        this.formId = null;
+        this.formVersion = null;
         this.state.submission = null;
-        this.state.root = null;
         this.state.loading = true;
+        this.state.tree = null;
+        this.state.form = null;
     };
 
     /**
@@ -46,6 +49,7 @@ export default class DocumentViewComponent extends BasePageComponent {
     onSubmissionResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
         this.userData = UserData.importJSON(res.data);
+        this.formVersion = res.data.form_version;
         this.setState({submission: res.data});
         let documentId = typeof this.props.path.document != 'undefined' ? this.props.path.document : null;
         if (!documentId) {
@@ -66,6 +70,7 @@ export default class DocumentViewComponent extends BasePageComponent {
         if (this.handleErrorResponse(res)) { return; }
         this.title = res.data.label;
         this.setTitle(this.title);
+        this.formId = res.data.parent;
         BackendAPI.get(
             'tree/version/fetch', {id: res.data.id},
             this.onDocumentTreeResponse
@@ -77,12 +82,28 @@ export default class DocumentViewComponent extends BasePageComponent {
      */
     onDocumentTreeResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
-        let js = new JsonConverter;
-        let tree = js.import(res.data.tree);
-        tree.type = TREE_DOCUMENT;
+        let jc = new JsonConverter;
+        let tree = jc.import(res.data.tree);
+        if (!tree.type) { tree.type = TREE_DOCUMENT; }
+        this.setState({tree: tree});
+        if (tree.type == TREE_DOCUMENT_PDF_FORM) {
+            BackendAPI.get(
+                'tree/version/fetch', {id: this.formId, version: this.formVersion},
+                this.onFormTreeResponse
+            );
+            return;
+        }
+        this.setLoaded();
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onFormTreeResponse(res) {
+        let jc = new JsonConverter;
         this.setState({
-            tree: tree
-        });        
+            form: jc.import(res.data.tree)
+        })
         this.setLoaded();
     }
 
@@ -120,6 +141,7 @@ export default class DocumentViewComponent extends BasePageComponent {
                 <RootNodeComponent
                     node={this.state.tree}
                     userData={this.userData} 
+                    parentForm={this.state.form}
                 />
             </section>
         </div>;

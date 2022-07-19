@@ -11,7 +11,7 @@ import BuilderFormComponent from './form';
 import BuilderNodeTitleComponent from './node_title';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass, faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
-import { BTN_DELETE, MSG_CLIPBOARD, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
+import { BTN_DELETE, MSG_CLIPBOARD, MSG_TREE_NODE_DELETE, MSG_TREE_ROOT_DELETE, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
 import PdfFieldNode from '../../nodes/pdf_field';
 import PdfFieldValueNode from '../../nodes/pdf_field_value';
 import PdfFieldMapNode from '../../nodes/pdf_field_map';
@@ -40,7 +40,8 @@ export default class BuilderNodeComponent extends React.Component {
         super(props);
         this.state = {
             dropState: DROP_STATE_NONE,
-            showAll: false
+            showAll: false,
+            active: false
         }
         this.root = props?.root;
         this.parent = props?.parent;
@@ -59,6 +60,7 @@ export default class BuilderNodeComponent extends React.Component {
         this.onDrop = this.onDrop.bind(this);
         this.onDragStart = this.onDragStart.bind(this);
         this.onShowMore = this.onShowMore.bind(this);
+        this.onActive = this.onActive.bind(this);
     }
 
     /**
@@ -68,7 +70,8 @@ export default class BuilderNodeComponent extends React.Component {
         Events.listen('builder_delete', this.onDelete);
         Events.listen('update', this.onUpdate);
         Events.listen('rerender', this.onDoRerender);
-        Events.listen('drag', this.onDragStart)
+        Events.listen('drag', this.onDragStart);
+        Events.listen('builder-active-node', this.onActive);
     }
 
     /**
@@ -78,7 +81,8 @@ export default class BuilderNodeComponent extends React.Component {
         Events.remove('builder_delete', this.onDelete);
         Events.remove('update', this.onUpdate);
         Events.remove('rerender', this.onDoRerender);
-        Events.remove('drag', this.onDragStart)
+        Events.remove('drag', this.onDragStart);
+        Events.remove('builder-active-node', this.onActive);
     }
 
     /**
@@ -118,7 +122,7 @@ export default class BuilderNodeComponent extends React.Component {
                 dropState = ' ds-child';
             }
         }
-        return 'node ' + typeName + dropState;
+        return 'node ' + typeName + dropState + (this.state.active ? ' active' : '');
     }
 
     /**
@@ -208,10 +212,17 @@ export default class BuilderNodeComponent extends React.Component {
      */
     onDelButton(e) {
         e.preventDefault();
-        if (!this.node || this.node instanceof RootNode) {
+        if (!this.node) {
             return;
         }
-        if (confirm('Are you sure you want to delete this node and all of its children?')) {
+        if (this.node instanceof RootNode) {
+            if (!this.props?.onRootDelete) { return; }
+            if (confirm(MSG_TREE_ROOT_DELETE)) {
+                this.props?.onRootDelete(this.node);
+            }
+            return;
+        }
+        if (confirm(MSG_TREE_NODE_DELETE)) {
             Events.dispatch(
                 'builder_delete',
                 this.node.uid
@@ -273,6 +284,14 @@ export default class BuilderNodeComponent extends React.Component {
         if (e.detail.uid == this.node.uid) {
             this.forceUpdate();
         }
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onActive(e) {
+        let active = e.detail.node.uid == this.node.uid;
+        this.setState({active: active});
     }
 
     /**
@@ -452,7 +471,6 @@ export default class BuilderNodeComponent extends React.Component {
     availableTypes() {
         switch (this.node.constructor) {
             case RootNode: {
-                console.log(this.root.type);
                 if (this.root && this.root.type == TREE_DOCUMENT_PDF_FORM) {
                     return {};
                 }
@@ -577,6 +595,7 @@ export default class BuilderNodeComponent extends React.Component {
                 </li>
             );
         }
+        let canDelete = this.node.builderCanDelete() || (this.node.uid == this.root.uid && this.props?.onRootDelete);
         return <li
             className={this.getClassName()}
             id={'node-' + this.node.uid}
@@ -589,7 +608,7 @@ export default class BuilderNodeComponent extends React.Component {
                     <div className='pure-button-group'>
                         <button className='pure-button opt opt-uid' onClick={this.onUidButton} title='UID'><FontAwesomeIcon icon={faMagnifyingGlass} /></button>
                         <button
-                            className={'pure-button opt opt-del' + (this.node.builderCanDelete() ? '' : ' hidden')}
+                            className={'pure-button opt opt-del' + (canDelete ? '' : ' hidden')}
                             onClick={this.onDelButton}
                             title={BTN_DELETE}>
                                 <FontAwesomeIcon icon={faTrash} />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BTN_BACK, BTN_NEXT, BTN_SAVE, MSG_ISSUES_FOUND, MSG_ISSUE_FOUND, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEXT, BTN_SAVE, MSG_ISSUES_FOUND, MSG_ISSUE_FOUND, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM, TREE_FORM } from '../../config';
 import { faBackward, faFloppyDisk, faForward, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import GroupNode from '../../nodes/group';
 import RootNode from '../../nodes/root';
@@ -7,6 +7,7 @@ import BaseNodeComponent from './base';
 import GroupNodeComponent from './group';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RULE_TYPE_VALIDATION } from '../../nodes/rule';
+import PdfViewerComponent from '../pdf_viewer';
 
 export default class RootNodeComponent extends BaseNodeComponent {
 
@@ -15,6 +16,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
         this.saveCallback = props?.onSave;
         this.state.section = null;
         this.state.validationErrorCount = 0;
+        this.state.hasRuleEval = false;
         this.onSection = this.onSection.bind(this);
         this.onSave = this.onSave.bind(this);
     }
@@ -67,6 +69,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
      */
     onRuleEvaluation(e) {
         super.onRuleEvaluation(e);
+        this.setState({hasRuleEval: true});
         // check for all invalid fields that have input and increment the
         // validation error counter
         let results = e.detail;
@@ -197,7 +200,23 @@ export default class RootNodeComponent extends BaseNodeComponent {
      * {@inheritdoc}
      */
     render() {
-        if (!(this.node instanceof RootNode)) { return null; }
+        if (!(this.node instanceof RootNode) || !this.state.hasRuleEval) { return null; }
+
+        switch (this.node.type) {
+            case TREE_DOCUMENT: {
+                return <div className={'tree-node tree-' + this.constructor.getTypeName() + ' tree-' + this.node.type}>
+                    <div className='tree-children'>{this.renderChildren()}</div>
+                </div>;
+            }
+            case TREE_DOCUMENT_PDF_FORM: {
+                return <div className={'tree-node tree-' + this.constructor.getTypeName() + ' tree-' + this.node.type}>
+                    <div className='tree-children'>
+                        <PdfViewerComponent document={this.node} form={this.props?.parentForm} userData={this.userData} />
+                    </div>
+                </div>;
+            }
+        }
+
         let options = [];
         if (this.saveCallback) {
             options.push(

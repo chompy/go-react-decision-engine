@@ -15,7 +15,6 @@ export default class UserData {
     constructor(id) {
         this.id = id;
         this.answers = {};
-        this.hidden = [];
         this.saveCount = 0;
         this.valid = false;
         this.questionValidationMessages = {};
@@ -261,6 +260,7 @@ export default class UserData {
     isHidden(node, root, matrixId) {
         if (!(node instanceof BaseNode)) { return false; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
+        console.log(key);
         if (this.hasFlag(FLAG_HIDDEN, key)) { return true; }
         if (root && root instanceof BaseNode) {
             let parent = node;

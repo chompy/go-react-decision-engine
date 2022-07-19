@@ -53,7 +53,12 @@ export default class BuilderComponent extends React.Component {
     render() {
         return <div className='decision-engine-builder'>
             <ul className='top builder'>
-                <BuilderNodeComponent root={this.node} node={this.node} ruleNode={this.ruleNode} />
+                <BuilderNodeComponent
+                    root={this.node}
+                    node={this.node}
+                    ruleNode={this.ruleNode}
+                    onRootDelete={this.props?.onRootDelete}
+                />
             </ul>
         </div>;
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faCopy, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder/builder';
@@ -9,7 +9,7 @@ import JsonConverter from '../../converters/json';
 import Events from '../../events';
 import { message as msgPopup } from 'react-message-popup';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
-import PdfFormComponent from '../pdf_form/pdf_form';
+import PdfFormComponent from '../pdf_form';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -90,21 +90,22 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         // new tree
         if (!res.data.tree || res.data.tree.length == 0) {
             res.data.tree = [{
-                uid: this.state.root.id,
+                label: 'TOP',
                 type: 'root',
                 version: res.data.version,
                 created: new Date(),
                 modified: new Date()
             }];
         }
-        res.data.tree[0].label = 'TOP';
+        res.data.tree[0].uid = this.state.root.id;
+        res.data.tree[0].version = res.data.version;
         let jc = new JsonConverter;
         this.setState({
             object: res.data,
             tree: jc.import(res.data.tree)
         });
         this.setTitle(this.state.root.label + ' v' + res.data.version);
-        if (this.state.root.type == TREE_DOCUMENT) {
+        if (this.state.root.type == TREE_DOCUMENT || this.state.root.type == TREE_DOCUMENT_PDF_FORM) {
             BackendAPI.get(
                 'tree/version/fetch', 
                 {id: this.state.root.parent}, this.onFormTreeVersionResponse

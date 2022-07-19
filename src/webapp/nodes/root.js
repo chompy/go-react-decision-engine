@@ -5,6 +5,7 @@ export default class RootNode extends BaseNode {
         super(uid);
         this.type = '';
         this.versionHash = '';
+        this.data = {};
     }
 
     /**
@@ -18,9 +19,26 @@ export default class RootNode extends BaseNode {
      * @inheritdoc
      */
     getData() {
-        return {
-            'type' : this.type            
-        };
+        return Object.assign(
+            {},
+            {
+                type: this.type,
+            },
+            this.data
+        );
+    }
+
+    /**
+     * @param {object} data 
+     */
+    importData(data) {
+        this.data = {};
+        for (let k in data) {
+            this.data[k] = data[k];
+        }
+        if ('type' in data) {
+            this.type = data['type'];
+        }
     }
 
     /**

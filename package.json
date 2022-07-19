@@ -24,7 +24,7 @@
     "buffer": "^6.0.3",
     "fengari-web": "^0.1.4",
     "font-awesome": "^4.7.0",
-    "pdfform.js": "^1.0.14",
+    "pdf-lib": "^1.17.1",
     "pdfjs": "^2.4.7",
     "pdfjs-dist": "^2.14.305",
     "pdfmake": "^0.2.5",

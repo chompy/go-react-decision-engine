@@ -57,3 +57,5 @@ export const MSG_TYPEAHEAD_PLACEHOLDER = 'Enter question/answer label.';
 export const MSG_PDF_FORM_NO_FIELDS = 'This PDF has no form fields.';
 export const MSG_FILE_NOT_PDF = 'This file is not a PDF.';
 export const MSG_QUESTION_OR_ANSWER = 'Questions/Answer';
+export const MSG_TREE_NODE_DELETE = 'Are you sure you want to delete this node and all of its children?';
+export const MSG_TREE_ROOT_DELETE = 'Are you sure you want to delete the entire tree?';

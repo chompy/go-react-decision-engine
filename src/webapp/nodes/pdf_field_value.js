@@ -1,17 +1,9 @@
-import BaseNode from './base';
-
-export const FIELD_TEXT = 'text';
-export const FIELD_TEXTAREA = 'textarea';
-export const FIELD_CHECKBOX = 'checkbox';
-export const FIELD_COMBOBOX = 'combobox';
-
-export default class PdfFieldValueNode extends BaseNode {
+import PdfFieldBaseNode, { FIELD_CHECKBOX, FIELD_COMBOBOX } from './pdf_field_base';
+export default class PdfFieldValueNode extends PdfFieldBaseNode {
 
     constructor(uid) {
         super(uid);
         this.value = '';
-        this.fieldType = FIELD_TEXT;
-        this.fieldChoices = [];
     }
 
     /**
@@ -25,7 +17,7 @@ export default class PdfFieldValueNode extends BaseNode {
      * @inheritdoc
      */
     getName() {
-        if (this.fieldType == FIELD_CHECKBOX) {
+        if (this.getFieldType() == FIELD_CHECKBOX) {
             return 'Checked';
         } else if (this.value) {
             return this.value;
@@ -37,15 +29,19 @@ export default class PdfFieldValueNode extends BaseNode {
      * @param {Object} field 
      */
     setField(field) {
-        this.fieldType = field.type == FIELD_TEXT && field?.multiline ? FIELD_TEXTAREA : field.type;
-        if (this.fieldType == FIELD_COMBOBOX) {
-            this.fieldChoices = [];
-            for (let i in field.items) {
-                this.fieldChoices.push(
-                    field.items[i]?.exportValue ? field.items[i].exportValue : field.items[i]?.displayValue
-                );
+        super.setField(field);
+        switch (this.getFieldType()) {
+            case FIELD_CHECKBOX: {
+                this.value = true;
+                break;
             }
-            this.value = this.fieldChoices[0];
+            case FIELD_COMBOBOX: {
+                if (!this.value) {
+                    let fieldChoices = this.getFieldChoices();
+                    this.value = fieldChoices.length > 0 ? fieldChoices[0] : '';
+                }
+                break;
+            }
         }
     }
 
@@ -53,26 +49,23 @@ export default class PdfFieldValueNode extends BaseNode {
      * @inheritdoc
      */
     getData() {
-        return {
-            'value' : this.value,
-            'fieldType': this.fieldType,
-            'fieldChoices': this.fieldChoices
-        };
+        return Object.assign({}, super.getData(), {value: this.value});
     }
 
     /**
      * @inheritdoc
      */
     builderFields() {
-        switch (this.fieldType) {
+        let fieldType = this.getFieldType();
+        switch (fieldType) {
             case FIELD_CHECKBOX: {
                 return [];
             }
             case FIELD_COMBOBOX: {
-                return [['value', 'Value', 'choice', this.fieldChoices]];
+                return [['value', 'Value', 'choice', this.getFieldChoices()]];
             }
             default: {
-                return [['value', 'Value', this.fieldType]];
+                return [['value', 'Value', fieldType]];
             }
         }
     }

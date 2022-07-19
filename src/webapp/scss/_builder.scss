@@ -76,7 +76,11 @@
                     color: #000;
                 }
             }
-
+            &.active {
+                outline: 3px dotted red;
+                outline-offset: -3px;     
+                padding-bottom: 5px;        
+            }
         }
     }
 }

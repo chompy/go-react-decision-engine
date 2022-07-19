@@ -2,12 +2,13 @@ import React from 'react';
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { BTN_DELETE, MSG_FILE_NOT_PDF, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
-import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import BuilderComponent from '../builder/builder';
-import RootNode from '../../nodes/root';
-import PdfFieldNode from '../../nodes/pdf_field';
-import Events from '../../events';
+import { BTN_DELETE, MSG_FILE_NOT_PDF, TREE_DOCUMENT_PDF_FORM } from '../config';
+import BuilderComponent from './builder/builder';
+import RootNode from '../nodes/root';
+import PdfFieldNode from '../nodes/pdf_field';
+import Events from '../events';
+import md5 from 'blueimp-md5';
+import PdfFieldBaseNode from '../nodes/pdf_field_base';
 
 export default class PdfFormComponent extends React.Component {
 
@@ -15,7 +16,7 @@ export default class PdfFormComponent extends React.Component {
         super(props);
         this.state = {
             pdfLoaded: false,
-            formFields: null,
+            formFieldsLoaded: false,
             error: null,
             currentField: null,
             pdfScrollFixed: false,
@@ -25,26 +26,44 @@ export default class PdfFormComponent extends React.Component {
         this.pdfViewerTop = 0;
         this.document = null;
         this.currentFile = null;
+        this.formFields = null;
         this.ruleTypeaheadNode = props?.ruleNode;
         this.node = props?.node ? props.node : new RootNode;
         this.onPdfFile = this.onPdfFile.bind(this);
         this.onPdfFileLoad = this.onPdfFileLoad.bind(this);
         this.onPdfDocument = this.onPdfDocument.bind(this);
+        this.onPdfBase64 = this.onPdfBase64.bind(this);
         this.onPdfFormFields = this.onPdfFormFields.bind(this);
         this.onPdfPage = this.onPdfPage.bind(this);
         this.onPdfRender = this.onPdfRender.bind(this);
-        this.onClickDelete = this.onClickDelete.bind(this);
         this.onBuilderActiveNode = this.onBuilderActiveNode.bind(this);
         this.onScroll = this.onScroll.bind(this);
         this.onResize = this.onResize.bind(this);
+        this.onRootDelete = this.onRootDelete.bind(this);
     }
 
+    /**
+     * @inheritDoc
+     */
     componentDidMount() {
         Events.listen('builder-active-node', this.onBuilderActiveNode);
         window.addEventListener('scroll', this.onScroll);
         window.addEventListener('resize', this.onResize);
+        if (this.node.data.pdfB64) {
+            fetch(this.node.data.pdfB64)
+            .then(res => res.blob())
+            .then(blob => {
+                this.currentFile = blob;
+                let reader = new FileReader;
+                reader.onload = this.onPdfFileLoad;
+                reader.readAsBinaryString(blob);                
+            });
+        }
     }
 
+    /**
+     * @inheritDoc
+     */
     componentWillUnmount() {
         Events.remove('builder-active-node', this.onBuilderActiveNode);
         window.removeEventListener('scroll', this.onScroll);
@@ -85,8 +104,31 @@ export default class PdfFormComponent extends React.Component {
         console.log('> PDF loaded.');
         this.setState({pdfLoaded: true});
         this.document = pdf;
-        let getFieldPromise = pdf.getFieldObjects();
-        getFieldPromise.then(this.onPdfFormFields);
+        // after document is loaded and verified to be a pdf
+        // convert it to base64 for storage
+        let reader = new FileReader;
+        reader.onload = this.onPdfBase64;
+        reader.readAsDataURL(this.currentFile);
+    }
+
+    /**
+     * Captures base64 of PDF document for database storage.
+     * @param {Event} e 
+     */
+    onPdfBase64(e) {
+        if (this.node) {
+            let pdfMd5 = md5(e.target.result);
+            this.node.data.pdfB64 = e.target.result;
+            if (this.node.data.pdfMd5 != pdfMd5) {
+                this.node.label = this.currentFile.name;
+                this.node.type = TREE_DOCUMENT_PDF_FORM;
+                this.node.data.pdfMd5 = pdfMd5;
+                this.node.children = [];
+            }
+        }
+        // get form fields in pdf
+        let getFieldPromise = this.document.getFieldObjects();
+        getFieldPromise.then(this.onPdfFormFields);       
     }
 
     /**
@@ -94,22 +136,32 @@ export default class PdfFormComponent extends React.Component {
      * @param {Object} fields 
      */
     onPdfFormFields(fields) {
-        this.setState(
-            {formFields: fields}, function() {
-                let fields = this.sortFields();
-                if (this.node && this.node.name != this.currentFile.name) {
-                    this.node.type = TREE_DOCUMENT_PDF_FORM;
-                    this.node.children = [];
-                    let fields = this.sortFields();
-                    for (let i in fields) {
-                        let child = new PdfFieldNode(PdfFieldNode.generateUid());
-                        child.setField(fields[i]);
-                        this.node.addChild(child);
-                    }
-                    this.node.name = this.currentFile.name;
+        this.formFields = fields;
+        let sFields = this.sortFields();
+        for (let i in sFields) {
+            let field = sFields[i];
+            let hasNode = false;
+            for (let c in this.node.children) {
+                let child = this.node.children[c];
+                if (child instanceof PdfFieldBaseNode && child.fieldName == field.name) {
+                    child.ruleNode = this.ruleTypeaheadNode;
+                    child.setField(field);
+                    hasNode = true;
+                    break;
                 }
-                for (let i in fields) {
-                    this.highlightField(fields[i].name);
+            }
+            if (!hasNode) {
+                let child = new PdfFieldNode(PdfFieldNode.generateUid());
+                child.ruleNode = this.ruleTypeaheadNode;
+                child.setField(sFields[i]);
+                this.node.addChild(child);
+            }
+        }
+        this.setState(
+            {formFieldsLoaded: true}, function() {
+                let sFields = this.sortFields();
+                for (let i in sFields) {
+                    this.highlightField(sFields[i].name);
                     return;
                 }
                 this.highlightField('');
@@ -159,18 +211,6 @@ export default class PdfFormComponent extends React.Component {
     /**
      * @param {Event} e 
      */
-    onClickDelete(e) {
-        e.preventDefault();
-        this.document = null;
-        this.currentFile = null;
-        this.setState({
-            formFields: null,
-            currentField: null,
-            pdfLoaded: null,
-            error: null
-        });
-    }
-
     onBuilderActiveNode(e) {
         let node = e.detail.node;
         while (node && !(node instanceof PdfFieldNode)) {
@@ -183,6 +223,9 @@ export default class PdfFormComponent extends React.Component {
         this.highlightField('');
     }
 
+    /**
+     * @param {Event} e 
+     */
     onScroll(e) {
         let containerElement = document.getElementById(this.canvasId);
         if (containerElement) {
@@ -206,15 +249,32 @@ export default class PdfFormComponent extends React.Component {
     }
 
     /**
+     * Fires when top node in builder is deleted. Remove PDF.
+     */
+    onRootDelete() {
+        this.document = null;
+        this.currentFile = null;
+        this.node.data = {
+            pdfB64: '',
+            pdfMd5: ''
+        };
+        this.setState({
+            formFieldsLoaded: false,
+            currentField: null,
+            pdfLoaded: null,
+            error: null
+        });
+    }
+
+    /**
      * Sort form fields by page and position on page (top to bottom, left to right).
      * @returns {Array}
      */
     sortFields() {
-        if (!this.state.formFields) { return []; }
-        console.log(this.state.formFields);
-        let items = Object.keys(this.state.formFields).map(function(key) {
-            this.state.formFields[key][0]['name'] = key;
-            return this.state.formFields[key][0];
+        if (!this.formFields) { return []; }
+        let items = Object.keys(this.formFields).map(function(key) {
+            this.formFields[key][0]['name'] = key;
+            return this.formFields[key][0];
         }.bind(this));
         items.sort(function(a, b) {
             if (a.page != b.page) { return a.page - b.page; }
@@ -231,9 +291,9 @@ export default class PdfFormComponent extends React.Component {
      * @param {String} name 
      */
     highlightField(name) {
-        if (this.state.formFields && name in this.state.formFields) { 
+        if (this.formFields && name in this.formFields) { 
             this.setState(
-                {currentField: this.state.formFields[name][0]}, 
+                {currentField: this.formFields[name][0]}, 
                 function() {
                     this.document.getPage(this.state.currentField ? (this.state.currentField.page+1) : 1).then(this.onPdfPage).catch(
                         function(reason) { console.error('> ERROR: ' + reason); }
@@ -253,7 +313,13 @@ export default class PdfFormComponent extends React.Component {
      */
     renderFormFieldEditor() {
         return <div className='field-editor'>
-            <BuilderComponent key={'builder-' + this.currentFile.name} type={TREE_DOCUMENT_PDF_FORM} node={this.node} ruleNode={this.ruleTypeaheadNode} />
+            <BuilderComponent
+                key={'builder-' + this.currentFile.name}
+                type={TREE_DOCUMENT_PDF_FORM}
+                node={this.node}
+                ruleNode={this.ruleTypeaheadNode}
+                onRootDelete={this.onRootDelete}
+            />
         </div>;
     }
 
@@ -271,14 +337,10 @@ export default class PdfFormComponent extends React.Component {
                     &nbsp;{this.state.error}
                 </div>
             </div>;
+        } else if (!this.state.formFieldsLoaded) {
+            return <div className='pdf-form loading'></div>
         }
         return <div className='pdf-form loaded'>
-            <div className='pdf-file-info'>
-                <a href='#' title={BTN_DELETE} onClick={this.onClickDelete}>
-                    <FontAwesomeIcon icon={faCircleXmark} />
-                </a>
-                {this.currentFile.name}
-            </div>
             <div key='pdf-viewer' className={'viewer' + (this.state.pdfScrollFixed ? ' fixed' : '')} id={this.canvasId}></div>
             <div className='editor pure-form pure-form-stacked' style={{minWidth: this.state.builderWidth + 'px'}}>
                 {this.renderFormFieldEditor()}

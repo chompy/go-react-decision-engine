@@ -1,0 +1,7 @@
+"https://{default}/":
+    type: upstream
+    upstream: "app:http"
+
+"https://logicengine.contextualcode.com/":
+    type: upstream
+    upstream: "app:http"

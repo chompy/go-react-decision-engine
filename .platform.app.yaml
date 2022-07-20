@@ -1,0 +1,27 @@
+name: app
+type: golang:1.17
+
+hooks:
+    build: |
+        npm install
+        npm run build
+        cd src/backend
+        go build
+
+web:
+    commands:
+        start: cd src/backend && ./backend
+    
+    locations:
+        /:
+            root: dist
+            index: [index.html]
+            allow: true
+            passthru: '/index.html'
+            expires: 5m
+        /api:
+            allow: false
+            passthru: true
+
+relationships:
+    database: 'database:mongodb'

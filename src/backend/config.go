@@ -3,6 +3,9 @@ package main
 import (
 	"io/ioutil"
 
+	psh "github.com/platformsh/config-reader-go/v2"
+	mongoPsh "github.com/platformsh/config-reader-go/v2/mongo"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,6 +25,18 @@ func ConfigLoad() (Config, error) {
 	out := Config{}
 	if err := yaml.Unmarshal(rawData, &out); err != nil {
 		return out, err
+	}
+	// platform.sh configurations
+	pshConfig, err := psh.NewRuntimeConfig()
+	if err == nil {
+		mongoCreds, err := pshConfig.Credentials("database")
+		if err != nil {
+			return out, err
+		}
+		out.DatabaseURI, err = mongoPsh.FormattedCredentials(mongoCreds)
+		if err != nil {
+			return out, err
+		}
 	}
 	return out, nil
 }

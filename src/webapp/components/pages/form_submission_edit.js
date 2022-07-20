@@ -78,7 +78,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
     onTreeRootResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
         this.setState({ root: res.data, loading: false, });
-        this.setTitle(this.state.root.label);
+        this.setTitle(this.state.root.label + ' (v' + this.state.version.version + ')');
     }
 
     /**
@@ -148,6 +148,9 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         this.gotoPage(DocumentViewListComponent, {id: this.userData.id});
     }
 
+    /**
+     * {@inheritDoc}
+     */
     render() {
         if (this.state.error) {
             return this.renderError();
@@ -155,7 +158,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             return this.renderLoader();
         }
         return <div className='page submission-edit'>
-            <h1 className='title'>{this.state.root.label}</h1>
+            <h1 className='title'>{this.state.root.label + ' (v' + this.state.version.version + ')'}</h1>
             <em>Submission {this.userData.id}</em>
             <TreeVersionInfoComponent treeversion={this.state.submission} showstate={false} />
             <div className='options top'>

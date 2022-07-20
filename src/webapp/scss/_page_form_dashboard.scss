@@ -10,6 +10,9 @@
     }
     .list {
         vertical-align: top;
+        h2 {
+            margin-bottom: 5px;
+        }
     }
     .list.documents, .list.submissions {
         display: inline-block;

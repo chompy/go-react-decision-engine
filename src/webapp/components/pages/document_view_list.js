@@ -78,7 +78,7 @@ export default class DocumentViewListComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        return <div className='page tree-version-list'>
+        return <div className='page document-view-list'>
             <h1 className='title'>{this.title}</h1>
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}

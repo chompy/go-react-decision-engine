@@ -7,6 +7,7 @@ import RootNodeComponent from '../nodes/root';
 import JsonConverter from '../../converters/json';
 import PdfConverter from '../../converters/pdf';
 import UserData from '../../user_data';
+import TreeVersionInfoComponent from '../helper/tree_version_info';
 
 export default class DocumentViewComponent extends BasePageComponent {
 
@@ -20,6 +21,7 @@ export default class DocumentViewComponent extends BasePageComponent {
         this.state.loading = true;
         this.state.tree = null;
         this.state.form = null;
+        this.pdfFormData = null;
     };
 
     /**
@@ -39,7 +41,7 @@ export default class DocumentViewComponent extends BasePageComponent {
             console.error('> ERROR: Missing submission parameter.')
             this.setState({error: ERR_NOT_FOUND});
             return;
-        } 
+        }
         BackendAPI.get('submission/fetch', {id: submissionId}, this.onSubmissionResponse); 
     }
 
@@ -70,9 +72,9 @@ export default class DocumentViewComponent extends BasePageComponent {
         if (this.handleErrorResponse(res)) { return; }
         this.title = res.data.label;
         this.setTitle(this.title);
-        this.formId = res.data.parent;
+        this.formId = res.data.parent;       
         BackendAPI.get(
-            'tree/version/fetch', {id: res.data.id},
+            'tree/version/fetch', {id: res.data.id, version: this.props.path?.version},
             this.onDocumentTreeResponse
         );
     }
@@ -82,6 +84,8 @@ export default class DocumentViewComponent extends BasePageComponent {
      */
     onDocumentTreeResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
+        this.title += ' (v' + res.data.version + ')';
+        this.setTitle(this.title);
         let jc = new JsonConverter;
         let tree = jc.import(res.data.tree);
         if (!tree.type) { tree.type = TREE_DOCUMENT; }
@@ -115,11 +119,33 @@ export default class DocumentViewComponent extends BasePageComponent {
         window.history.back();
     }
 
+    /**
+     * @param {Event} e 
+     */
     onClickPdf(e) {
         e.preventDefault();
-        let c = new PdfConverter;
-        c.userData = this.userData;
-        console.log( c.export(this.state.tree) );
+
+        switch (this.state.tree.type) {
+            case TREE_DOCUMENT: {
+                let c = new PdfConverter;
+                c.userData = this.userData;
+                c.download(this.state.tree);
+                return;
+            }
+            case TREE_DOCUMENT_PDF_FORM: {
+                if (this.pdfFormData) {
+                    window.open(this.pdfFormData, '_blank');
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * @param {String} data 
+     */
+    onPdfFormGenerate(data) {
+        this.pdfFormData = data;
     }
 
     /**
@@ -131,8 +157,10 @@ export default class DocumentViewComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        return <div className='page tree-version-list'>
+        return <div className='page document-view'>
             <h1 className='title'>{this.title}</h1>
+            <em>Submission {this.userData.id}</em>
+            <TreeVersionInfoComponent treeversion={this.state.submission} showstate={false} />
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_DOWNLOAD_PDF, this.onClickPdf, faFilePdf)}
@@ -142,6 +170,7 @@ export default class DocumentViewComponent extends BasePageComponent {
                     node={this.state.tree}
                     userData={this.userData} 
                     parentForm={this.state.form}
+                    pdfViewerCallback={this.onPdfFormGenerate}
                 />
             </section>
         </div>;

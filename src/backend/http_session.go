@@ -8,7 +8,7 @@ import (
 )
 
 const httpSessionCookieName = "ccde_session"
-const httpSessionExpire = 3600
+const httpSessionExpire = 14400 // 4 hours
 
 type httpSession struct {
 	id      string

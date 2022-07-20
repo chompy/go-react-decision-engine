@@ -63,9 +63,13 @@ export default class PathResolver {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                         }
                         let submissionId = path[2].trim();
-                        if (path.length == 4) {
+                        if (path.length >= 4) {
                             let documentId = path[3].trim();
-                            return {component: DocumentViewComponent, team: teamId, submission: submissionId, document: documentId};    
+                            let versionNo = null;
+                            if (path.length >= 5) {
+                                versionNo = parseInt(path[4].trim().substring(1));
+                            }
+                            return {component: DocumentViewComponent, team: teamId, submission: submissionId, document: documentId, version: versionNo};    
                         }
                         return {component: DocumentViewListComponent, team: teamId, id: submissionId};
                     }

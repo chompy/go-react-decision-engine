@@ -16,16 +16,41 @@ export default class PdfViewerComponent extends React.Component {
         this.docTree = props?.document ? props.document : new RootNode;
         this.formTree = props?.form ? props.form : new RootNode;
         this.userData = props?.userData ? props.userData : new UserData;
-        this.renderCallback = props?.callback;
-        this.document = null;
-
+        this.pdfCallback = props?.callback;
+        this.pdfData = null;
+        this.pdfIframeRef = React.createRef();
+        this.onResize = this.onResize.bind(this);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     componentDidMount() {
         this.generatePdf();
+        window.addEventListener('resize', this.onResize);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.onResize);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    componentDidUpdate() {
+        this.onResize();
+    }
+
+    /**
+     * Fires on window resize. Resize PDF iframe.
+     */
+    onResize() {
+        const node = this.pdfIframeRef.current;
+        if (!node) { return; }
+        node.style.height =  (window.innerHeight - node.offsetTop - 32) + 'px';
     }
     
     /**
@@ -67,7 +92,6 @@ export default class PdfViewerComponent extends React.Component {
             doc => {
                 const form = doc.getForm();
                 for (let name in fields) {
-                    console.log(name, fields[name]);
                     try {
                         let field = form.getTextField(name);
                         if (fields[name].length > 0) {
@@ -78,7 +102,6 @@ export default class PdfViewerComponent extends React.Component {
                     try {
                         let field = form.getCheckBox(name);
                         field.uncheck();
-                        console.log(fields[name]);
                         if (fields[name] && fields[name].length > 0) {
                             field.check();
                         }
@@ -92,23 +115,32 @@ export default class PdfViewerComponent extends React.Component {
                 }
                 doc.save().then(
                     res => {
-
-                        // TODO
                         let b = new Blob([res], { type: 'application/pdf' });
                         let reader = new FileReader;
                         reader.onload = function(e) {
-                            console.log(e.target.result);
-                        };
+                            this.pdfData = e.target.result;
+                            if (this.pdfCallback) {
+                                this.pdfCallback(this.pdfData);
+                            }
+                            this.setState({pdfLoaded: true});
+                        }.bind(this);
                         reader.readAsDataURL(b);
-
                     }
                 )
             }
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     render() {
-        return <div>testing123</div>;
+        if (!this.state.pdfLoaded) {
+            return <div className='pdf-viewer loading'></div>;
+        }
+        return <div className='pdf-viewer'>
+            <iframe ref={this.pdfIframeRef} src={this.pdfData} />
+        </div>;
     }
 
 }

@@ -533,6 +533,15 @@ export default class PdfConverter extends BaseConverter {
      * {@inheritdoc}
      */
     export(node) {
+        // TODO this currently forces a download, should this behavior change?
+        return PdfConverter.build(node, this.userData ? this.userData : new UserData(''));
+    }
+
+    /**
+     * Download PDF.
+     * @param {*} node  
+     */
+    download(node) {
         return PdfConverter.build(node, this.userData ? this.userData : new UserData(''));
     }
 

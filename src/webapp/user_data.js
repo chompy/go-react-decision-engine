@@ -260,7 +260,6 @@ export default class UserData {
     isHidden(node, root, matrixId) {
         if (!(node instanceof BaseNode)) { return false; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
-        console.log(key);
         if (this.hasFlag(FLAG_HIDDEN, key)) { return true; }
         if (root && root instanceof BaseNode) {
             let parent = node;

@@ -211,7 +211,12 @@ export default class RootNodeComponent extends BaseNodeComponent {
             case TREE_DOCUMENT_PDF_FORM: {
                 return <div className={'tree-node tree-' + this.constructor.getTypeName() + ' tree-' + this.node.type}>
                     <div className='tree-children'>
-                        <PdfViewerComponent document={this.node} form={this.props?.parentForm} userData={this.userData} />
+                        <PdfViewerComponent
+                            document={this.node}
+                            form={this.props?.parentForm}
+                            userData={this.userData}
+                            callback={this.props?.pdfViewerCallback}
+                        />
                     </div>
                 </div>;
             }

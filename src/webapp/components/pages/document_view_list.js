@@ -66,7 +66,7 @@ export default class DocumentViewListComponent extends BasePageComponent {
      */
     onClickBack(e) {
         e.preventDefault();
-        window.history.back();
+        this.gotoReferer();
     }
 
     /**

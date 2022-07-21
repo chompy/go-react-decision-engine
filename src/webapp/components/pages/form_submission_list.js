@@ -1,21 +1,18 @@
 import React from 'react';
-import { faBackward, faTrash, faEdit, faCopy, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import EditTitleComponent from '../helper/edit_title';
-import { BTN_BACK, BTN_DELETE, ERR_NOT_FOUND, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_LOADING, TITLE_FORM_SUBMISSION_LIST, TREE_DOCUMENT, TREE_FORM } from '../../config';
+import { BTN_BACK, ERR_NOT_FOUND, TITLE_FORM_SUBMISSION_LIST } from '../../config';
 import ApiTableComponent from '../helper/api_table';
-import TreeVersionEditPageComponent from './tree_version_edit';
-import { message as msgPopup } from 'react-message-popup';
-import FormDashboardPageComponent from './form_dashboard';
-import TreeListPageComponent from './tree_list';
 import FormSubmissionEditPageComponent from './form_submission_edit';
+import DocumentViewComponent from './document_view';
 
 export default class FormSubmissionListPageComponent extends BasePageComponent {
 
     constructor(props) {
         super(props);
         this.title = '';
+        this.ref = null;
         this.state.root = null;
         this.state.loading = true;
     }
@@ -32,13 +29,12 @@ export default class FormSubmissionListPageComponent extends BasePageComponent {
      */
     onReady() {
         this.setState({loading: true});
-        let treeRootId = typeof this.props.path.id != 'undefined' ? this.props.path.id : null;
-        if (!treeRootId) {
+        if (!this.props.path?.id) {
             console.error('> ERROR: Missing ID parameter.')
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        BackendAPI.get('tree/fetch', {team: this.state.user.team, id: treeRootId}, this.onTreeResponse);    
+        BackendAPI.get('tree/fetch', {team: this.state.user.team, id: this.props.path.id}, this.onTreeResponse);    
     }
 
     /**
@@ -47,16 +43,25 @@ export default class FormSubmissionListPageComponent extends BasePageComponent {
     onTreeResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
         this.setState({root: res.data});
-        this.setLoaded();
         this.title = TITLE_FORM_SUBMISSION_LIST.replace('{label}', res.data.label);
         this.setTitle(this.title);
+        this.setLoaded();
     }
 
     /**
      * @param {Object} data 
      */
     onSelectSubmission(data) {
+        if (this.props.path?.ref) {
+            let ref = this.props.path.ref.split('-');
+            this.gotoPage(DocumentViewComponent, {submission: data.id, document: ref[0], version: ref[1].substring(1)});
+            return;
+        }
         this.gotoPage(FormSubmissionEditPageComponent, {id: data.id});
+    }
+
+    onBackButton() {
+        this.gotoReferer();
     }
 
     /**
@@ -71,7 +76,7 @@ export default class FormSubmissionListPageComponent extends BasePageComponent {
         return <div className='page tree-version-list'>
             <h1 className='title'>{this.title}</h1>
             <div className='options top'>
-                {this.renderPageButton(BTN_BACK, FormDashboardPageComponent, {id: this.state.root.id}, faBackward)}
+                {this.renderCallbackButton(BTN_BACK, this.onBackButton, faBackward)}
             </div>
             <section>
                 <ApiTableComponent

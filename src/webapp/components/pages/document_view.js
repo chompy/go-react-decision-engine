@@ -36,7 +36,7 @@ export default class DocumentViewComponent extends BasePageComponent {
      */
     onReady() {
         this.setState({loading: true});
-        let submissionId = typeof this.props.path.submission != 'undefined' ? this.props.path.submission : null;
+        let submissionId = this.props.path?.submission;
         if (!submissionId) {
             console.error('> ERROR: Missing submission parameter.')
             this.setState({error: ERR_NOT_FOUND});
@@ -53,7 +53,7 @@ export default class DocumentViewComponent extends BasePageComponent {
         this.userData = UserData.importJSON(res.data);
         this.formVersion = res.data.form_version;
         this.setState({submission: res.data});
-        let documentId = typeof this.props.path.document != 'undefined' ? this.props.path.document : null;
+        let documentId = this.props.path?.document;
         if (!documentId) {
             console.error('> ERROR: Missing document parameter.')
             this.setState({error: ERR_NOT_FOUND});
@@ -116,7 +116,7 @@ export default class DocumentViewComponent extends BasePageComponent {
      */
     onClickBack(e) {
         e.preventDefault();
-        window.history.back();
+        this.gotoReferer();
     }
 
     /**

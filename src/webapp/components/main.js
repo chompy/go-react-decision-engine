@@ -9,6 +9,7 @@ import ErrorPageComponent from './pages/error';
 import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED } from '../config';
 import { message as msgPopup } from 'react-message-popup';
 import TreeListPageComponent from './pages/tree_list';
+import { componentsToColor } from 'pdf-lib';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -28,6 +29,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.onLogin = this.onLogin.bind(this);
         this.onLogout = this.onLogout.bind(this);
         this.onGotoPage = this.onGotoPage.bind(this);
+        this.onGotoReferer = this.onGotoReferer.bind(this);
         this.onSessionExpire = this.onSessionExpire.bind(this);
     }
 
@@ -42,6 +44,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.listen('login', this.onLogin);
         Events.listen('logout', this.onLogout);
         Events.listen('goto_page', this.onGotoPage);
+        Events.listen('goto_referer', this.onGotoReferer);
         Events.listen('session_expire', this.onSessionExpire);
     }
 
@@ -52,6 +55,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.remove('login', this.onLogin);
         Events.remove('logout', this.onLogout);
         Events.remove('goto_page', this.onGotoPage);
+        Events.remove('goto_refer', this.onGotoReferer);
         Events.remove('session_expire', this.onSessionExpire);
     }
 
@@ -141,6 +145,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     }
 
     /**
+     * Fires when 'goto-page' event is received.
      * @param {Event} e 
      */
     onGotoPage(e) {
@@ -148,21 +153,50 @@ export default class DecisionEngineMainComponent extends React.Component {
     }
 
     /**
+     * Fires when 'goto-referer' event is received.
+     */
+    onGotoReferer() {
+        this.gotoReferer();
+    }
+
+    /**
+     * Navigate to page.
      * @param {BasePageComponent} component 
      * @param {Object} params 
+     * @param {boolean} noReferer
      */
-    gotoPage(component, params) {
+    gotoPage(component, params, noReferer) {
         console.log('> Go to "' + component.getName() + '" page.');
         params = Object.assign({}, {
             team: this.state.team ? this.state.team.id : '',
             user: this.state.user ? this.state.user.id : ''
         }, params ? params : {});
-        PathResolver.setPathFromComponent(component, params);
+        console.log(component, params);
+        let path = PathResolver.getPathFromComponent(component, params);
+        PathResolver.setPath(path);
         let resolvedPage = PathResolver.resolveCurrentPath();
         if (component == LoginPageComponent && typeof params.referer != 'undefined') {
             resolvedPage.referer = params.referer;
         }
-        this.setState({path: resolvedPage, referer: this.state.path});
+        if (this.state.path && !noReferer) {
+            window.localStorage.setItem(
+                'page-referer-' + resolvedPage.component.getName(),
+                PathResolver.getPathFromComponent(this.state.path.component, this.state.path)
+            );
+        }
+        let stateParams = {path: resolvedPage};
+        if (!noReferer) { stateParams.referer = this.state.path; }
+        this.setState(stateParams);
+    }
+
+    /**
+     * Navigate to referer page.
+     */
+    gotoReferer() {
+        if (!this.state.path) { return; }
+        let pathStr = window.localStorage.getItem('page-referer-' + this.state.path.component.getName());
+        let path = PathResolver.resolvePath(pathStr);
+        this.gotoPage(path.component, path, true);
     }
 
     /**

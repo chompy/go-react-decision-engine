@@ -178,6 +178,7 @@ export default class BasePageComponent extends React.Component {
         return true;
     }
 
+    
     /**
      * Render page navigation button.
      * @param {string} label 

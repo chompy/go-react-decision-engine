@@ -115,7 +115,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
     onClickBack(e) {
         e.preventDefault();
         this.onSave();
-        window.history.back();
+        this.gotoReferer();
     }
 
     /**
@@ -136,7 +136,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_SUBMISSION_DELETED, MSG_DISPLAY_TIME);
-        window.history.back();
+        this.gotoReferer();
     }
 
     /**

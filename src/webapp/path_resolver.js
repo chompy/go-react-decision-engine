@@ -8,7 +8,7 @@ import LoginPageComponent from "./components/pages/login";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
-import { APP_TITLE, ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
+import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 
 
 // Determines pages and page parameters from current URL path.
@@ -96,7 +96,11 @@ export default class PathResolver {
                                 if (path.length >= 5) {
                                     switch (path[4]) {
                                         case 'submissions': {
-                                            return {component: FormSubmissionListPageComponent, team: teamId, id: formId};
+                                            let ref = null;
+                                            if (path.length >= 6) {
+                                                ref = path[5].substring(4);
+                                            }
+                                            return {component: FormSubmissionListPageComponent, team: teamId, id: formId, ref: ref};
                                         }
                                         default: {
                                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
@@ -136,33 +140,24 @@ export default class PathResolver {
     static resolveCurrentPath() {
         return PathResolver.resolvePath(window.location.pathname);
     }
-    
-    /**
-     * @param {string} path 
-     * @param {string} title 
-     */
-    static setPath(path, title) {
-        if (path[0] != '/') {
-            path = '/' + path;
-        }
-        history.pushState({}, '', path);
-    }
 
     /**
      * @param {*} component 
      * @param {Object} params 
      */
-    static setPathFromComponent(component, params) {
+    static getPathFromComponent(component, params) {
         let componentList = {
             // public pages
             '{team}/login': LoginPageComponent,
             // normal user pages
             '{team}/form/{id}': FormSubmissionEditPageComponent,
             '{team}/view/{id}': DocumentViewListComponent,
+            '{team}/view/{submission}/{document}/v{version}': DocumentViewComponent,
             '{team}/view/{submission}/{document}': DocumentViewComponent,
             // admin pages
             '{team}/admin/docs/{id}': TreeListPageComponent,
             '{team}/admin/forms': TreeListPageComponent,
+            '{team}/admin/form/{id}/submissions/ref-{ref}': FormSubmissionListPageComponent,
             '{team}/admin/form/{id}/submissions': FormSubmissionListPageComponent,
             '{team}/admin/form/{id}': FormDashboardPageComponent,
             '{team}/admin/tree/{id}/v{version}': TreeVersionEditPageComponent,
@@ -175,10 +170,27 @@ export default class PathResolver {
                     path = path.replace('{' + k.toLowerCase() + '}', params[k]);
                 }
                 if (path.includes('}') || path.includes('{')) { continue; }
-                PathResolver.setPath(path, component.getTitle());
-                return;
+                return path;
             }
         }
+    }
+    
+    /**
+     * @param {string} path 
+     */
+    static setPath(path) {
+        if (path[0] != '/') {
+            path = '/' + path;
+        }
+        history.pushState({}, '', path);
+    }
+
+    /**
+     * @param {*} component 
+     * @param {Object} params 
+     */
+    static setPathFromComponent(component, params) {
+        PathResolver.setPath(PathResolver.getPathFromComponent(component, params));
     }
 
 }

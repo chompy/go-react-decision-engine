@@ -171,7 +171,6 @@ export default class DecisionEngineMainComponent extends React.Component {
             team: this.state.team ? this.state.team.id : '',
             user: this.state.user ? this.state.user.id : ''
         }, params ? params : {});
-        console.log(component, params);
         let path = PathResolver.getPathFromComponent(component, params);
         PathResolver.setPath(path);
         let resolvedPage = PathResolver.resolveCurrentPath();

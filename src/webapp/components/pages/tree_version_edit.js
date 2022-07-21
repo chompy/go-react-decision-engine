@@ -292,7 +292,6 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-
         let builder = <BuilderComponent
             node={this.state.tree}
             type={this.state.root.type}

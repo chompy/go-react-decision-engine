@@ -151,7 +151,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         );
     }
 
-
     /**
      * @param {Object} res 
      */

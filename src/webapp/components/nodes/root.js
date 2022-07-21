@@ -17,6 +17,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
         this.state.section = null;
         this.state.validationErrorCount = 0;
         this.state.hasRuleEval = false;
+        this.state.hasChange = false;
         this.onSection = this.onSection.bind(this);
         this.onSave = this.onSave.bind(this);
     }
@@ -51,6 +52,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
      * {@inheritdoc}
      */
     onUpdateCallback(node, matrix) {
+        this.setState({hasChange: true});
         this.evaluateRules();
         super.onUpdateCallback(node, matrix);
     }
@@ -110,6 +112,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
      */
     onSave(e) {
         e.preventDefault();
+        this.setState({hasChange: false});
         // flag all questions as have user input
         this.userData.setUserInputAll();
         this.evaluateRules();
@@ -201,7 +204,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
      */
     render() {
         if (!(this.node instanceof RootNode) || !this.state.hasRuleEval) { return null; }
-
         switch (this.node.type) {
             case TREE_DOCUMENT: {
                 return <div className={'tree-node tree-' + this.constructor.getTypeName() + ' tree-' + this.node.type}>
@@ -221,7 +223,6 @@ export default class RootNodeComponent extends BaseNodeComponent {
                 </div>;
             }
         }
-
         let options = [];
         if (this.saveCallback) {
             options.push(
@@ -229,6 +230,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
                     key='tree-btn-save'
                     className='pure-button'
                     onClick={this.onSave}
+                    disabled={!this.state.hasChange}
                 >
                     {BTN_SAVE} <FontAwesomeIcon icon={faFloppyDisk} />
                 </button>                

@@ -3,7 +3,8 @@
         margin: 20px;
     }
     section {
-        padding: 20px;
+        padding: 10px 20px 20px 20px;
+        margin-bottom: 20px;
         .section-name {
             border-bottom: 1px solid $page-section-divide;
             span {
@@ -19,6 +20,7 @@
         }
         button {
             margin-right: 5px;
+            margin-bottom: 5px;
         }
     }
     &.login section {

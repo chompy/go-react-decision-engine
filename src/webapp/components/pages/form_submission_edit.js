@@ -15,6 +15,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
     constructor(props) {
         super(props);
         this.userData = null;
+        this.hasChange = false;
         this.state.submission = null;
         this.state.root = null;
         this.state.version = null;
@@ -85,6 +86,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
      * Fired when save is requested.
      */
     onSave() {
+        if (!this.hasChange) { return; }
         this.msgLoadPromise = msgPopup.loading(MSG_SAVING, 10000);
         BackendAPI.post(
             'submission/store',
@@ -101,12 +103,20 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
     }
 
     /**
+     * Fires when user changes/adds an answer.
+     */
+    onUpdate() {
+        this.hasChange = true;
+    }
+
+    /**
      * @param {Object} res 
      */
     onStoreResponse(res) {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_SAVED, MSG_DISPLAY_TIME);
+        this.hasChange = false;
     }
 
     /**
@@ -171,6 +181,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
                     node={this.state.tree}
                     userData={this.userData} 
                     onSave={this.onSave}
+                    onUpdate={this.onUpdate}
                 />
             </section>
         </div>;

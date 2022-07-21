@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -22,28 +23,44 @@ type HTTPMessage struct {
 	UserCan []string    `json:"user_can,omitempty"`
 }
 
+type HTTPEndpoint struct {
+	Path     string
+	Function func(http.ResponseWriter, *http.Request)
+	Methods  string
+}
+
+var httpEndpoints = []HTTPEndpoint{
+	{"/api/user/login", HTTPUserLogin, "POST"},
+	{"/api/user/logout", HTTPUserLogout, "GET,POST"},
+	{"/api/user/me", HTTPUserMe, "GET"},
+	{"/api/user", HTTPUser, "GET"},
+	{"/api/team", HTTPTeam, "GET"},
+	{"/api/team/users", HTTPTeamUsers, "GET"},
+	{"/api/tree/fetch", HTTPTreeRootFetch, "GET"},
+	{"/api/tree/list", HTTPTreeRootList, "GET"},
+	{"/api/tree/store", HTTPTreeRootStore, "POST"},
+	{"/api/tree/delete", HTTPTreeRootDelete, "POST"},
+	{"/api/tree/version/fetch", HTTPTreeVersionFetch, "GET"},
+	{"/api/tree/version/list", HTTPTreeVersionList, "GET"},
+	{"/api/tree/version/store", HTTPTreeVersionStore, "POST"},
+	{"/api/tree/version/delete", HTTPTreeVersionDelete, "POST"},
+	{"/api/tree/version/publish", HTTPTreeVersionPublish, "POST"},
+	{"/api/submission/fetch", HTTPFormSubmissionFetch, "GET"},
+	{"/api/submission/list", HTTPFormSubmissionList, "GET"},
+	{"/api/submission/store", HTTPFormSubmissionStore, "POST"},
+	{"/api/submission/delete", HTTPFormSubmissionDelete, "POST"},
+	{"/api/rule_template/fetch", HTTPRuleTemplateFetch, "GET"},
+	{"/api/rule_template/list", HTTPRuleTemplateList, "GET"},
+	{"/api/rule_template/store", HTTPRuleTemplateStore, "POST"},
+	{"/api/rule_template/delete", HTTPRuleTemplateDelete, "POST"},
+}
+
 func HTTPStart(config *Config) error {
-	// init routes
 	r := mux.NewRouter()
-	r.HandleFunc("/api/user/login", HTTPUserLogin).Methods("POST")
-	r.HandleFunc("/api/user/logout", HTTPUserLogout).Methods("GET", "POST")
-	r.HandleFunc("/api/user/me", HTTPUserMe).Methods("GET")
-	r.HandleFunc("/api/user", HTTPUser).Methods("GET")
-	r.HandleFunc("/api/team", HTTPTeam).Methods("GET")
-	r.HandleFunc("/api/team/users", HTTPTeamUsers).Methods("GET")
-	r.HandleFunc("/api/tree/fetch", HTTPTreeRootFetch).Methods("GET")
-	r.HandleFunc("/api/tree/list", HTTPTreeRootList).Methods("GET")
-	r.HandleFunc("/api/tree/store", HTTPTreeRootStore).Methods("POST")
-	r.HandleFunc("/api/tree/delete", HTTPTreeRootDelete).Methods("POST")
-	r.HandleFunc("/api/tree/version/fetch", HTTPTreeVersionFetch).Methods("GET")
-	r.HandleFunc("/api/tree/version/list", HTTPTreeVersionList).Methods("GET")
-	r.HandleFunc("/api/tree/version/store", HTTPTreeVersionStore).Methods("POST")
-	r.HandleFunc("/api/tree/version/delete", HTTPTreeVersionDelete).Methods("POST")
-	r.HandleFunc("/api/tree/version/publish", HTTPTreeVersionPublish).Methods("POST")
-	r.HandleFunc("/api/submission/fetch", HTTPFormSubmissionFetch).Methods("GET")
-	r.HandleFunc("/api/submission/list", HTTPFormSubmissionList).Methods("GET")
-	r.HandleFunc("/api/submission/store", HTTPFormSubmissionStore).Methods("POST")
-	r.HandleFunc("/api/submission/delete", HTTPFormSubmissionDelete).Methods("POST")
+	for _, e := range httpEndpoints {
+		r.HandleFunc(e.Path, e.Function).Methods(strings.Split(e.Methods, ",")...)
+	}
+	r.HandleFunc("/api/batch", HTTPBatch).Methods("POST")
 	log.Println("HTTP listening.")
 	// start server
 	return http.ListenAndServe(fmt.Sprintf(":%d", config.HTTPPort), r)

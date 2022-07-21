@@ -78,7 +78,13 @@ func FetchTreeVersionLatestPublished(rootId string, user *User) (*TreeVersion, e
 func ListTreeVersion(rootId string, user *User, offset int) ([]*TreeVersion, int, error) {
 	// database fetch
 	rootDbId := DatabaseIDFromString(rootId)
-	res, count, err := databaseList(TreeVersion{}, bson.M{"root_id": rootDbId}, bson.M{"created": -1}, nil, offset)
+	res, count, err := databaseList(
+		TreeVersion{},
+		bson.M{"root_id": rootDbId},
+		bson.M{"created": -1},
+		bson.M{"tree": 0},
+		offset,
+	)
 	if err != nil {
 		return nil, 0, err
 	}

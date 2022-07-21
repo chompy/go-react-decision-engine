@@ -40,4 +40,13 @@ export default class BackendAPI {
         return BackendAPI.request(endpoint, 'POST', query, data, callback);
     }
 
+    static batch(requests, callback) {
+        if (typeof requests != 'object' || requests.length == 0) { return; }
+        let fixedRequests = requests.map(function(r) {
+            r.path = URL_PREFIX + r.path;
+            return r;
+        })
+        return BackendAPI.request('batch', 'POST', null, fixedRequests, callback);
+    }
+
 }

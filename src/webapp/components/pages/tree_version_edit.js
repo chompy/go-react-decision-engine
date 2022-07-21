@@ -66,32 +66,31 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        BackendAPI.get('tree/fetch', {team: this.state.user.team, id: treeRootId}, this.onTreeRootResponse);    
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onTreeRootResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
         let version = typeof this.props.path.version != 'undefined' ? this.props.path.version : null;
         if (!version) {
             console.error('> ERROR: Missing version parameter.')
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        this.setState({root: res.data});
-        BackendAPI.get('tree/version/fetch', {id: res.data.id, version: version}, this.onTreeVersionResponse);    
+        BackendAPI.batch(
+            [
+                {path: 'tree/fetch', payload: {team: this.state.user.team, id: treeRootId}},
+                {path: 'tree/version/fetch', payload: {id: treeRootId, version: version}}
+            ],
+            this.onTreeResponse
+        );
     }
 
     /**
      * @param {Object} res 
-     */
-    onTreeVersionResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
+     */    
+    onTreeResponse(res) {
+        if (this.handleBatchErrorResponse(res)) { return; }
+        let resRoot = res.data[0].data;
+        let resTree = res.data[1].data;
         // new tree
-        if (!res.data.tree || res.data.tree.length == 0) {
-            res.data.tree = [{
+        if (!resTree.tree || resTree.tree.length == 0) {
+            resTree.tree = [{
                 label: 'TOP',
                 type: 'root',
                 version: res.data.version,
@@ -99,15 +98,16 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 modified: new Date()
             }];
         }
-        res.data.tree[0].uid = this.state.root.id;
-        res.data.tree[0].version = res.data.version;
+        resTree.tree[0].uid = resRoot.id;
+        resTree.tree[0].version = resTree.version;
         let jc = new JsonConverter;
         this.setState({
-            object: res.data,
-            tree: jc.import(res.data.tree)
+            object: resTree,
+            root: resRoot,
+            tree: jc.import(resTree.tree)
         });
-        this.setTitle(this.state.root.label + ' v' + res.data.version);
-        if (this.state.root.type == TREE_DOCUMENT || this.state.root.type == TREE_DOCUMENT_PDF_FORM) {
+        this.setTitle(resRoot.label + ' v' + resTree.version);
+        if (resRoot.type == TREE_DOCUMENT || resRoot.type == TREE_DOCUMENT_PDF_FORM) {
             BackendAPI.get(
                 'tree/version/fetch', 
                 {id: this.state.root.parent}, this.onFormTreeVersionResponse
@@ -119,7 +119,6 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
 
     /**
      * @param {Object} res 
-     * @returns 
      */
     onFormTreeVersionResponse(res)
     {

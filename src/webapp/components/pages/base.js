@@ -178,6 +178,18 @@ export default class BasePageComponent extends React.Component {
         return true;
     }
 
+    /**
+     * Handles an error from a batch API response.
+     * @param {Object} res 
+     * @returns {boolean}
+     */
+    handleBatchErrorResponse(res) {
+        if (this.handleErrorResponse(res)) { return true; }
+        for (let i in res.data) {
+            if (this.handleErrorResponse(res.data[i])) { return true; }
+        }
+        return false;
+    }
     
     /**
      * Render page navigation button.

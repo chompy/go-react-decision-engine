@@ -28,6 +28,10 @@ func databaseFilter(data interface{}) interface{} {
 		{
 			return bson.M{"_id": d.ID}
 		}
+	case *RuleTemplate:
+		{
+			return bson.M{"_id": d.ID}
+		}
 	}
 	return nil
 }

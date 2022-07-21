@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -45,13 +47,12 @@ func FetchTreeRoot(id string, user *User) (*TreeRoot, error) {
 	return treeRoot, nil
 }
 
-// List all tree root forms that user's team has access to.
-func ListFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
+func listRoot(filter bson.M, user *User, offset int) ([]*TreeRoot, int, error) {
 	if user == nil {
 		return nil, 0, ErrNoUser
 	}
 	// databse fetch
-	res, count, err := databaseList(TreeRoot{}, bson.M{"type": string(TreeForm), "parent": user.Team}, bson.M{"created": -1}, nil, offset)
+	res, count, err := databaseList(TreeRoot{}, filter, bson.M{"created": -1}, nil, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -69,14 +70,65 @@ func ListFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
 	return out, count, nil
 }
 
+// List all tree root forms that user's team has access to.
+func ListFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
+	return listRoot(
+		bson.M{"type": string(TreeForm), "parent": user.Team},
+		user,
+		offset,
+	)
+}
+
 // List all documents for given form tree root uid.
 func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, int, error) {
+	pFormRootUid := DatabaseIDFromString(formRootUid)
+	return listRoot(
+		bson.M{"type": string(TreeDocument), "parent": pFormRootUid},
+		user,
+		offset,
+	)
+}
+
+func listPublishedRoot(filter bson.M, user *User, offset int) ([]*TreeRoot, int, error) {
 	if user == nil {
 		return nil, 0, ErrNoUser
 	}
-	// database fetch
-	pFormRootUid := DatabaseIDFromString(formRootUid)
-	res, count, err := databaseList(TreeRoot{}, bson.M{"type": string(TreeDocument), "parent": pFormRootUid}, bson.M{"created": -1}, nil, offset)
+	res, count, err := databaseListAggregate(
+		TreeRoot{},
+		mongo.Pipeline{
+			bson.D{bson.E{Key: "$match", Value: filter}},
+			bson.D{bson.E{Key: "$lookup", Value: bson.M{
+				"from": getDatabaseCollectionNameFromData(TreeVersion{}),
+				"let":  bson.M{"root_id": "$_id"},
+				"pipeline": bson.A{
+					bson.M{
+						"$match": bson.M{
+							"$expr": bson.M{
+								"$and": bson.A{
+									bson.M{"$eq": bson.A{"$root_id", "$$root_id"}},
+									bson.M{"$eq": bson.A{"$state", TreePublished}},
+								},
+							},
+						},
+					},
+				},
+				"as": "published_version",
+			}}},
+			bson.D{bson.E{Key: "$match", Value: bson.M{
+				"published_version": bson.M{
+					"$exists": true,
+					"$size":   1,
+				},
+			}}},
+			bson.D{bson.E{Key: "$project", Value: bson.M{
+				"published_version": 0,
+			}}},
+			bson.D{bson.E{Key: "$sort", Value: bson.M{
+				"created": -1,
+			}}},
+		},
+		offset,
+	)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -92,6 +144,25 @@ func ListDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, 
 		out = append(out, item.(*TreeRoot))
 	}
 	return out, count, nil
+}
+
+// List all form that contain published version.
+func ListPublishedFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
+	return listPublishedRoot(
+		bson.M{"type": string(TreeForm), "parent": user.Team},
+		user,
+		offset,
+	)
+}
+
+// List all documents that contain published version for given form tree root uid.
+func ListPublishedDocumentRoot(formRootUid string, user *User, offset int) ([]*TreeRoot, int, error) {
+	pFormRootUid := DatabaseIDFromString(formRootUid)
+	return listPublishedRoot(
+		bson.M{"type": string(TreeDocument), "parent": pFormRootUid},
+		user,
+		offset,
+	)
 }
 
 // Store the tree root.

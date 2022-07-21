@@ -43,6 +43,8 @@ func HTTPTreeRootList(w http.ResponseWriter, r *http.Request) {
 	if offset < 0 {
 		offset = 0
 	}
+	// require published items only
+	requirePublished := r.URL.Query().Get("published") != ""
 	// get user
 	s := HTTPGetSession(r)
 	user := s.getUser()
@@ -59,11 +61,19 @@ func HTTPTreeRootList(w http.ResponseWriter, r *http.Request) {
 				HTTPSendError(w, ErrHTTPMissingParam)
 				return
 			}
+			if requirePublished {
+				res, count, err = ListPublishedDocumentRoot(formId, user, offset)
+				break
+			}
 			res, count, err = ListDocumentRoot(formId, user, offset)
 			break
 		}
 	default:
 		{
+			if requirePublished {
+				res, count, err = ListPublishedFormRoot(user, offset)
+				break
+			}
 			res, count, err = ListFormRoot(user, offset)
 			break
 		}

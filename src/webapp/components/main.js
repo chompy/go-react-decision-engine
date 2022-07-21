@@ -10,6 +10,7 @@ import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS,
 import { message as msgPopup } from 'react-message-popup';
 import TreeListPageComponent from './pages/tree_list';
 import { componentsToColor } from 'pdf-lib';
+import UserTimeComponent from './helper/user_time';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -25,7 +26,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         };
         this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
-        this.onTeam = this.onTeam.bind(this);
+        this.onUserTeam = this.onUserTeam.bind(this);
         this.onLogin = this.onLogin.bind(this);
         this.onLogout = this.onLogout.bind(this);
         this.onGotoPage = this.onGotoPage.bind(this);
@@ -39,7 +40,13 @@ export default class DecisionEngineMainComponent extends React.Component {
     componentDidMount() {
         window.addEventListener('popstate', this.onPopState);
         if (typeof this.state.path.team != 'undefined' && this.state.path.team) {
-            BackendAPI.get('team', {id: this.state.path.team}, this.onTeam);
+            BackendAPI.batch(
+                [
+                    {path: 'team', payload: {id: this.state.path.team}},
+                    {path: 'user/me'}
+                ],
+                this.onUserTeam
+            )
         }
         Events.listen('login', this.onLogin);
         Events.listen('logout', this.onLogout);
@@ -67,7 +74,9 @@ export default class DecisionEngineMainComponent extends React.Component {
             if (this.state.path.component == LoginPageComponent) {
                 return;
             } else if (this.state.path.component != LoginPageComponent && this.state.path.team) {
-                this.gotoPage(LoginPageComponent, {team: this.state.path.team, referer: this.state.path});
+                this.gotoPage(
+                    LoginPageComponent, {team: this.state.path.team, referer: this.state.path}, true
+                );
                 return;
             }
             this.displayError(ERR_NOT_FOUND);
@@ -76,25 +85,32 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Fetched user "' + res.data.email + '" (' + res.data.id + ').');
         this.setState({user: res.data});
         if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
-            this.gotoPage(TreeListPageComponent, {team: res.data.team});
+            this.gotoPage(TreeListPageComponent, {team: res.data.team}, true);
         }
+        UserTimeComponent.users[res.data.id] = res.data;
         Events.dispatch('user_me', res.data);
     }
 
     /**
      * @param {Object} res 
      */
-    onTeam(res) {
+    onUserTeam(res) {
         if (!res.success) { 
             this.displayError(ERR_NOT_FOUND);
             return;
         }
-        console.log('> Fetched team "' + res.data.name + '" (' + res.data.id + ').');
+        let teamResp = res.data[0];
+        let userResp = res.data[1];
+        if (!teamResp.success) {
+            this.displayError(ERR_NOT_FOUND);
+            return;
+        }
+        console.log('> Fetched team "' + teamResp.data.name + '" (' + teamResp.data.id + ').');
         this.setState({
-            team: res.data
+            team: teamResp.data
         });
-        Events.dispatch('team', res.data);
-        BackendAPI.get('user/me', null, this.onUserMe);
+        Events.dispatch('team', teamResp.data);
+        this.onUserMe(userResp);
     }
 
     /**
@@ -105,10 +121,10 @@ export default class DecisionEngineMainComponent extends React.Component {
         BackendAPI.get('user/me', null, this.onUserMe);
         msgPopup.success(MSG_LOGIN_SUCCESS, MSG_DISPLAY_TIME);
         if (typeof this.state.path.referer != 'undefined') {
-            this.gotoPage(this.state.path.referer.component, this.state.path.referer);
+            this.gotoPage(this.state.path.referer.component, this.state.path.referer, true);
             return; 
         }
-        this.gotoPage(TreeListPageComponent);
+        this.gotoPage(TreeListPageComponent, {}, true);
     }
 
     /**
@@ -118,7 +134,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Log out successful.');
         this.setState({user: null});
         msgPopup.success(MSG_LOGOUT_SUCCESS, MSG_DISPLAY_TIME);
-        this.gotoPage(LoginPageComponent, {team: this.state.team.id});
+        this.gotoPage(LoginPageComponent, {team: this.state.team.id}, true);
     }
 
     /**
@@ -128,7 +144,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         e.preventDefault();
         let resolvedPage = PathResolver.resolveCurrentPath();
         if (resolvedPage.component == LoginPageComponent && this.state.user) {
-            this.gotoPage(TreeListPageComponent, {team: this.state.user.team});
+            this.gotoPage(TreeListPageComponent, {team: this.state.user.team}, true);
             return;
         }
         this.setState({path: resolvedPage});
@@ -140,7 +156,7 @@ export default class DecisionEngineMainComponent extends React.Component {
     onSessionExpire(e) {
         msgPopup.success(MSG_SESSION_EXPIRED, MSG_DISPLAY_TIME);
         this.gotoPage(
-            LoginPageComponent, {referer: this.state.path}
+            LoginPageComponent, {referer: this.state.path}, true
         );
     }
 

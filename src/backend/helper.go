@@ -26,6 +26,10 @@ func getDatabaseCollectionNameFromData(data interface{}) string {
 		{
 			return "team"
 		}
+	case RuleTemplate, *RuleTemplate:
+		{
+			return "rule_template"
+		}
 	}
 	return ""
 }
@@ -68,6 +72,10 @@ func getEmptyStruct(dataType interface{}) interface{} {
 	case Team, *Team:
 		{
 			return &Team{}
+		}
+	case RuleTemplate, *RuleTemplate:
+		{
+			return &RuleTemplate{}
 		}
 	}
 	return nil

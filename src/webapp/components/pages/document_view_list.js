@@ -1,8 +1,8 @@
 import React from 'react';
-import { faBackward, faFilePdf } from '@fortawesome/free-solid-svg-icons'
+import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_DOWNLOAD_PDF, ERR_NOT_FOUND, TREE_DOCUMENT } from '../../config';
+import { BTN_BACK, ERR_NOT_FOUND, TREE_DOCUMENT } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import DocumentViewComponent from './document_view';
 
@@ -92,7 +92,7 @@ export default class DocumentViewListComponent extends BasePageComponent {
                         'modified': 'Modified'
                     }}
                     endpoint='tree/list'
-                    params={{type: TREE_DOCUMENT, form: this.state.submission.form_id}}
+                    params={{type: TREE_DOCUMENT, form: this.state.submission.form_id, published: true}}
                     callback={this.onSelectDocument}
                 />
             </section>

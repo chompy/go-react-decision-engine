@@ -102,6 +102,11 @@ func checkStorePermission(i interface{}, user *User) error {
 			creator = i.Creator
 			break
 		}
+	case *RuleTemplate:
+		{
+			team = i.Team
+			creator = i.Creator
+		}
 	}
 	// user should be provided
 	if user == nil {

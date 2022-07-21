@@ -8,15 +8,23 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func databaseReadResult(dataType interface{}, rawStruct interface{}) (interface{}, error) {
+	rawData, err := bson.Marshal(rawStruct)
+	if err != nil {
+		return nil, err
+	}
+	data := getEmptyStruct(dataType)
+	if err := bson.Unmarshal(rawData, data); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 func databaseReadResults(dataType interface{}, cur *mongo.Cursor) ([]interface{}, error) {
 	out := make([]interface{}, 0)
 	for cur.Next(databaseContext()) {
-		rawData, err := bson.Marshal(cur.Current)
+		data, err := databaseReadResult(dataType, cur.Current)
 		if err != nil {
-			return nil, err
-		}
-		data := getEmptyStruct(dataType)
-		if err := bson.Unmarshal(rawData, data); err != nil {
 			return nil, err
 		}
 		out = append(out, data)
@@ -67,6 +75,61 @@ func databaseList(dataType interface{}, filter interface{}, sort interface{}, pr
 		count = len(res)
 	}
 	return res, count, err
+}
+
+func databaseListAggregate(dataType interface{}, pipeline mongo.Pipeline, offset int) ([]interface{}, int, error) {
+	// missing params
+	if dataType == nil || pipeline == nil {
+		return nil, 0, ErrNoData
+	}
+	// get collection
+	col, err := databaseCollectionFromData(dataType)
+	if err != nil {
+		return nil, 0, err
+	}
+	// build facets, set limit and offset
+	facet := bson.D{
+		bson.E{
+			Key: "$facet",
+			Value: bson.M{
+				"count": bson.A{
+					bson.M{"$count": "total"},
+				},
+				"documents": bson.A{
+					bson.M{"$skip": offset},
+					bson.M{"$limit": dbFetchLimit},
+				},
+			},
+		},
+	}
+	pipeline = append(pipeline, facet)
+	// perform aggregate query
+	cur, err := col.Aggregate(databaseContext(), pipeline)
+	defer cur.Close(databaseContext())
+	// decode results
+	if !cur.Next(databaseContext()) {
+		return nil, 0, ErrNoData
+	}
+	res := map[string]interface{}{}
+	if err := cur.Decode(&res); err != nil {
+		return nil, 0, err
+	}
+	totalCount := 0
+	if len(res["count"].(bson.A)) > 0 {
+		totalCount = int(res["count"].(bson.A)[0].(map[string]interface{})["total"].(int32))
+	}
+	out := make([]interface{}, 0)
+	if totalCount > 0 {
+		docs := res["documents"].(bson.A)
+		for _, doc := range docs {
+			data, err := databaseReadResult(dataType, doc)
+			if err != nil {
+				return nil, 0, err
+			}
+			out = append(out, data)
+		}
+	}
+	return out, totalCount, nil
 }
 
 func databaseFetch(dataType interface{}, filter interface{}, sort interface{}) (interface{}, error) {

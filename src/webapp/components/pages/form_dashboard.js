@@ -54,7 +54,8 @@ export default class FormDashboardPageComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onApiResponse(res) {
-        if (this.handleBatchErrorResponse(res)) { return; }
+        if (this.handleErrorResponse(res) || this.handleErrorResponse(res.data[0])) { return; }
+
         let root = res.data[0].data;
         if (root.type != TREE_FORM) {
             console.error('> ERROR: unexpected tree type');
@@ -62,11 +63,14 @@ export default class FormDashboardPageComponent extends BasePageComponent {
             return;
         }
         this.setTitle(root.label);
-        let version = res.data[1].data;
+        let publishedVer = null;
+        if (res.data[1].success) {
+            publishedVer = res.data[1].data;
+        }
         this.setState({
             form: root,
             title: root.label,
-            published: version
+            published: publishedVer
         });
         this.setLoaded();
     }

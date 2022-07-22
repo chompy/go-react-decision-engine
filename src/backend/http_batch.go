@@ -49,28 +49,87 @@ type HTTPBatchPayload struct {
 }
 
 func HTTPBatch(w http.ResponseWriter, r *http.Request) {
-
 	// parse payload
 	requests := []HTTPBatchPayload{}
 	if err := HTTPReadPayload(r, &requests); err != nil {
 		HTTPSendError(w, err)
 		return
 	}
-	// itterate all requests in batch
 	out := make([]HTTPMessage, 0)
+	// replace parameters in payload to allow subsequent calls to use
+	// values from previous call
+	replVal := func(rv string) string {
+		if !strings.Contains(rv, "$") {
+			return rv
+		}
+		for i := range out {
+			if out[i].Data == nil {
+				continue
+			}
+			for k, v := range out[i].Data.(map[string]interface{}) {
+				k = fmt.Sprintf("$%d.%s", i+1, k)
+				switch v := v.(type) {
+				case string:
+					{
+						rv = strings.ReplaceAll(rv, k, v)
+						break
+					}
+				case float64:
+					{
+						rv = strings.ReplaceAll(rv, k, fmt.Sprintf("%d", int(v)))
+						break
+					}
+				case int:
+					{
+						rv = strings.ReplaceAll(rv, k, fmt.Sprintf("%d", v))
+						break
+					}
+				}
+			}
+		}
+		return rv
+	}
+	// itterate all requests in batch
 	for _, req := range requests {
 		hasEndpoint := false
 		for _, endpoint := range httpEndpoints {
 			if endpoint.Path == req.Path {
 				hasEndpoint = true
 				method := strings.Split(endpoint.Methods, ",")[0]
+				// process value replaces on payload
+				switch p := req.Payload.(type) {
+				case map[string]interface{}:
+					{
+						for k, v := range p {
+							switch v := v.(type) {
+							case string:
+								{
+									p[k] = replVal(v)
+								}
+							}
+						}
+						break
+					}
+				}
 				// generate url w/ query string
 				rawUrl := endpoint.Path
 				if method == "GET" {
 					queryStr := ""
 					if req.Payload != nil {
 						for k, v := range req.Payload.(map[string]interface{}) {
-							queryStr += fmt.Sprintf("&%s=%s", k, v)
+							switch v := v.(type) {
+							case float64:
+								{
+									queryStr += fmt.Sprintf("&%s=%d", k, int(v))
+									break
+								}
+							case string:
+								{
+									queryStr += fmt.Sprintf("&%s=%s", k, v)
+									break
+								}
+							}
+
 						}
 						queryStr = strings.TrimLeft(queryStr, "&")
 					}
@@ -122,11 +181,9 @@ func HTTPBatch(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
-
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 		Count:   len(out),
 		Data:    out,
 	}, http.StatusOK)
-
 }

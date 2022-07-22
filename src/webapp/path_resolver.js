@@ -167,6 +167,7 @@ export default class PathResolver {
             let tComp = componentList[path];
             if (component == tComp) {
                 for (let k in params) {
+                    if (!params[k]) { continue; }
                     path = path.replace('{' + k.toLowerCase() + '}', params[k]);
                 }
                 if (path.includes('}') || path.includes('{')) { continue; }

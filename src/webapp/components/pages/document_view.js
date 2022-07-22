@@ -157,7 +157,7 @@ export default class DocumentViewComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        return <div className='page document-view'>
+        return <div className={'page document-view ' + this.state.tree.type}>
             <h1 className='title'>{this.title}</h1>
             <em>Submission {this.userData.id}</em>
             <TreeVersionInfoComponent treeversion={this.state.submission} showstate={false} />

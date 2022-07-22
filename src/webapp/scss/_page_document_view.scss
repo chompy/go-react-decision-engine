@@ -5,4 +5,10 @@
     .tree-version-info, em {
         margin: 0 20px;
     }
+
+    &.document-pdf-form {
+        section {
+            margin-bottom: 0;
+        }
+    }
 }

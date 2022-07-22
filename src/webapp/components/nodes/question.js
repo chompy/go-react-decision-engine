@@ -11,7 +11,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         super(props);
         this.state.disabled = false;
         this.state.answers = this.userData.getQuestionAnswers(this.node, this.matrix);
-        this.state.messages = [];
+        this.state.messages = this.userData.getValidationMessages(this.node, this.matrix);
         this.state.showValidation = this.userData.hasInput(this.node, this.matrix);
         this.onChange = this.onChange.bind(this);
         this.onFileDelete = this.onFileDelete.bind(this);

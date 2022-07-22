@@ -41,45 +41,41 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        BackendAPI.get('submission/fetch', {id: submissionId}, this.onSubmissionResponse);        
-    }
-
-    /**
-     * 
-     * @param {Object} res 
-     */
-    onSubmissionResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        this.userData = UserData.importJSON(res.data);
-        this.setState({submission: res.data});
-        BackendAPI.get(
-            'tree/version/fetch', {id: res.data.form_id, version: res.data.form_version},
-            this.onTreeVersionResponse
+        BackendAPI.batch(
+            [
+                {path: 'submission/fetch', payload: {id: submissionId}},
+                {path: 'tree/version/fetch', payload: {id: "$1.form_id", version: "$1.form_version"}},
+                {path: 'tree/fetch', payload: {id: "$2.root_id"}}
+            ],
+            this.onApiResponse
         );
     }
 
     /**
+     * Fires on response from API fetch.
      * @param {Object} res 
      */
-    onTreeVersionResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
+    onApiResponse(res) {
+        if (this.handleBatchErrorResponse(res)) { return; }
+        // submission
+        let submission = res.data[0].data;        
+        this.userData = UserData.importJSON(res.data[0].data);
+        // tree version
+        let treeVersion = res.data[1].data;
         let js = new JsonConverter;
-        let tree = js.import(res.data.tree);
+        let tree = js.import(treeVersion.tree);
         tree.type = TREE_FORM;
+        // root form
+        let root = res.data[2].data;
+        // update state, set loaded
         this.setState({
-            version: res.data,
-            tree: tree
-        });
-        BackendAPI.get('tree/fetch', {id: res.data.root_id}, this.onTreeRootResponse)
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onTreeRootResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        this.setState({ root: res.data, loading: false, });
+            submission: submission,
+            version: treeVersion,
+            tree: tree,
+            root: root,
+        });        
         this.setTitle(this.state.root.label + ' (v' + this.state.version.version + ')');
+        this.setLoaded();
     }
 
     /**

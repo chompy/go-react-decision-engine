@@ -29,6 +29,7 @@ export const BTN_MORE = 'See All ({count})';
 export const BTN_SAVE = 'Save';
 export const BTN_VIEW = 'View';
 export const BTN_DOWNLOAD_PDF = 'Download PDF';
+export const BTN_RULE_TEMPLATE = 'Rule Templates';
 
 // page titles
 export const TITLE_DOC_LIST = 'Documents For "{label}'

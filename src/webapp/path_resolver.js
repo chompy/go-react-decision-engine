@@ -5,11 +5,11 @@ import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import FormSubmissionEditPageComponent from "./components/pages/form_submission_edit";
 import FormSubmissionListPageComponent from "./components/pages/form_submission_list";
 import LoginPageComponent from "./components/pages/login";
+import RuleTemplateListPageComponent from "./components/pages/rule_template_list";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
-
 
 // Determines pages and page parameters from current URL path.
 export default class PathResolver {
@@ -123,6 +123,19 @@ export default class PathResolver {
                                 }
                                 return {component: TreeVersionEditPageComponent, team: teamId, id: treeId, version: versionNo};
                             }
+                            case 'rule': {
+                                if (path.length < 4) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
+                                switch (path[3]) {
+                                    case 'list': {
+                                        return {component: RuleTemplateListPageComponent};
+                                    }
+                                    default: {
+                                        return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                    }
+                                }
+                            }
                             default: {
                                 return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
                             }
@@ -161,7 +174,8 @@ export default class PathResolver {
             '{team}/admin/form/{id}/submissions': FormSubmissionListPageComponent,
             '{team}/admin/form/{id}': FormDashboardPageComponent,
             '{team}/admin/tree/{id}/v{version}': TreeVersionEditPageComponent,
-            '{team}/admin/tree/{id}': TreeVersionListPageComponent
+            '{team}/admin/tree/{id}': TreeVersionListPageComponent,
+            '{team}/admin/rule/list': RuleTemplateListPageComponent
         };
         for (let path in componentList) {
             let tComp = componentList[path];

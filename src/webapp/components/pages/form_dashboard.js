@@ -41,30 +41,33 @@ export default class FormDashboardPageComponent extends BasePageComponent {
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        BackendAPI.get('tree/fetch', {team: this.state.user.team, id: treeRootId}, this.onTreeResponse);
+        BackendAPI.batch(
+            [
+                {path: 'tree/fetch', payload: {team: this.state.user.team, id: treeRootId}},
+                {path: 'tree/version/fetch', payload: {id: treeRootId}}
+            ],
+            this.onApiResponse
+        );
     }
 
     /**
      * @param {Object} res 
      */
-    onTreeResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        if (res.data.type != TREE_FORM) {
+    onApiResponse(res) {
+        if (this.handleBatchErrorResponse(res)) { return; }
+        let root = res.data[0].data;
+        if (root.type != TREE_FORM) {
             console.error('> ERROR: unexpected tree type');
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
+        this.setTitle(root.label);
+        let version = res.data[1].data;
         this.setState({
-            form: res.data,
-            title: res.data.label
+            form: root,
+            title: root.label,
+            published: version
         });
-        BackendAPI.get('tree/version/fetch', {id: res.data.id}, this.onPublishedVersionResponse)
-        this.setTitle(res.data.label);
-    }
-
-    onPublishedVersionResponse(res) {
-        //if (this.handleErrorResponse(res)) { return;
-        this.setState({published: res.data});
         this.setLoaded();
     }
 

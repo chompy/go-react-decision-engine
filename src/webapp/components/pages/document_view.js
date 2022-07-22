@@ -42,57 +42,48 @@ export default class DocumentViewComponent extends BasePageComponent {
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        BackendAPI.get('submission/fetch', {id: submissionId}, this.onSubmissionResponse); 
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onSubmissionResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        this.userData = UserData.importJSON(res.data);
-        this.formVersion = res.data.form_version;
-        this.setState({submission: res.data});
         let documentId = this.props.path?.document;
         if (!documentId) {
             console.error('> ERROR: Missing document parameter.')
             this.setState({error: ERR_NOT_FOUND});
             return;
         } 
-        BackendAPI.get(
-            'tree/fetch', {id: documentId},
-            this.onDocumentResponse
+        BackendAPI.batch(
+            [
+                {path: 'submission/fetch', payload: {id: submissionId}},
+                {path: 'tree/fetch', payload: {id: documentId}},
+                {path: 'tree/version/fetch', payload: {id: '$2.id', version: this.props.path?.version}}
+            ],
+            this.onApiResponse
         );
     }
 
     /**
      * @param {Object} res 
      */
-    onDocumentResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        this.title = res.data.label;
-        this.setTitle(this.title);
-        this.formId = res.data.parent;       
-        BackendAPI.get(
-            'tree/version/fetch', {id: res.data.id, version: this.props.path?.version},
-            this.onDocumentTreeResponse
-        );
-    }
-
-    /**
-     * @param {Object} res 
-     */
-    onDocumentTreeResponse(res) {
-        if (this.handleErrorResponse(res)) { return; }
-        this.title += ' (v' + res.data.version + ')';
+    onApiResponse(res) {
+        if (this.handleBatchErrorResponse(res)) { return; }
+        // submission
+        let submission = res.data[0].data;
+        let formVersion = submission.form_version;
+        this.userData = UserData.importJSON(submission);
+        // root
+        let root = res.data[1].data;
+        let formId = root.parent;
+        // version
+        let version = res.data[2].data;
+        this.title = root.label + ' (v' + version.version + ')';
         this.setTitle(this.title);
         let jc = new JsonConverter;
-        let tree = jc.import(res.data.tree);
+        let tree = jc.import(version.tree);
         if (!tree.type) { tree.type = TREE_DOCUMENT; }
-        this.setState({tree: tree});
+        this.setState({
+            submission: submission,
+            tree: tree
+        });
         if (tree.type == TREE_DOCUMENT_PDF_FORM) {
             BackendAPI.get(
-                'tree/version/fetch', {id: this.formId, version: this.formVersion},
+                'tree/version/fetch', {id: formId, version: formVersion},
                 this.onFormTreeResponse
             );
             return;

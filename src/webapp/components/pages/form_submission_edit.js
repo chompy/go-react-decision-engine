@@ -9,6 +9,7 @@ import RootNodeComponent from '../nodes/root';
 import BasePageComponent from './base';
 import { message as msgPopup } from 'react-message-popup';
 import DocumentViewListComponent from './document_view_list';
+import RuleTemplateCollector from '../../rule_template_collector';
 
 export default class FormSubmissionEditPageComponent extends BasePageComponent {
 
@@ -67,6 +68,9 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         tree.type = TREE_FORM;
         // root form
         let root = res.data[2].data;
+        // import rules
+        let ruleTemplates = treeVersion?.rule_templates ? treeVersion.rule_templates : [];
+        for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
         // update state, set loaded
         this.setState({
             submission: submission,

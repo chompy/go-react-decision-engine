@@ -35,6 +35,9 @@ export const BTN_RULE_TEMPLATE = 'Rule Templates';
 export const TITLE_DOC_LIST = 'Documents For "{label}'
 export const TITLE_FORM_SUBMISSION_LIST = 'Submissions For "{label}"';
 
+// default names
+export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';
+
 // generic messages
 export const MSG_LOGIN_SUCCESS = 'Login successful.';
 export const MSG_LOGOUT_SUCCESS = 'You have been logged out.';
@@ -52,6 +55,7 @@ export const MSG_NO_PUBLISHED = 'No published version found.';
 export const MSG_ISSUE_FOUND = 'issue found.';
 export const MSG_ISSUES_FOUND = 'issues found.';
 export const MSG_SUBMISSION_DELETED = 'Form submission was deleted.';
+export const MSG_RULE_TEMPLATE_DELETED = 'Rule template was deleted.';
 export const MSG_YES = 'Yes';
 export const MSG_NO = 'No';
 export const MSG_TYPEAHEAD_PLACEHOLDER = 'Enter question/answer label.';
@@ -60,3 +64,4 @@ export const MSG_FILE_NOT_PDF = 'This file is not a PDF.';
 export const MSG_QUESTION_OR_ANSWER = 'Questions/Answer';
 export const MSG_TREE_NODE_DELETE = 'Are you sure you want to delete this node and all of its children?';
 export const MSG_TREE_ROOT_DELETE = 'Are you sure you want to delete the entire tree?';
+export const MSG_NO_RULE_TEMPLATES = 'No rule templates exist.';

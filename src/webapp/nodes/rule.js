@@ -8,59 +8,64 @@ export default class RuleNode extends BaseNode {
     constructor(uid) {
         super(uid);
         this.type = RULE_TYPE_VISIBILITY;
-        this.script = '';
-        this.scriptFieldValues = {};
+        this.templateData = {
+            template: '',
+            fieldValues: {}
+        };
+
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     static getTypeName() {
         return 'rule';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     getData() {
         return {
             'type' : this.type,
-            'script' : this.script            
+            'template': this.templateData?.template,
+            'fieldValues': this.templateData?.fieldValues   
         };
     }
     
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     builderFields() {
         let out = [
             ['label', 'Label', 'text'],
-            ['script', 'Template', 'code'],
+            ['templateData', 'Template', 'rule_template'],
         ];
         return out;
     }
 
     /**
-     * Get Lua script to use to evaluate this rule.
      * @returns {string}
      */
-    getScript() {
-        try {
-            let scriptData = JSON.parse(this.script);
-            return scriptData.value.trim();
-        } catch {}
-        return this.script.trim();
+    getTemplateId() {
+        return this.templateData?.template ? this.templateData.template : '';
     }
 
     /**
      * @returns {Object}
      */
     getRuleFieldValues() {
-        try {
-            let scriptData = JSON.parse(this.script);
-            return scriptData.fields;
-        } catch {}
-        return {};
+        return this.templateData?.fieldValues ? this.templateData.fieldValues : {};
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    importData(data) {
+        this.templateData = {
+            template: data?.template,
+            fieldValues: data?.fieldValues ? data.fieldValues : {}  
+        }
     }
 
 }

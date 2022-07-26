@@ -17,7 +17,6 @@ export default class BuilderComponent extends React.Component {
         }
         this.node.type = props?.type ? props.type : TREE_DOCUMENT;
         this.ruleNode = props?.ruleNode ? props.ruleNode : this.node;
-        this.ruleEditorTemplates = props?.ruleEditorTemplates ? props.ruleEditorTemplates : {};
         this.setNodeCallback = this.setNodeCallback.bind(this);
         Events.dispatch('builder_set_node', {
             set: this.setNodeCallback

@@ -9,7 +9,6 @@ import ErrorPageComponent from './pages/error';
 import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED } from '../config';
 import { message as msgPopup } from 'react-message-popup';
 import TreeListPageComponent from './pages/tree_list';
-import { componentsToColor } from 'pdf-lib';
 import UserTimeComponent from './helper/user_time';
 
 export default class DecisionEngineMainComponent extends React.Component {
@@ -187,7 +186,7 @@ export default class DecisionEngineMainComponent extends React.Component {
             team: this.state.team ? this.state.team.id : '',
             user: this.state.user ? this.state.user.id : ''
         }, params ? params : {});
-        let path = PathResolver.getPathFromComponent(component, params);
+        let path = PathResolver.getPathFromComponent(component, params);        
         PathResolver.setPath(path);
         let resolvedPage = PathResolver.resolveCurrentPath();
         if (component == LoginPageComponent && typeof params.referer != 'undefined') {

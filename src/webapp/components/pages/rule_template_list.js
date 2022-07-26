@@ -1,10 +1,11 @@
 import React from 'react';
 import { faBackward, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import BackendAPI from '../../api';
-import { BTN_BACK, BTN_NEW, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TITLE_DOC_LIST, TREE_DOCUMENT, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEW, DEFAULT_RULE_TEMPLATE_TITLE, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import { message as msgPopup } from 'react-message-popup';
+import RuleTemplateEditPageComponent from './rule_template_edit';
+import BackendAPI from '../../api';
 
 
 export default class RuleTemplateListPageComponent extends BasePageComponent {
@@ -12,7 +13,7 @@ export default class RuleTemplateListPageComponent extends BasePageComponent {
     constructor(props) {
         super(props);
         this.title = 'Rule Templates';
-        this.state.loading = false;
+        this.state.loading = true;
     }
 
     /**
@@ -44,7 +45,13 @@ export default class RuleTemplateListPageComponent extends BasePageComponent {
     onClickNew(e) {
         e.preventDefault();
         this.msgLoadPromise = msgPopup.loading(MSG_LOADING, 10000);
-        // TODO
+        BackendAPI.post(
+            'rule_template/store', null, {
+                label: DEFAULT_RULE_TEMPLATE_TITLE,
+                script: ''
+            },
+            this.onNewResponse
+        );
     }
 
     /**
@@ -54,14 +61,14 @@ export default class RuleTemplateListPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_DONE, MSG_DISPLAY_TIME);
-        // TODO
+        this.gotoPage(RuleTemplateEditPageComponent, {id: res.data.id});
     }
 
     /**
      * @param {Object} data 
      */
     onSelectRuleTemplate(data)  {
-        // TODO
+        this.gotoPage(RuleTemplateEditPageComponent, {id: data.id});
     }
 
     /**

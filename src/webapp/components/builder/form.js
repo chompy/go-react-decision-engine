@@ -40,7 +40,7 @@ export default class BuilderFormComponent extends React.Component {
     /**
      * {@inheritdoc}
      */
-     render() {
+    render() {
         if (!this.state.active) {
             return <form></form>;
         }

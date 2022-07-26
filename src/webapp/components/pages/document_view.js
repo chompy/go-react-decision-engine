@@ -8,6 +8,7 @@ import JsonConverter from '../../converters/json';
 import PdfConverter from '../../converters/pdf';
 import UserData from '../../user_data';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
+import RuleTemplateCollector from '../../rule_template_collector';
 
 export default class DocumentViewComponent extends BasePageComponent {
 
@@ -81,7 +82,11 @@ export default class DocumentViewComponent extends BasePageComponent {
             submission: submission,
             tree: tree
         });
-        if (tree.type == TREE_DOCUMENT_PDF_FORM) {
+        // import rules
+        let ruleTemplates = version?.rule_templates ? version.rule_templates : [];
+        for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
+        // fetch form tree for rules
+        if (tree.type == TREE_DOCUMENT_PDF_FORM || tree.type == TREE_DOCUMENT) {
             BackendAPI.get(
                 'tree/version/fetch', {id: formId, version: formVersion},
                 this.onFormTreeResponse
@@ -95,6 +100,10 @@ export default class DocumentViewComponent extends BasePageComponent {
      * @param {Object} res 
      */
     onFormTreeResponse(res) {
+        // import rules
+        let ruleTemplates = res.data?.rule_templates ? res.data.rule_templates : [];
+        for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
+        // add form tree
         let jc = new JsonConverter;
         this.setState({
             form: jc.import(res.data.tree)

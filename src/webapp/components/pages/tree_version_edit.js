@@ -13,6 +13,7 @@ import PdfFormComponent from '../pdf_form';
 import { faEye } from '@fortawesome/free-regular-svg-icons';
 import FormSubmissionListPageComponent from './form_submission_list';
 import RuleTemplateListPageComponent from './rule_template_list';
+import RuleTemplateCollector from '../../rule_template_collector';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -61,13 +62,13 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
      */
     onReady() {
         this.setState({loading: true});
-        let treeRootId = typeof this.props.path.id != 'undefined' ? this.props.path.id : null;
+        let treeRootId = this.props.path?.id;
         if (!treeRootId) {
             console.error('> ERROR: Missing ID parameter.')
             this.setState({error: ERR_NOT_FOUND});
             return;
         }
-        let version = typeof this.props.path.version != 'undefined' ? this.props.path.version : null;
+        let version = this.props.path?.version;
         if (!version) {
             console.error('> ERROR: Missing version parameter.')
             this.setState({error: ERR_NOT_FOUND});
@@ -89,6 +90,9 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (this.handleBatchErrorResponse(res)) { return; }
         let resRoot = res.data[0].data;
         let resTree = res.data[1].data;
+        // import rules
+        let ruleTemplates = resTree?.rule_templates ? resTree.rule_templates : [];
+        for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
         // new tree
         if (!resTree.tree || resTree.tree.length == 0) {
             resTree.tree = [{
@@ -124,6 +128,10 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
     onFormTreeVersionResponse(res)
     {
         if (res.success) {
+            // import rules
+            let ruleTemplates = res.data?.rule_templates ? res.data.rule_templates : [];
+            for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
+            // add form tree
             let jc = new JsonConverter;
             this.setState({
                 formTree: jc.import(res.data.tree)
@@ -309,7 +317,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         let builder = <BuilderComponent
             node={this.state.tree}
             type={this.state.root.type}
-            ruleNode={this.state.formTree ? this.state.formTree : this.state.tree} 
+            ruleNode={this.state.formTree ? this.state.formTree : this.state.tree}
         />;
         if (this.state.root.type == TREE_DOCUMENT) {
             builder = <PdfFormComponent

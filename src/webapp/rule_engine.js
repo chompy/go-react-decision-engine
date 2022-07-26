@@ -5,6 +5,7 @@ import QuestionNode from './nodes/question';
 import BaseNode from './nodes/base';
 import RuleNode from './nodes/rule';
 import UserData from './user_data';
+import RuleTemplateCollector from './rule_template_collector';
 
 const LUA_METATABLE = 'DecisionNodeMT';
 
@@ -106,20 +107,25 @@ export default class RuleEngine {
         if (this.root) {
             this.parent = this.rule.getParent(this.root);
         }
-        let err = lauxlib.luaL_loadstring(this.L, to_luastring(this.rule.getScript()));
-        if (err != 0) {
-            let errMsg = '(unknown)';
-            if (err > 0) {
-                errMsg = lua.lua_tojsstring(this.L, -1);
+        if (this.rule.getTemplateId()) {
+            let script = RuleTemplateCollector.getScript(this.rule.getTemplateId());
+            if (script) {
+                let err = lauxlib.luaL_loadstring(this.L, to_luastring(script));
+                if (err != 0) {
+                    let errMsg = '(unknown)';
+                    if (err > 0) {
+                        errMsg = lua.lua_tojsstring(this.L, -1);
+                    }
+                    throw new {
+                        number: err, 
+                        message: errMsg, 
+                        rule: this.rule
+                    };
+                }
+                lua.lua_setglobal(this.L, '_rule_func');
+                this.evaluate();
             }
-            throw new {
-                number: err, 
-                message: errMsg, 
-                rule: this.rule
-            };
         }
-        lua.lua_setglobal(this.L, '_rule_func');
-        this.evaluate(); 
     }
 
     /**
@@ -144,7 +150,7 @@ export default class RuleEngine {
             if (err > 0) {
                 errMsg = lua.lua_tojsstring(this.L, -1);
             }
-            throw new {
+            throw {
                 number: err, 
                 message: errMsg, 
                 rule: this.rule

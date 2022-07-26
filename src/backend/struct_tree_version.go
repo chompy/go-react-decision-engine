@@ -20,14 +20,15 @@ const (
 
 // TreeVersion is a tree's version and its state.
 type TreeVersion struct {
-	RootID   DatabaseID `bson:"root_id" json:"root_id"`
-	Created  time.Time  `bson:"created,omitempty" json:"created"`
-	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
-	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
-	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
-	Version  int        `bson:"version" json:"version"`
-	State    TreeState  `bson:"state" json:"state"`
-	Tree     []Node     `bson:"tree" json:"tree"`
+	RootID        DatabaseID      `bson:"root_id" json:"root_id"`
+	Created       time.Time       `bson:"created,omitempty" json:"created"`
+	Modified      time.Time       `bson:"modified,omitempty" json:"modified"`
+	Creator       DatabaseID      `bson:"creator,omitempty" json:"creator"`
+	Modifier      DatabaseID      `bson:"modifier,omitempty" json:"modifier"`
+	Version       int             `bson:"version" json:"version"`
+	State         TreeState       `bson:"state" json:"state"`
+	Tree          []Node          `bson:"tree" json:"tree"`
+	RuleTemplates []*RuleTemplate `bson:"-" json:"rule_templates"`
 }
 
 func FetchTreeVersion(rootId string, version int, user *User) (*TreeVersion, error) {
@@ -42,7 +43,9 @@ func FetchTreeVersion(rootId string, version int, user *User) (*TreeVersion, err
 	if err := checkFetchPermission(res, user); err != nil {
 		return nil, err
 	}
-	return treeVersion, nil
+	// fetch rule templates
+	treeVersion.RuleTemplates, err = ListRuleTemplateByID(user, treeVersion.GetRuleTemplateIDs())
+	return treeVersion, err
 }
 
 func FetchTreeVersionLatest(rootId string, user *User) (*TreeVersion, error) {
@@ -193,4 +196,27 @@ func (t *TreeVersion) Publish(user *User) error {
 		return err
 	}
 	return nil
+}
+
+// GetRuleTemplateUIDs retrieves the rule template ids.
+func (t *TreeVersion) GetRuleTemplateIDs() []string {
+	out := make([]string, 0)
+	for _, n := range t.Tree {
+		if n.Type == "rule" {
+			templateId := n.Data["template"]
+			if templateId != nil {
+				hasTemplateId := false
+				for i := range out {
+					if hasTemplateId = out[i] == templateId; hasTemplateId {
+						break
+					}
+				}
+				if !hasTemplateId {
+					out = append(out, templateId.(string))
+				}
+			}
+
+		}
+	}
+	return out
 }

@@ -57,6 +57,28 @@ func HTTPRuleTemplateList(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
+func HTTPRuleTemplateListAll(w http.ResponseWriter, r *http.Request) {
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// fetch
+	res, err := ListAllRuleTemplate(user)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// convert results to map of id to label
+	out := make(map[string]string)
+	for _, r := range res {
+		out[r.ID.String()] = r.Label
+	}
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Count:   len(res),
+		Data:    out,
+	}, http.StatusOK)
+}
+
 func HTTPRuleTemplateStore(w http.ResponseWriter, r *http.Request) {
 	// parse payload
 	payload := HTTPRuleTemplatePayload{}
@@ -64,16 +86,17 @@ func HTTPRuleTemplateStore(w http.ResponseWriter, r *http.Request) {
 		HTTPSendError(w, err)
 		return
 	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
 	// build + validate
 	dbId := DatabaseIDFromString(payload.ID)
 	ruleTemplate := RuleTemplate{
 		ID:     dbId,
 		Label:  payload.Label,
 		Script: payload.Script,
+		Team:   user.Team,
 	}
-	// get user
-	s := HTTPGetSession(r)
-	user := s.getUser()
 	// store
 	if err := ruleTemplate.Store(user); err != nil {
 		HTTPSendError(w, err)
@@ -102,13 +125,13 @@ func HTTPRuleTemplateDelete(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// fetch
-	treeRoot, err := FetchTreeRoot(payload.ID, user)
+	ruleTemplate, err := FetchRuleTemplate(payload.ID, user)
 	if err != nil {
 		HTTPSendError(w, err)
 		return
 	}
 	// delete
-	if err := treeRoot.Delete(user); err != nil {
+	if err := ruleTemplate.Delete(user); err != nil {
 		HTTPSendError(w, err)
 		return
 	}

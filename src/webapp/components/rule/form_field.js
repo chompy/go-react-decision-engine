@@ -2,7 +2,6 @@
 import React from 'react';
 import RuleFormField, { RULE_FIELD_ANSWER, RULE_FIELD_CHOICE, RULE_FIELD_NODE } from '../../rule_field';
 import BaseNode from '../../nodes/base';
-import { RULE_MODE_BUILDER } from '../rule_editor';
 import TypeaheadComponent from '../helper/typeahead';
 
 export default class RuleEditorFormFieldComponent extends React.Component {
@@ -11,9 +10,8 @@ export default class RuleEditorFormFieldComponent extends React.Component {
         super(props);
         this.id = 'rf-' + BaseNode.generateUid();
         this.field = new RuleFormField('unknown');
-        this.mode = typeof props.mode != 'undefined' ? props.mode : '';
-        this.root = typeof props.root != 'undefined' ? props.root : null;
-        if (props.field instanceof RuleFormField) {
+        this.ruleNode = props?.ruleNode;
+        if (props?.field instanceof RuleFormField) {
             this.field = props.field;
         }
         this.state = {
@@ -21,20 +19,6 @@ export default class RuleEditorFormFieldComponent extends React.Component {
         };
         this.externalOnChange = typeof props.onChange != 'undefined' ? props.onChange : null;
         this.onChange = this.onChange.bind(this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidMount() {
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentWillUnmount() {
-
     }
 
     /**
@@ -64,24 +48,11 @@ export default class RuleEditorFormFieldComponent extends React.Component {
         switch (this.field.type) {
             case RULE_FIELD_NODE:
             case RULE_FIELD_ANSWER: {
-                switch (this.mode) {
-                    case RULE_MODE_BUILDER: {
-                        return <TypeaheadComponent
-                            root={this.root}
-                            value={this.state.value}
-                            onChange={this.onChange}
-                        />;
-                    }
-                    default: {
-                        return <input
-                            type="text"
-                            name={this.id + '-input'}
-                            id={this.id + '-input'}
-                            value={this.state.value ? this.state.value : ''}
-                            onChange={this.onChange}
-                        />;
-                    }
-                }
+                return <TypeaheadComponent
+                    root={this.ruleNode}
+                    value={this.state.value}
+                    onChange={this.onChange}
+                />;
             }
             case RULE_FIELD_CHOICE: {
                 let options = [];

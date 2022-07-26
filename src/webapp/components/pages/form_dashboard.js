@@ -55,7 +55,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
      */
     onApiResponse(res) {
         if (this.handleErrorResponse(res) || this.handleErrorResponse(res.data[0])) { return; }
-
         let root = res.data[0].data;
         if (root.type != TREE_FORM) {
             console.error('> ERROR: unexpected tree type');
@@ -246,7 +245,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                 {this.renderPageButton(BTN_BACK, TreeListPageComponent, {}, faBackward)}
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
             </div>
-
             <section>
                 <div className='published'>
                     <h2>Published</h2>

@@ -13,31 +13,9 @@ export default class RuleTesterComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.fetchScript = props.scriptCallback;
         this.ruleEngine = new RuleEngine;
         this.onTest = this.onTest.bind(this);
         this.onCustomTest = this.onCustomTest.bind(this);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidMount() {
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentWillUnmount() {
-
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidUpdate() {
-
     }
 
     /**
@@ -50,17 +28,13 @@ export default class RuleTesterComponent extends React.Component {
         let question = new QuestionNode;
         question.uid = TEST_QUESTION_UID;
         question.type = FIELD_TEXT;
+        question.label = 'Test Question';
         root.addChild(question);
         let rule = new RuleNode;
         rule.uid = TEST_RULE_UID;
         rule.type = RULE_TYPE_VISIBILITY;
-        if (this.fetchScript) {
-            let data = this.fetchScript();
-            rule.script = JSON.stringify({
-                value: data.script,
-                fields: data.fields
-            });
-        }
+        rule.template = '_test';
+        rule.fieldValues = {};
         question.addChild(rule);
         return root;
     }
@@ -70,10 +44,6 @@ export default class RuleTesterComponent extends React.Component {
      * @param {Array} answers 
      */
     runTest(answers) {
-        if (!this.fetchScript) {
-            this.displayResults('Rule script fetch callback not set.');
-            return;
-        }
         let node = this.getTestNode();
         this.ruleEngine.setRootNode(node);
         let userData = new UserData;
@@ -122,10 +92,10 @@ export default class RuleTesterComponent extends React.Component {
      */
      render() {
         return <div className='rule-tester'>
-            <button onClick={this.onTest} data-answers=''>Test w/ No Answers</button>
-            <button onClick={this.onTest} data-answers='red'>Test w/ One Answer</button>
-            <button onClick={this.onTest} data-answers='red,blue'>Test w/ Two Answers</button>
-            <button onClick={this.onCustomTest}>Test w/ Custom Answers</button>
+            <button className='pure-button' onClick={this.onTest} data-answers=''>Test w/ No Answers</button>
+            <button className='pure-button' onClick={this.onTest} data-answers='red'>Test w/ One Answer</button>
+            <button className='pure-button' onClick={this.onTest} data-answers='red,blue'>Test w/ Two Answers</button>
+            <button className='pure-button' onClick={this.onCustomTest}>Test w/ Custom Answers</button>
         </div>;
     }
 

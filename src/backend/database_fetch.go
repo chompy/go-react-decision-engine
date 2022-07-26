@@ -32,6 +32,38 @@ func databaseReadResults(dataType interface{}, cur *mongo.Cursor) ([]interface{}
 	return out, nil
 }
 
+func databaseListAll(dataType interface{}, filter interface{}, sort interface{}, projection interface{}) ([]interface{}, error) {
+	// missing params
+	if dataType == nil || filter == nil {
+		return nil, ErrNoData
+	}
+	// get collection
+	col, err := databaseCollectionFromData(dataType)
+	if err != nil {
+		return nil, err
+	}
+	// set fetch options
+	opts := options.Find()
+	// sort
+	if sort == nil {
+		sort = bson.D{{Key: "modified", Value: -1}}
+	}
+	opts.SetSort(sort)
+	// projection
+	if projection != nil {
+		opts.SetProjection(projection)
+	}
+	// do fetch
+	cur, err := col.Find(databaseContext(), filter, opts)
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(databaseContext())
+	// convert back to go structs
+	res, err := databaseReadResults(dataType, cur)
+	return res, err
+}
+
 func databaseList(dataType interface{}, filter interface{}, sort interface{}, projection interface{}, offset int) ([]interface{}, int, error) {
 	// missing params
 	if dataType == nil || filter == nil {

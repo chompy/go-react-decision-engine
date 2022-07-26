@@ -8,13 +8,13 @@ import (
 
 type RuleTemplate struct {
 	ID       DatabaseID `bson:"_id" json:"id"`
-	Created  time.Time  `bson:"created,omitempty" json:"created"`
-	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
-	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
-	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
-	Team     DatabaseID `bson:"parent" json:"parent"`
-	Label    string     `bson:"label" json:"label"`
-	Script   string     `bson:"script" json:"script"`
+	Created  time.Time  `bson:"created,omitempty" json:"created,omitempty"`
+	Modified time.Time  `bson:"modified,omitempty" json:"modified,omitempty"`
+	Creator  DatabaseID `bson:"creator,omitempty" json:"creator,omitempty"`
+	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier,omitempty"`
+	Team     DatabaseID `bson:"team,omitempty" json:"team,omitempty"`
+	Label    string     `bson:"label,omitempty" json:"label,omitempty"`
+	Script   string     `bson:"script,omitempty" json:"script,omitempty"`
 }
 
 // Fetch a rule template object from the database.
@@ -58,6 +58,71 @@ func ListRuleTemplate(user *User, offset int) ([]*RuleTemplate, int, error) {
 		out = append(out, item.(*RuleTemplate))
 	}
 	return out, count, nil
+}
+
+// List all rule templates that user's team has access to.
+func ListAllRuleTemplate(user *User) ([]*RuleTemplate, error) {
+	if user == nil {
+		return nil, ErrNoUser
+	}
+	// databse fetch
+	res, err := databaseListAll(
+		RuleTemplate{},
+		bson.M{"team": user.Team},
+		bson.M{"created": -1},
+		bson.M{"label": 1},
+	)
+	if err != nil {
+		return nil, err
+	}
+	// check permission
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, err
+		}
+	}
+	// format output
+	out := make([]*RuleTemplate, 0)
+	for _, item := range res {
+		out = append(out, item.(*RuleTemplate))
+	}
+	return out, nil
+}
+
+func ListRuleTemplateByID(user *User, ids []string) ([]*RuleTemplate, error) {
+	if user == nil {
+		return nil, ErrNoUser
+	}
+	if ids == nil {
+		return []*RuleTemplate{}, nil
+	}
+	// convert id list
+	dbIDs := make(bson.A, 0)
+	for _, id := range ids {
+		dbIDs = append(dbIDs, DatabaseIDFromString(id))
+	}
+	// databse fetch
+	res, err := databaseListAll(
+		RuleTemplate{},
+		bson.M{"team": user.Team, "_id": bson.M{"$in": dbIDs}},
+		bson.M{"created": -1},
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+	// check permission
+	if len(res) > 0 {
+		if err := checkFetchPermission(res[0], user); err != nil {
+			return nil, err
+		}
+	}
+	// format output
+	out := make([]*RuleTemplate, 0)
+	for _, item := range res {
+		out = append(out, item.(*RuleTemplate))
+	}
+	return out, nil
 }
 
 // Store the rule template.

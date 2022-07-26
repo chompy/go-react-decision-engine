@@ -5,6 +5,7 @@ import FormDashboardPageComponent from "./components/pages/form_dashboard";
 import FormSubmissionEditPageComponent from "./components/pages/form_submission_edit";
 import FormSubmissionListPageComponent from "./components/pages/form_submission_list";
 import LoginPageComponent from "./components/pages/login";
+import RuleTemplateEditPageComponent from "./components/pages/rule_template_edit";
 import RuleTemplateListPageComponent from "./components/pages/rule_template_list";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
@@ -129,7 +130,14 @@ export default class PathResolver {
                                 }
                                 switch (path[3]) {
                                     case 'list': {
-                                        return {component: RuleTemplateListPageComponent};
+                                        return {component: RuleTemplateListPageComponent, team: teamId};
+                                    }
+                                    case 'edit': {
+                                        if (path.length < 5) {
+                                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                        }
+                                        let ruleId = path[4];
+                                        return {component: RuleTemplateEditPageComponent, team: teamId, id: ruleId};
                                     }
                                     default: {
                                         return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
@@ -175,7 +183,8 @@ export default class PathResolver {
             '{team}/admin/form/{id}': FormDashboardPageComponent,
             '{team}/admin/tree/{id}/v{version}': TreeVersionEditPageComponent,
             '{team}/admin/tree/{id}': TreeVersionListPageComponent,
-            '{team}/admin/rule/list': RuleTemplateListPageComponent
+            '{team}/admin/rule/list': RuleTemplateListPageComponent,
+            '{team}/admin/rule/edit/{id}': RuleTemplateEditPageComponent
         };
         for (let path in componentList) {
             let tComp = componentList[path];

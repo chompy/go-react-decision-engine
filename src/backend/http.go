@@ -51,6 +51,7 @@ var httpEndpoints = []HTTPEndpoint{
 	{"/api/submission/delete", HTTPFormSubmissionDelete, "POST"},
 	{"/api/rule_template/fetch", HTTPRuleTemplateFetch, "GET"},
 	{"/api/rule_template/list", HTTPRuleTemplateList, "GET"},
+	{"/api/rule_template/list_all", HTTPRuleTemplateListAll, "GET"},
 	{"/api/rule_template/store", HTTPRuleTemplateStore, "POST"},
 	{"/api/rule_template/delete", HTTPRuleTemplateDelete, "POST"},
 }

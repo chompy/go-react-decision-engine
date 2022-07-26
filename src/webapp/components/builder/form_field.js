@@ -3,9 +3,9 @@ import Events from '../../events';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
-import RuleEditorComponent, { RULE_MODE_BUILDER } from '../rule_editor';
 import TypeaheadComponent from '../helper/typeahead';
 import RuleNode from '../../nodes/rule';
+import RuleEditorTemplateSelectComponent from '../rule/template_select';
 
 const UPDATE_TIMEOUT = 250; 
 
@@ -17,6 +17,7 @@ export const FIELD_TYPE_CODE = 'code';
 export const FIELD_TYPE_TYPEAHEAD = 'typeahead';
 export const FIELD_TYPE_RICHTEXT = 'richtext';
 export const FIELD_TYPE_CHOICE = 'choice';
+export const FIELD_TYPE_RULE_TEMPLATE = 'rule_template';
 export default class BuilderFormFieldComponent extends React.Component {
 
     constructor(props) {
@@ -25,30 +26,14 @@ export default class BuilderFormFieldComponent extends React.Component {
         this.root = props.root;
         this.field = props.field;
         this.ruleNode = props?.ruleNode ? props.ruleNode : this.root;
-        this.ruleTemplateInstanceId = '';
         this.state = {
             value: this.getValue()
         };
         this.onChange = this.onChange.bind(this);
         this.onRteChange = this.onRteChange.bind(this);
         this.onUpdateTimeout = this.onUpdateTimeout.bind(this);
-        this.onRuleTemplate = this.onRuleTemplate.bind(this);
         this.timeout = null;
         this.hasUserInput = this.getValue() != '';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentDidMount() {
-        Events.listen('rule_template_selection', this.onRuleTemplate);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    componentWillUnmount() {
-        Events.remove('rule_template_selection', this.onRuleTemplate);
     }
 
     /**
@@ -95,8 +80,9 @@ export default class BuilderFormFieldComponent extends React.Component {
                 this.node[this.field[0]] = e.target.checked;
                 break;
             }
-            case FIELD_TYPE_CODE: {
-                this.node[this.field[0]] = JSON.stringify(e);
+            case FIELD_TYPE_CODE:
+            case FIELD_TYPE_RULE_TEMPLATE: {
+                this.node[this.field[0]] = e;
                 break;
             }
             case FIELD_TYPE_TYPEAHEAD: {
@@ -122,39 +108,6 @@ export default class BuilderFormFieldComponent extends React.Component {
     onUpdateTimeout() {
         clearTimeout(this.timeout);
         Events.dispatch('update', this.node);
-    }
-
-    /**
-     * Fires when rule template is selected.
-     * @param {Event} e 
-     */
-    onRuleTemplate(e) {
-        if (
-            !(this.node instanceof RuleNode) ||
-            (
-                this.hasUserInput && (
-                    this.node[this.field[0]] && this.node[this.field[0]] != 'Rule ' + this.node.uid) &&
-                    this.node[this.field[0]] != e.detail.label
-                )
-        ) {
-            return;
-        }
-        if (!this.ruleTemplateInstanceId) {
-            this.ruleTemplateInstanceId = e.detail.instanceId;
-        }
-        if (this.ruleTemplateInstanceId != e.detail.instanceId) {
-            return;
-        }
-        switch (this.field[0]) {
-            case 'label': {
-                this.node[this.field[0]] = e.detail.label;
-                this.setState({
-                    value: this.node[this.field[0]]
-                });
-                this.hasUserInput = false;
-                break;
-            }
-        }
     }
 
     /**
@@ -237,17 +190,14 @@ export default class BuilderFormFieldComponent extends React.Component {
                     />
                 </div>;
             }
-            case FIELD_TYPE_CODE: {
-                let data = {};
-                try { data = JSON.parse(this.getValue()) } catch {};
+            case FIELD_TYPE_CODE:
+            case FIELD_TYPE_RULE_TEMPLATE: {
                 return <div className={'build-field ' + this.getFieldType()}>
                     <label>{this.getLabel()}</label>
-                    <RuleEditorComponent
-                        id={this.getId()}
+                    <RuleEditorTemplateSelectComponent
+                        value={this.getValue()}
                         onChange={this.onChange}
-                        data={data}
-                        root={this.ruleNode}
-                        mode={RULE_MODE_BUILDER}
+                        ruleNode={this.ruleNode}
                     />
                 </div>;
             }

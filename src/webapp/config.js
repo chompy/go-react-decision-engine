@@ -30,6 +30,8 @@ export const BTN_SAVE = 'Save';
 export const BTN_VIEW = 'View';
 export const BTN_DOWNLOAD_PDF = 'Download PDF';
 export const BTN_RULE_TEMPLATE = 'Rule Templates';
+export const BTN_DASHBOARD = 'Dashboard';
+export const BTN_LOGOUT = 'Logout';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';

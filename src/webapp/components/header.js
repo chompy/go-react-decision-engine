@@ -2,7 +2,9 @@ import { faPowerOff, faHouse } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React from 'react';
 import BackendAPI from '../api';
+import { APP_TITLE, BTN_DASHBOARD, BTN_LOGOUT } from '../config';
 import Events from '../events';
+import TeamDashboardPageComponent from './pages/team_dashboard';
 
 export default class AppHeaderComponent extends React.Component {
 
@@ -14,6 +16,7 @@ export default class AppHeaderComponent extends React.Component {
         };
         this.onClickLogout = this.onClickLogout.bind(this);
         this.onAPILogout = this.onAPILogout.bind(this);
+        this.onClickDashboard = this.onClickDashboard.bind(this);
         this.onTeam = this.onTeam.bind(this);
         this.onUser = this.onUser.bind(this);
     }
@@ -62,6 +65,14 @@ export default class AppHeaderComponent extends React.Component {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickDashboard(e) {
+        e.preventDefault();
+        Events.dispatch('goto_page', {component: TeamDashboardPageComponent});
+    }
+
+    /**
      * @param {Event} event
      */
     onTeam(e) {
@@ -82,8 +93,8 @@ export default class AppHeaderComponent extends React.Component {
         return <div className='user'>
             <div className='name'>{this.state.user?.email}</div>
             <div className='options'>
-                <a href='#' title='Dashboard'><FontAwesomeIcon icon={faHouse} /></a>
-                <a href='#' onClick={this.onClickLogout} title='Logout'><FontAwesomeIcon icon={faPowerOff} /></a>    
+                <a href='#' onClick={this.onClickDashboard} title={BTN_DASHBOARD}><FontAwesomeIcon icon={faHouse} /></a>
+                <a href='#' onClick={this.onClickLogout} title={BTN_LOGOUT}><FontAwesomeIcon icon={faPowerOff} /></a>    
             </div>
         </div>;
     }
@@ -93,7 +104,7 @@ export default class AppHeaderComponent extends React.Component {
      */
     render() {
         return <div className='header'>
-            <div className='app-name'>{this.state.teamName ? this.state.teamName : ''}</div>
+            <div className='app-name'>{this.state.teamName ? this.state.teamName : APP_TITLE}</div>
             {this.renderUser()}
         </div>;
     }

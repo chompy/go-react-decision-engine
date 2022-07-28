@@ -34,6 +34,7 @@ var httpEndpoints = []HTTPEndpoint{
 	{"/api/user/logout", HTTPUserLogout, "GET,POST"},
 	{"/api/user/me", HTTPUserMe, "GET"},
 	{"/api/user/fetch", HTTPUserFetch, "GET"},
+	{"/api/user/store", HTTPUserStore, "POST"},
 	{"/api/team/fetch", HTTPTeamFetch, "GET"},
 	{"/api/team/store", HTTPTeamStore, "POST"},
 	{"/api/team/users", HTTPTeamUsers, "GET"},

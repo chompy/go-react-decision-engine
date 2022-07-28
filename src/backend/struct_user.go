@@ -14,9 +14,9 @@ type User struct {
 	Creator    DatabaseID     `bson:"creator,omitempty" json:"creator"`
 	Modifier   DatabaseID     `bson:"modifier,omitempty" json:"modifier"`
 	Email      string         `bson:"email" json:"email"`
-	Password   []byte         `bson:"password" json:"-"`
-	Team       DatabaseID     `bson:"team" json:"team"`
-	Permission UserPermission `bson:"permission" json:"permission"`
+	Password   []byte         `bson:"password,omitempty" json:"-"`
+	Team       DatabaseID     `bson:"team,omitempty" json:"team"`
+	Permission UserPermission `bson:"permission,omitempty" json:"permission"`
 }
 
 func FetchUserByID(id string) (*User, error) {
@@ -78,6 +78,7 @@ func (u *User) Store(editor *User) error {
 	u.Modifier = DatabaseID{}
 	if editor != nil {
 		u.Modifier = editor.ID
+		u.Team = editor.Team
 	}
 	if u.ID.IsEmpty() {
 		u.ID = GenerateDatabaseId()

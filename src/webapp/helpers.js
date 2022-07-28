@@ -4,7 +4,7 @@ export default class Helpers {
     /**
      * Format date object to human readable string.
      * @param {Date} date 
-     * @return {string}
+     * @return {String}
      */
     static formatDate(date) {
         if (typeof date == 'string') {
@@ -15,8 +15,8 @@ export default class Helpers {
 
     /**
      * Shorten an id string.
-     * @param {string} id 
-     * @returns 
+     * @param {String} id 
+     * @returns {String}
      */
     static truncateId(id) {
         if (typeof id != 'string') {
@@ -26,6 +26,15 @@ export default class Helpers {
             return id;
         }
         return id.substring(0, 6) + '...';
+    }
+
+    /**
+     * Validate an email address.
+     * @param {String} email 
+     * @returns {boolean}
+     */
+    static validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
 }

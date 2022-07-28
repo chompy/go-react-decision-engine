@@ -102,7 +102,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
     /**
      * @param {Event} e 
      */
-     onClickDelete(e) {
+    onClickDelete(e) {
         e.preventDefault();
         // TODO really make sure the user wants to delete this
         if (!confirm('Are you sure you want to delete this?')) {

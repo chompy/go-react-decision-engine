@@ -9,6 +9,8 @@ import FormDashboardPageComponent from './form_dashboard';
 import { message as msgPopup } from 'react-message-popup';
 import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 import TreeListPageComponent from './tree_list';
+import UserListPageComponent from './user_list';
+import UserEditPageComponent from './user_edit';
 
 export default class TeamDashboardPageComponent extends BasePageComponent {
 
@@ -81,10 +83,25 @@ export default class TeamDashboardPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickNewUser(e) {
+        e.preventDefault();
+        this.gotoPage(UserEditPageComponent);
+    }
+
+    /**
      * @param {Object} form 
      */
     onSelectForm(form) {
         this.gotoPage(FormDashboardPageComponent, {id: form.id});
+    }
+
+    /**
+     * @param {Object} user 
+     */
+    onSelectUser(user) {
+        this.gotoPage(UserEditPageComponent, {id: user.id});
     }
 
     /**
@@ -96,7 +113,7 @@ export default class TeamDashboardPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        return <div className='page form-dashboard'>
+        return <div className='page team-dashboard'>
             <EditTitleComponent title={this.state.team?.name} callback={this.onNameChange} />
             <div className='options top'>
             </div>
@@ -118,7 +135,25 @@ export default class TeamDashboardPageComponent extends BasePageComponent {
                         callback={this.onSelectForm}
                         seeMore={[TreeListPageComponent]}
                     />
+                </div>
+                <div className='list forms'>
+                    <h2>Users</h2>
+                    <div className='options'>
+                        {this.renderCallbackButton(BTN_NEW, this.onClickNewUser, faCirclePlus)}
                     </div>
+                    <ApiTableComponent
+                        columns={{
+                            'id': 'ID',
+                            'email': 'Email',
+                            'created': 'Created',
+                            'modified': 'Modified'
+                        }}
+                        endpoint='team/users'
+                        params={{team: this.state.user.team}}
+                        callback={this.onSelectUser}
+                        seeMore={[UserListPageComponent]}
+                    />
+                </div>
             </section>
         </div>;
     }

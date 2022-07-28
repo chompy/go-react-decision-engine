@@ -36,7 +36,7 @@ export default class UserTimeComponent extends React.Component {
             }
             UserTimeComponent.users[this.user] = false;
             if (parseInt(this.user) != 0) {
-                BackendAPI.get('user', {id: this.user}, this.onUserResponse);   
+                BackendAPI.get('user/fetch', {id: this.user}, this.onUserResponse);   
             }
         }
     }

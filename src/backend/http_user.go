@@ -8,6 +8,13 @@ type HTTPUserLoginPayload struct {
 	Team     string `json:"team"`
 }
 
+type HTTPUserPayload struct {
+	ID         string         `json:"id"`
+	Email      string         `json:"email"`
+	Password   string         `json:"password"`
+	Permission UserPermission `json:"permission"`
+}
+
 func HTTPUserLogin(w http.ResponseWriter, r *http.Request) {
 	// read payload
 	payload := HTTPUserLoginPayload{}
@@ -74,6 +81,44 @@ func HTTPUserFetch(w http.ResponseWriter, r *http.Request) {
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 		Data:    fetchedUser,
+	}, http.StatusOK)
+}
+
+func HTTPUserStore(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPUserPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// build + validate
+	dbId := DatabaseIDFromString(payload.ID)
+	userEdit := User{
+		ID:         dbId,
+		Email:      payload.Email,
+		Permission: payload.Permission,
+	}
+	// password
+	if payload.Password != "" {
+		password, err := HashPassword(payload.Password)
+		if err != nil {
+			HTTPSendError(w, err)
+			return
+		}
+		userEdit.Password = password
+	}
+	// store
+	if err := userEdit.Store(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    userEdit,
 	}, http.StatusOK)
 }
 

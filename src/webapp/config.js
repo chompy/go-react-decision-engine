@@ -31,9 +31,19 @@ export const BTN_VIEW = 'View';
 export const BTN_DOWNLOAD_PDF = 'Download PDF';
 export const BTN_RULE_TEMPLATE = 'Rule Templates';
 
+// field text
+export const FIELD_BASIC_INFO = 'Basic Information';
+export const FIELD_EMAIL = 'E-Mail';
+export const FIELD_PASSWORD = 'Password';
+export const FIELD_PASSWORD_REPEAT = 'Password (Repeat)';
+export const FIELD_PERMISSION = 'Permissions';
+
 // page titles
 export const TITLE_DOC_LIST = 'Documents For "{label}'
 export const TITLE_FORM_SUBMISSION_LIST = 'Submissions For "{label}"';
+export const TITLE_USER_LIST = 'Users'
+export const TITLE_USER_NEW = 'New User';
+export const TITLE_USER_EDIT = 'Edit User "{email}"';
 
 // default names
 export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';
@@ -67,3 +77,10 @@ export const MSG_QUESTION_OR_ANSWER = 'Questions/Answer';
 export const MSG_TREE_NODE_DELETE = 'Are you sure you want to delete this node and all of its children?';
 export const MSG_TREE_ROOT_DELETE = 'Are you sure you want to delete the entire tree?';
 export const MSG_NO_RULE_TEMPLATES = 'No rule templates exist.';
+export const MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS = 'Cannot change permissions of the team creator.';
+export const MSG_UNSAVED_CHANGES = 'You changes will not be saved, continue?';
+
+// validation messages
+export const MSG_INVALID_BLANK = 'This field is required.';
+export const MSG_INVALID_EMAIL = 'Invalid e-mail address.';
+export const MSG_INVALID_PASSWORD_MATCH = 'Passwords must match.';

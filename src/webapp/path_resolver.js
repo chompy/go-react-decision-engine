@@ -11,6 +11,8 @@ import TeamDashboardPageComponent from "./components/pages/team_dashboard";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
+import UserEditPageComponent from "./components/pages/user_edit";
+import UserListPageComponent from "./components/pages/user_list";
 import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 
 // Determines pages and page parameters from current URL path.
@@ -80,6 +82,26 @@ export default class PathResolver {
                             return {component: TeamDashboardPageComponent, team: teamId};
                         }
                         switch (path[2]) {
+                            case 'user': {
+                                if (path.length < 4) {
+                                    return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                }
+                                switch (path[3]) {
+                                    case 'list': {
+                                        return {component: UserListPageComponent, team: teamId};
+                                    }
+                                    case 'edit': {
+                                        if (path.length < 5) {
+                                            return {component: UserEditPageComponent, team: teamId};
+                                        }
+                                        let userId = path[4];
+                                        return {component: UserEditPageComponent, team: teamId, id: userId};
+                                    }
+                                    default: {
+                                        return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                                    }
+                                }
+                            }
                             case 'forms': {
                                 return {component: TreeListPageComponent, team: teamId};
                             }
@@ -178,6 +200,9 @@ export default class PathResolver {
             '{team}/view/{submission}/{document}': DocumentViewComponent,
             // admin pages
             '{team}/admin': TeamDashboardPageComponent,
+            '{team}/admin/user/list': UserListPageComponent,
+            '{team}/admin/user/edit/{id}': UserEditPageComponent,
+            '{team}/admin/user/edit': UserEditPageComponent,
             '{team}/admin/docs/{id}': TreeListPageComponent,
             '{team}/admin/forms': TreeListPageComponent,
             '{team}/admin/form/{id}/submissions/ref-{ref}': FormSubmissionListPageComponent,

@@ -9,11 +9,13 @@ export default class AppHeaderComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            teamName : props.team?.name
+            teamName : props.team?.name,
+            user: props?.user
         };
         this.onClickLogout = this.onClickLogout.bind(this);
         this.onAPILogout = this.onAPILogout.bind(this);
         this.onTeam = this.onTeam.bind(this);
+        this.onUser = this.onUser.bind(this);
     }
 
     /**
@@ -21,6 +23,7 @@ export default class AppHeaderComponent extends React.Component {
      */
     componentDidMount() {
         Events.listen('team', this.onTeam);
+        Events.listen('user_me', this.onUser);
     }
 
     /**
@@ -28,6 +31,16 @@ export default class AppHeaderComponent extends React.Component {
      */
     componentWillUnmount() {
         Events.remove('team', this.onTeam);
+        Events.remove('user_me', this.onUser);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    componentDidUpdate() {
+        if (this.props.user && !this.state.user) {
+            this.setState({user: this.props.user});
+        }
     }
 
     /**
@@ -49,10 +62,17 @@ export default class AppHeaderComponent extends React.Component {
     }
 
     /**
-     * @param {Object} team 
+     * @param {Event} event
      */
     onTeam(e) {
         this.setState({teamName: e.detail.name});
+    }
+
+    /**
+     * @param {Event} event
+     */
+    onUser(e) {
+        this.setState({user: e.detail.user});
     }
 
     renderUser() {
@@ -60,7 +80,7 @@ export default class AppHeaderComponent extends React.Component {
             return null;
         }
         return <div className='user'>
-            <div className='name'>{this.props.user.email}</div>
+            <div className='name'>{this.state.user?.email}</div>
             <div className='options'>
                 <a href='#' title='Dashboard'><FontAwesomeIcon icon={faHouse} /></a>
                 <a href='#' onClick={this.onClickLogout} title='Logout'><FontAwesomeIcon icon={faPowerOff} /></a>    

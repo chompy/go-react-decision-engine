@@ -17,6 +17,7 @@ func GenerateDatabaseId() DatabaseID {
 	out := [5]byte{0, 0, 0, 0, 0}
 	timestamp := time.Now()
 	binary.BigEndian.PutUint32(out[1:5], uint32(timestamp.Unix()))
+	// TODO might be better to have an incrementing rand digit
 	randV, err := rand.Int(rand.Reader, big.NewInt(255))
 	if err == nil {
 		out[0] = uint8(randV.Uint64())

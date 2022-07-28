@@ -37,6 +37,8 @@ export const TITLE_FORM_SUBMISSION_LIST = 'Submissions For "{label}"';
 
 // default names
 export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';
+export const DEFAULT_FORM_TITLE = 'Untitled Form';
+export const DEFAULT_DOCUMENT_TITLE = 'Untitled Document';
 
 // generic messages
 export const MSG_LOGIN_SUCCESS = 'Login successful.';

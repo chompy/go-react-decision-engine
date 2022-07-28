@@ -103,7 +103,7 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_DELETE_SUCCESS.replace('{name}', this.state.root.label), MSG_DISPLAY_TIME);
-        this.onClickBack();
+        this.gotoReferer();
     }
 
     /**
@@ -123,16 +123,8 @@ export default class TreeVersionListPageComponent extends BasePageComponent {
      * @param {Event} e 
      */
     onClickBack(e) {
-        if (e) { e.preventDefault(); }
-        if (this.state.root.type == TREE_DOCUMENT) {
-            if (this.props.referer && this.props.referer.component == TreeListPageComponent) {
-                this.gotoPage(TreeListPageComponent, {id: this.state.root.parent, type: TREE_DOCUMENT});
-                return;
-            }
-            this.gotoPage(FormDashboardPageComponent, {id: this.state.root.parent});
-            return;
-        }
-        this.gotoPage(FormDashboardPageComponent, {id: this.state.root.id});
+        e.preventDefault();
+        this.gotoReferer();
     }
 
     /**

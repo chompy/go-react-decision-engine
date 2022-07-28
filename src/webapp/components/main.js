@@ -41,7 +41,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         if (typeof this.state.path.team != 'undefined' && this.state.path.team) {
             BackendAPI.batch(
                 [
-                    {path: 'team', payload: {id: this.state.path.team}},
+                    {path: 'team/fetch', payload: {id: this.state.path.team}},
                     {path: 'user/me'}
                 ],
                 this.onUserTeam

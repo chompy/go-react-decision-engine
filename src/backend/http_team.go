@@ -5,7 +5,12 @@ import (
 	"strconv"
 )
 
-func HTTPTeam(w http.ResponseWriter, r *http.Request) {
+type HTTPTeamPayload struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+func HTTPTeamFetch(w http.ResponseWriter, r *http.Request) {
 	// get team id, user current user team if team id not provided
 	teamId := r.URL.Query().Get("id")
 	if teamId == "" {
@@ -24,6 +29,38 @@ func HTTPTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// send success response
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
+		Data:    team,
+	}, http.StatusOK)
+}
+
+func HTTPTeamStore(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPTeamPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// build + validate
+	if payload.ID == "" {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	dbId := DatabaseIDFromString(payload.ID)
+	team := Team{
+		ID:   dbId,
+		Name: payload.Name,
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// store
+	if err := team.Store(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 		Data:    team,

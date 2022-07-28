@@ -1,7 +1,7 @@
 import React from 'react';
 import { faBackward, faTrash, faCopy, faFloppyDisk, faGears } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, BTN_RULE_TEMPLATE, BTN_VIEW, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, BTN_RULE_TEMPLATE, BTN_VIEW, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder/builder';
@@ -201,7 +201,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         console.log('> Delete tree version ' + this.state.object.root_id + '/v' + this.state.object.version + '.');
-        this.gotoPage(TreeVersionListPageComponent, {id: this.state.root.id});
+        this.gotoReferer();
     }
 
     /**
@@ -325,6 +325,10 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 ruleNode={this.state.formTree ? this.state.formTree : this.state.tree} 
             />;
         }
+        let viewBtn = null;
+        if (this.state.root.type != TREE_FORM) {
+            viewBtn = this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye);
+        }
         return <div className='page tree-version-edit'>
             <h1 className='title'>{this.state.root.label}</h1>
             <TreeVersionInfoComponent treeversion={this.state.object} />
@@ -333,7 +337,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
                 {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk, this.state.object.state == 'published')}
                 {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
-                {this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye)}
+                {viewBtn}
                 {this.renderCallbackButton(BTN_RULE_TEMPLATE, this.onClickRuleTemplates, faGears)}
             </div>
             <section>{builder}</section>

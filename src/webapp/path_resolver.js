@@ -7,6 +7,7 @@ import FormSubmissionListPageComponent from "./components/pages/form_submission_
 import LoginPageComponent from "./components/pages/login";
 import RuleTemplateEditPageComponent from "./components/pages/rule_template_edit";
 import RuleTemplateListPageComponent from "./components/pages/rule_template_list";
+import TeamDashboardPageComponent from "./components/pages/team_dashboard";
 import TreeListPageComponent from "./components/pages/tree_list";
 import TreeVersionEditPageComponent from "./components/pages/tree_version_edit";
 import TreeVersionListPageComponent from "./components/pages/tree_version_list";
@@ -76,7 +77,7 @@ export default class PathResolver {
                     }
                     case 'admin': {
                         if (path.length == 2) {
-                            return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
+                            return {component: TeamDashboardPageComponent, team: teamId};
                         }
                         switch (path[2]) {
                             case 'forms': {
@@ -145,7 +146,7 @@ export default class PathResolver {
                                 }
                             }
                             default: {
-                                return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_FOUND};
+                                return {component: TeamDashboardPageComponent, team: teamId};
                             }
                         }
                     }
@@ -176,6 +177,7 @@ export default class PathResolver {
             '{team}/view/{submission}/{document}/v{version}': DocumentViewComponent,
             '{team}/view/{submission}/{document}': DocumentViewComponent,
             // admin pages
+            '{team}/admin': TeamDashboardPageComponent,
             '{team}/admin/docs/{id}': TreeListPageComponent,
             '{team}/admin/forms': TreeListPageComponent,
             '{team}/admin/form/{id}/submissions/ref-{ref}': FormSubmissionListPageComponent,

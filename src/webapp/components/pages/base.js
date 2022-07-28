@@ -15,8 +15,8 @@ export default class BasePageComponent extends React.Component {
         super(props);
         this.state = {
             error: '',
-            team: typeof props.team != 'undefined' ? props.team : null,
-            user: typeof props.user != 'undefined' ? props.user : null
+            team: props?.team,
+            user: props?.user
         };
         this.state.loading = !(this.state.team && this.state.user);
         this.onPageButton = this.onPageButton.bind(this);

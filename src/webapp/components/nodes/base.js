@@ -154,7 +154,13 @@ export default class BaseNodeComponent extends React.Component {
         for (let i in this.rules) {
             /** @var RuleEngine */
             let ruleEngine = this.rules[i];
-            let res = ruleEngine.evaluate();
+            let res = null;
+            try {
+                res = ruleEngine.evaluate();
+            } catch (e) {
+                console.error('> ERROR: Lua script threw exception.', e);
+                continue;
+            }
             switch (ruleEngine.rule.type) {
                 case RULE_TYPE_VALIDATION: {
                     if (!res.results) {

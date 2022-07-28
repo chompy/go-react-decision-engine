@@ -123,7 +123,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_DELETE_SUCCESS.replace('{name}', this.state.form.label), MSG_DISPLAY_TIME);
-        this.gotoPage(TreeListPageComponent);
+        this.gotoReferer();
     }
 
     /**
@@ -220,6 +220,14 @@ export default class FormDashboardPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickBack(e) {
+        e.preventDefault();
+        this.gotoReferer();
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -242,7 +250,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
         return <div className='page form-dashboard'>
             <EditTitleComponent title={this.state.title} callback={this.onLabel} />
             <div className='options top'>
-                {this.renderPageButton(BTN_BACK, TreeListPageComponent, {}, faBackward)}
+                {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
             </div>
             <section>
@@ -281,7 +289,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                         seeMore={[TreeListPageComponent, {id: this.state.form.id}]}
                     />
                 </div>
-
                 <div className='list submissions'>
                     <h2>Submissions</h2>
                     <div className='options'>
@@ -298,7 +305,6 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                         seeMore={[FormSubmissionListPageComponent, {id: this.state.form.id}]}
                     />
                 </div>
-
             </section>
         </div>;
     }

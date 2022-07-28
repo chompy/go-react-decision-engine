@@ -58,7 +58,10 @@ export default class RuleEditorTemplateSelectComponent extends React.Component {
      */
     onTemplateSelect(e) {
         if (!e.target.value) {
-            this.setState({templateId: e.target.value, loading: false});
+            this.templateFields = [];
+            this.setState({templateId: e.target.value, loading: false}, function() {
+                this.updateValue();
+            }.bind(this));
             return;
         }
         let templateScript = RuleTemplateCollector.getScript(e.target.value);

@@ -8,15 +8,26 @@ export default class AppHeaderComponent extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            teamName : props.team?.name
+        };
         this.onClickLogout = this.onClickLogout.bind(this);
         this.onAPILogout = this.onAPILogout.bind(this);
+        this.onTeam = this.onTeam.bind(this);
     }
 
     /**
      * {@inheritdoc}
      */
     componentDidMount() {
+        Events.listen('team', this.onTeam);
+    }
 
+    /**
+     * {@inheritdoc}
+     */
+    componentWillUnmount() {
+        Events.remove('team', this.onTeam);
     }
 
     /**
@@ -37,6 +48,13 @@ export default class AppHeaderComponent extends React.Component {
         Events.dispatch('logout');
     }
 
+    /**
+     * @param {Object} team 
+     */
+    onTeam(e) {
+        this.setState({teamName: e.detail.name});
+    }
+
     renderUser() {
         if (!this.props.user) {
             return null;
@@ -55,7 +73,7 @@ export default class AppHeaderComponent extends React.Component {
      */
     render() {
         return <div className='header'>
-            <div className='app-name'>{this.props.team ? this.props.team.name : ''}</div>
+            <div className='app-name'>{this.state.teamName ? this.state.teamName : ''}</div>
             {this.renderUser()}
         </div>;
     }

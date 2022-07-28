@@ -46,7 +46,7 @@ func HTTPUserLogout(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
-func HTTPUser(w http.ResponseWriter, r *http.Request) {
+func HTTPUserFetch(w http.ResponseWriter, r *http.Request) {
 	// get id
 	id := r.URL.Query().Get("id")
 	if id == "" {

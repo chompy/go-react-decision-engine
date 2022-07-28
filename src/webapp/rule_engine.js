@@ -133,10 +133,11 @@ export default class RuleEngine {
      * @returns {Object}
      */
     evaluate() {
-        if (!this.rule) {
+        let script = this.rule && this.rule.getTemplateId() ? RuleTemplateCollector.getScript(this.rule.getTemplateId()) : null;
+        if (!this.rule || !script) {
             return {
                 results: false,
-                message: 'No rule provided.',
+                message: 'No rule provided or empty script.',
                 rule: null,
                 matrixId: this.matrixId,
                 parent: this.parent

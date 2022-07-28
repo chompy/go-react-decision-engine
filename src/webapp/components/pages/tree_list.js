@@ -2,7 +2,7 @@ import React from 'react';
 import { faBackward, faCirclePlus } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_NEW, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TITLE_DOC_LIST, TREE_DOCUMENT, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_NEW, DEFAULT_DOCUMENT_TITLE, DEFAULT_FORM_TITLE, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, TITLE_DOC_LIST, TREE_DOCUMENT, TREE_FORM } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import { message as msgPopup } from 'react-message-popup';
 import FormDashboardPageComponent from './form_dashboard';
@@ -28,7 +28,7 @@ export default class TreeListPageComponent extends BasePageComponent {
      * {@inheritdoc}
      */
     onReady() {
-        if (typeof this.props.path.id != 'undefined' && this.props.path.id) {
+        if (this.props?.path?.id) {
             this.mode = TREE_DOCUMENT;
             this.setState({loading: true});
             let treeRootId = typeof this.props.path.id != 'undefined' ? this.props.path.id : null;
@@ -66,7 +66,7 @@ export default class TreeListPageComponent extends BasePageComponent {
             {
                 team: this.state.user.team,
                 type: this.mode,
-                label: 'Untitled ' + ((this.mode == TREE_DOCUMENT) ? 'Document' : 'Form'),
+                label: (this.mode == TREE_DOCUMENT) ? DEFAULT_DOCUMENT_TITLE : DEFAULT_FORM_TITLE,
                 form: this.mode == TREE_DOCUMENT ? this.props.path.id : ''
             },
             this.onNewResponse
@@ -114,6 +114,14 @@ export default class TreeListPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickBack(e) {
+        e.preventDefault();
+        this.gotoReferer();
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -122,14 +130,10 @@ export default class TreeListPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
-        let backBtn = null;
-        if (this.mode == TREE_DOCUMENT) {
-            backBtn = this.renderPageButton(BTN_BACK, FormDashboardPageComponent, {id: this.props.path.id}, faBackward);
-        }
         return <div className='page form-list'>
             <h1 className='title'>{this.title}</h1>
             <div className='options top'>
-                {backBtn}
+                {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_NEW, this.onClickNew, faCirclePlus)}
             </div>
             <section>

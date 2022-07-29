@@ -23,7 +23,14 @@ export default class BackendAPI {
         fetch(url, params)
             .then(res => res.json())
             .then(function(res) {
-                if (!res.success && res.message.includes('no user provided')) {
+                if (
+                    !res.success && 
+                    (
+                        res.message.includes('no user provided') ||
+                        res.message.includes('http invalid session') ||
+                        res.message.includes('http login required')
+                    )
+                ) {
                     Events.dispatch('session_expire', null);
                 }
                 return res;

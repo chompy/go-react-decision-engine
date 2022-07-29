@@ -65,7 +65,9 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         let treeVersion = res.data[1].data;
         let js = new JsonConverter;
         let tree = js.import(treeVersion.tree);
-        tree.type = TREE_FORM;
+        if (tree) {
+            tree.type = TREE_FORM;
+        }
         // root form
         let root = res.data[2].data;
         // import rules

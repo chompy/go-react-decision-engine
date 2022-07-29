@@ -46,6 +46,9 @@ func (id DatabaseID) IsEmpty() bool {
 }
 
 func (id DatabaseID) String() string {
+	if id.IsEmpty() {
+		return ""
+	}
 	out := make([]byte, 5)
 	for i := range id {
 		out[i] = id[i]

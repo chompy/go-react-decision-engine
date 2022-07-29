@@ -87,7 +87,26 @@ func (u *User) Store(editor *User) error {
 			u.Creator = editor.ID
 		}
 	}
+	if u.Creator.IsEmpty() {
+		prevUser, err := FetchUserByID(u.ID.String())
+		if err != nil {
+			return err
+		}
+		u.Creator = prevUser.Creator
+		u.Created = prevUser.Created
+	}
 	return databaseStoreOne(u)
+}
+
+func (u *User) Delete(editor *User) error {
+	if u.ID.IsEmpty() {
+		return ErrObjMissingParam
+	}
+	// check permission
+	if err := checkDeletePermission(u, editor); err != nil {
+		return err
+	}
+	return databaseDelete(User{}, bson.M{"_id": u.ID})
 }
 
 func (u User) CheckPassword(password string) error {

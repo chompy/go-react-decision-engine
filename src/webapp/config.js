@@ -78,6 +78,7 @@ export const MSG_FILE_NOT_PDF = 'This file is not a PDF.';
 export const MSG_QUESTION_OR_ANSWER = 'Questions/Answer';
 export const MSG_TREE_NODE_DELETE = 'Are you sure you want to delete this node and all of its children?';
 export const MSG_TREE_ROOT_DELETE = 'Are you sure you want to delete the entire tree?';
+export const MSG_USER_DELETE = 'Are you sure you want to delete this user?';
 export const MSG_NO_RULE_TEMPLATES = 'No rule templates exist.';
 export const MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS = 'Cannot change permissions of the team creator.';
 export const MSG_UNSAVED_CHANGES = 'You changes will not be saved, continue?';

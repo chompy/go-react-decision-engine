@@ -1,0 +1,12 @@
+.page.user-edit {
+    input[type=text], input[type=email], input[type=password] {
+        min-width: 300px;
+    }
+    legend {
+        font-weight: bold;
+    }
+    label.pure-checkbox {
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+}

@@ -292,7 +292,7 @@ export default class FormDashboardPageComponent extends BasePageComponent {
                 <div className='list submissions'>
                     <h2>Submissions</h2>
                     <div className='options'>
-                        {this.renderCallbackButton(BTN_NEW, this.onClickNewSubmission, faCirclePlus)}
+                        {this.renderCallbackButton(BTN_NEW, this.onClickNewSubmission, faCirclePlus, !this.state.published)}
                     </div>
                     <ApiTableComponent
                         columns={{

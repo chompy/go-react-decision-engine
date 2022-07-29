@@ -1,13 +1,12 @@
 import React from 'react';
 import { faBackward, faFloppyDisk, faTrash } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_DELETE, BTN_SAVE, FIELD_BASIC_INFO, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, FIELD_PERMISSION, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_INVALID_BLANK, MSG_INVALID_EMAIL, MSG_INVALID_PASSWORD_MATCH, MSG_RULE_TEMPLATE_DELETED, MSG_SAVED, MSG_SAVING, MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS, MSG_UNSAVED_CHANGES, TITLE_USER_EDIT, TITLE_USER_NEW } from '../../config';
+import { BTN_BACK, BTN_DELETE, BTN_SAVE, FIELD_BASIC_INFO, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, FIELD_PERMISSION, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_INVALID_BLANK, MSG_INVALID_EMAIL, MSG_INVALID_PASSWORD_MATCH, MSG_RULE_TEMPLATE_DELETED, MSG_SAVED, MSG_SAVING, MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS, MSG_UNSAVED_CHANGES, MSG_USER_DELETE, TITLE_USER_EDIT, TITLE_USER_NEW } from '../../config';
 import BackendAPI from '../../api';
 import { message as msgPopup } from 'react-message-popup';
 import UserPermission from '../../user_permission';
 import Helpers from '../../helpers';
 import Events from '../../events';
-
 export default class UserEditPageComponent extends BasePageComponent {
 
     constructor(props) {
@@ -121,6 +120,13 @@ export default class UserEditPageComponent extends BasePageComponent {
      */
     onClickDelete(e) {
         e.preventDefault();
+        if (!confirm(MSG_USER_DELETE)) { return; }
+        BackendAPI.post(
+            'user/delete',
+            null,
+            {id: this.state.userId},
+            this.onDeleteResponse
+        )
     }
     
     /**

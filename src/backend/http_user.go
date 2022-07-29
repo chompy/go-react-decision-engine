@@ -100,6 +100,7 @@ func HTTPUserStore(w http.ResponseWriter, r *http.Request) {
 		ID:         dbId,
 		Email:      payload.Email,
 		Permission: payload.Permission,
+		Creator:    DatabaseID{0, 0, 0, 0, 0},
 	}
 	// password
 	if payload.Password != "" {
@@ -119,6 +120,38 @@ func HTTPUserStore(w http.ResponseWriter, r *http.Request) {
 	HTTPSendMessage(w, &HTTPMessage{
 		Success: true,
 		Data:    userEdit,
+	}, http.StatusOK)
+}
+
+func HTTPUserDelete(w http.ResponseWriter, r *http.Request) {
+	// parse payload
+	payload := HTTPUserPayload{}
+	if err := HTTPReadPayload(r, &payload); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// missing id
+	if payload.ID == "" {
+		HTTPSendError(w, ErrHTTPInvalidPayload)
+		return
+	}
+	// get user
+	s := HTTPGetSession(r)
+	user := s.getUser()
+	// fetch
+	deleteUser, err := FetchUserByID(payload.ID)
+	if err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// delete
+	if err := deleteUser.Delete(user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
+	// send results
+	HTTPSendMessage(w, &HTTPMessage{
+		Success: true,
 	}, http.StatusOK)
 }
 

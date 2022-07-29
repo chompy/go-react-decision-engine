@@ -1,7 +1,7 @@
 import React from 'react';
-import { faBackward, faTrash, faCopy, faFloppyDisk, faGears } from '@fortawesome/free-solid-svg-icons'
+import { faBackward, faTrash, faCopy, faFloppyDisk, faGears, faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_PUBLISH, BTN_RULE_TEMPLATE, BTN_VIEW, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_COPY, BTN_DELETE, BTN_EXPORT, BTN_IMPORT, BTN_PUBLISH, BTN_RULE_TEMPLATE, BTN_VIEW, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_DONE, MSG_IMPORT_OVERRIDE, MSG_INVALID_FILE_TYPE, MSG_LOADING, MSG_SAVED, MSG_SAVING, TREE_DOCUMENT, TREE_DOCUMENT_PDF_FORM, TREE_FORM } from '../../config';
 import TreeVersionListPageComponent from './tree_version_list';
 import BackendAPI from '../../api';
 import BuilderComponent from '../builder/builder';
@@ -25,6 +25,7 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         this.state.tree = null;
         this.state.formTree = null;
         this.storeTimeout = null;
+        this.importUpload = React.createRef();
     }
 
     /**
@@ -306,6 +307,52 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickExport(e) {
+        e.preventDefault();
+        let js = new JsonConverter;
+        let treeExport = js.export(this.state.tree);
+        let a = document.createElement('a');
+        let file = new Blob([JSON.stringify(treeExport)], {type: 'application/json'});
+        a.href = URL.createObjectURL(file);
+        a.download = this.state.root.id + '_v' + this.state.object.version + '.json';
+        a.click();
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onClickImport(e) {
+        e.preventDefault();
+        if (this.state.tree && !confirm(MSG_IMPORT_OVERRIDE)) {
+            return;
+        }
+        this.importUpload.current.click();
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onImportFile(e) {
+        let file = e.target.files[0];
+        if (!file) { return; }
+        if (file.type != 'application/json') {
+            alert(MSG_INVALID_FILE_TYPE);
+            return;
+        }
+        this.setState({tree: null, loading: true});
+        let reader = new FileReader;
+        reader.onload = function(e) {
+            let data = JSON.parse(e.target.result);
+            let js = new JsonConverter;
+            this.setState({tree: js.import(data)});
+            this.setLoaded();
+        }.bind(this);
+        reader.readAsText(file);
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -337,10 +384,13 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
                 {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk, this.state.object.state == 'published')}
                 {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
+                {this.renderCallbackButton(BTN_EXPORT, this.onClickExport, faFileExport)}
+                {this.renderCallbackButton(BTN_IMPORT, this.onClickImport, faFileImport)}
                 {viewBtn}
                 {this.renderCallbackButton(BTN_RULE_TEMPLATE, this.onClickRuleTemplates, faGears)}
             </div>
             <section>{builder}</section>
+            <input type='file' ref={this.importUpload} onChange={this.onImportFile} hidden={true} />
         </div>;
     }
 

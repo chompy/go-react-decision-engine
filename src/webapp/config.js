@@ -32,6 +32,8 @@ export const BTN_DOWNLOAD_PDF = 'Download PDF';
 export const BTN_RULE_TEMPLATE = 'Rule Templates';
 export const BTN_DASHBOARD = 'Dashboard';
 export const BTN_LOGOUT = 'Logout';
+export const BTN_EXPORT = 'Export';
+export const BTN_IMPORT = 'Import';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';
@@ -82,6 +84,8 @@ export const MSG_USER_DELETE = 'Are you sure you want to delete this user?';
 export const MSG_NO_RULE_TEMPLATES = 'No rule templates exist.';
 export const MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS = 'Cannot change permissions of the team creator.';
 export const MSG_UNSAVED_CHANGES = 'You changes will not be saved, continue?';
+export const MSG_IMPORT_OVERRIDE = 'This import will replace the current document, continue?';
+export const MSG_INVALID_FILE_TYPE = 'Invalid file type.';
 
 // validation messages
 export const MSG_INVALID_BLANK = 'This field is required.';

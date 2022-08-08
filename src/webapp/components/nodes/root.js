@@ -232,7 +232,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
                     onClick={this.onSave}
                     disabled={!this.state.hasChange}
                 >
-                    {BTN_SAVE} <FontAwesomeIcon icon={faFloppyDisk} />
+                    <FontAwesomeIcon icon={faFloppyDisk} /> {BTN_SAVE}
                 </button>                
             );       
         }

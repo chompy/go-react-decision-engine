@@ -3,7 +3,8 @@ import AnswerNode from '../../nodes/answer';
 import QuestionNode, { FIELD_CHOICE, FIELD_DROPDOWN, FIELD_TEXT, FIELD_UPLOAD } from '../../nodes/question';
 import BaseNodeComponent from './base';
 import QuestionFileComponent from '../question_file';
-import Events from '../../events';
+import { MAX_UPLOAD_SIZE, MSG_DISPLAY_TIME, MSG_ERROR, MSG_FILE_TOO_LARGE } from '../../config';
+import { message as msgPopup } from 'react-message-popup';
 
 export default class QuestionNodeComponent extends BaseNodeComponent {
 
@@ -84,6 +85,11 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
             }
             case FIELD_UPLOAD: {
                 if (e.target.files.length > 0) {
+                    if (e.target.files[0].size > MAX_UPLOAD_SIZE) {
+                        e.target.value = '';
+                        msgPopup.error(MSG_FILE_TOO_LARGE, MSG_DISPLAY_TIME);
+                        return;
+                    }
                     let reader = new FileReader();
                     reader.readAsDataURL(e.target.files[0]);
                     let fileName = e.target.files[0].name;
@@ -96,11 +102,11 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                             answers: this.userData.getQuestionAnswers(this.node, this.matrix),
                             showValidation: true
                         });
-                    };
-                    reader.onload = reader.onload.bind(this);
+                    }.bind(this);
                     reader.onerror = function() {
+                        msgPopup.error(MSG_ERROR, MSG_DISPLAY_TIME);
                         console.error('ERROR: Upload failed.', e);
-                    }
+                    };
                 }
                 e.target.value = '';
                 break;

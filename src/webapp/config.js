@@ -1,6 +1,7 @@
 // app config
 export const APP_TITLE = 'Contextual Code Decision Engine';
 export const MSG_DISPLAY_TIME = 4000;
+export const MAX_UPLOAD_SIZE = 5242880;
 
 // tree types
 export const TREE_FORM = 'form';
@@ -86,6 +87,8 @@ export const MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS = 'Cannot change permissions o
 export const MSG_UNSAVED_CHANGES = 'You changes will not be saved, continue?';
 export const MSG_IMPORT_OVERRIDE = 'This import will replace the current document, continue?';
 export const MSG_INVALID_FILE_TYPE = 'Invalid file type.';
+export const MSG_FILE_TOO_LARGE = 'File is too large.';
+export const MSG_ERROR = 'An error occurred.';
 
 // validation messages
 export const MSG_INVALID_BLANK = 'This field is required.';

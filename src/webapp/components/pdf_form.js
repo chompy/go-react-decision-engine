@@ -2,7 +2,7 @@ import React from 'react';
 import * as pdfjsLib from 'pdfjs-dist/webpack';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { BTN_DELETE, MSG_FILE_NOT_PDF, TREE_DOCUMENT_PDF_FORM } from '../config';
+import { MAX_UPLOAD_SIZE, MSG_ERROR, MSG_FILE_NOT_PDF, MSG_FILE_TOO_LARGE, TREE_DOCUMENT_PDF_FORM } from '../config';
 import BuilderComponent from './builder/builder';
 import RootNode from '../nodes/root';
 import PdfFieldNode from '../nodes/pdf_field';
@@ -79,6 +79,12 @@ export default class PdfFormComponent extends React.Component {
         let file = e.target.files[0];
         if (file && file.type != 'application/pdf') {
             this.setState({error: MSG_FILE_NOT_PDF});
+            return;
+        } else if (file && file.size > MAX_UPLOAD_SIZE) {
+            this.setState({error: MSG_FILE_TOO_LARGE});
+            return;
+        } else if (!file) {
+            this.setState({error: MSG_ERROR});
             return;
         }
         let reader = new FileReader;
@@ -342,7 +348,7 @@ export default class PdfFormComponent extends React.Component {
         }
         return <div className='pdf-form loaded'>
             <div key='pdf-viewer' className={'viewer' + (this.state.pdfScrollFixed ? ' fixed' : '')} id={this.canvasId}></div>
-            <div className='editor pure-form pure-form-stacked' style={{minWidth: this.state.builderWidth + 'px'}}>
+            <div className='editor pure-form pure-form-stacked' style={{width: this.state.builderWidth + 'px'}}>
                 {this.renderFormFieldEditor()}
             </div>
         </div>

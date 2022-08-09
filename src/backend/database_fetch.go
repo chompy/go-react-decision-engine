@@ -137,6 +137,9 @@ func databaseListAggregate(dataType interface{}, pipeline mongo.Pipeline, offset
 	pipeline = append(pipeline, facet)
 	// perform aggregate query
 	cur, err := col.Aggregate(databaseContext(), pipeline)
+	if err != nil {
+		return nil, 0, err
+	}
 	defer cur.Close(databaseContext())
 	// decode results
 	if !cur.Next(databaseContext()) {

@@ -16,7 +16,7 @@ func TestTreeVersion(t *testing.T) {
 	testUser := User{
 		ID:         GenerateDatabaseId(),
 		Team:       GenerateDatabaseId(),
-		Permission: PermCreateForm | PermEditForm,
+		Permission: UserPermission{PermManageForm},
 	}
 	testTreeRoot := TreeRoot{
 		Type: TreeForm,

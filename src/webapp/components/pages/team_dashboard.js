@@ -136,7 +136,7 @@ export default class TeamDashboardPageComponent extends BasePageComponent {
                         seeMore={[TreeListPageComponent]}
                     />
                 </div>
-                <div className='list forms'>
+                <div className='list users'>
                     <h2>Users</h2>
                     <div className='options'>
                         {this.renderCallbackButton(BTN_NEW, this.onClickNewUser, faCirclePlus)}

@@ -89,6 +89,7 @@ export const MSG_IMPORT_OVERRIDE = 'This import will replace the current documen
 export const MSG_INVALID_FILE_TYPE = 'Invalid file type.';
 export const MSG_FILE_TOO_LARGE = 'File is too large.';
 export const MSG_ERROR = 'An error occurred.';
+export const MSG_INVALID_PERMISSION = 'Insufficient permissions.';
 
 // validation messages
 export const MSG_INVALID_BLANK = 'This field is required.';

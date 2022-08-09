@@ -5,6 +5,7 @@ import (
 )
 
 func checkFetchPermission(i interface{}, user *User) error {
+	// TODO check team
 	return nil
 }
 
@@ -23,10 +24,7 @@ func checkStorePermission(i interface{}, user *User) error {
 			case TreeForm:
 				{
 					team = i.Parent
-					perm = PermEditForm
-					if new {
-						perm = PermCreateForm
-					}
+					perm = PermManageForm
 					break
 				}
 			case TreeDocument:
@@ -36,10 +34,7 @@ func checkStorePermission(i interface{}, user *User) error {
 						return err
 					}
 					team = treeForm.(*TreeRoot).Parent
-					perm = PermEditDocument
-					if new {
-						perm = PermCreateDocument
-					}
+					perm = PermManageDocument
 					break
 				}
 			default:
@@ -56,7 +51,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		{
 			new = i.Version <= 0
 			creator = i.Creator
-			perm = PermEditForm
+			perm = PermManageForm
 			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.RootID}, nil)
 			if err != nil {
 				return err
@@ -66,7 +61,7 @@ func checkStorePermission(i interface{}, user *User) error {
 				if err != nil {
 					return err
 				}
-				perm = PermEditDocument
+				perm = PermManageDocument
 			}
 			team = treeRoot.(*TreeRoot).Parent
 			break
@@ -75,10 +70,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		{
 			new = i.ID.IsEmpty()
 			creator = i.Creator
-			perm = PermEditSubmission
-			if new {
-				perm = PermCreateSubmission
-			}
+			perm = PermManageSubmission
 			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.FormID}, nil)
 			if err != nil {
 				return err
@@ -90,9 +82,10 @@ func checkStorePermission(i interface{}, user *User) error {
 		{
 			new = i.ID.IsEmpty()
 			team = i.Team
-			perm = PermEditUser
-			if new {
-				perm = PermCreateUser
+			perm = PermManageUser
+			// same user can edit their profile
+			if !new && user != nil && i.ID == user.ID {
+				return nil
 			}
 			break
 		}
@@ -106,6 +99,7 @@ func checkStorePermission(i interface{}, user *User) error {
 		{
 			team = i.Team
 			creator = i.Creator
+			perm = PermManageRuleTemplate
 		}
 	}
 	// user should be provided

@@ -49,11 +49,7 @@ func (id DatabaseID) String() string {
 	if id.IsEmpty() {
 		return ""
 	}
-	out := make([]byte, 5)
-	for i := range id {
-		out[i] = id[i]
-	}
-	return strings.ToLower(base36.EncodeBytes(out))
+	return strings.ToLower(base36.EncodeBytes(id[:]))
 }
 
 func (id DatabaseID) MarshalJSON() ([]byte, error) {

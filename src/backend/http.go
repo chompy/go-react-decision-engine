@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strings"
@@ -84,7 +84,7 @@ func HTTPSendError(w http.ResponseWriter, err error) {
 }
 
 func HTTPReadPayload(r *http.Request, payload interface{}) error {
-	rawBody, err := ioutil.ReadAll(r.Body)
+	rawBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		return err
 	}

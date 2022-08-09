@@ -1,9 +1,10 @@
 import React from 'react';
 import { faBackward } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent from './base';
-import { BTN_BACK, TITLE_USER_LIST } from '../../config';
+import { BTN_BACK, MSG_INVALID_PERMISSION, TITLE_USER_LIST } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import UserEditPageComponent from './user_edit';
+import { USER_PERM_CREATE_USER, USER_PERM_DELETE_USER, USER_PERM_EDIT_USER } from '../../user_permission';
 export default class UserListPageComponent extends BasePageComponent {
 
     constructor(props) {
@@ -23,6 +24,7 @@ export default class UserListPageComponent extends BasePageComponent {
      */
     onReady() {
         this.setTitle(TITLE_USER_LIST);
+        this.checkAnyPermission(USER_PERM_CREATE_USER, USER_PERM_EDIT_USER, USER_PERM_DELETE_USER);
         this.setLoaded();
     }
 

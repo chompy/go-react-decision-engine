@@ -16,7 +16,7 @@ type User struct {
 	Email      string         `bson:"email" json:"email"`
 	Password   []byte         `bson:"password,omitempty" json:"-"`
 	Team       DatabaseID     `bson:"team,omitempty" json:"team"`
-	Permission UserPermission `bson:"permission,omitempty" json:"permission"`
+	Permission UserPermission `bson:"permission" json:"permission"`
 }
 
 func FetchUserByID(id string) (*User, error) {
@@ -116,6 +116,6 @@ func (u User) CheckPassword(password string) error {
 	return nil
 }
 
-func (u User) HasPermission(perm UserPermission) bool {
+func (u User) HasPermission(perm string) bool {
 	return u.Permission.Has(PermAdmin) || u.Permission.Has(perm)
 }

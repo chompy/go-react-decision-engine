@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
 
 type BatchResponseWriter struct {
-	StatusCode int
+	StatusCode *int
 	Body       *bytes.Reader
 	Response   *HTTPMessage
 	header     http.Header
@@ -40,7 +40,7 @@ func (w BatchResponseWriter) Write(data []byte) (int, error) {
 }
 
 func (w BatchResponseWriter) WriteHeader(statusCode int) {
-	w.StatusCode = statusCode
+	*w.StatusCode = statusCode
 }
 
 type HTTPBatchPayload struct {
@@ -160,7 +160,7 @@ func HTTPBatch(w http.ResponseWriter, r *http.Request) {
 				w := NewBatchResponseWriter()
 				endpoint.Function(w, subReq)
 				// read response
-				rawResp, err := ioutil.ReadAll(w.Body)
+				rawResp, err := io.ReadAll(w.Body)
 				if err != nil {
 					out = append(out, HTTPMessage{Success: false, Message: err.Error()})
 					break

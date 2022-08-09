@@ -25,7 +25,7 @@ func createTestObjects() {
 		}
 		return
 	}
-	dummyUser := User{Permission: PermAdmin}
+	dummyUser := User{Permission: UserPermission{PermAdmin}}
 	// create team
 	testTeam := Team{
 		Name: "Test Team",
@@ -41,7 +41,7 @@ func createTestObjects() {
 	adminTestUser := User{
 		Email:      "admin@example.com",
 		Password:   hashedPassword,
-		Permission: PermAdmin,
+		Permission: UserPermission{PermAdmin},
 		Team:       testTeam.ID,
 	}
 	dummyUser.Team = testTeam.ID

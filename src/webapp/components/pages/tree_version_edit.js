@@ -14,6 +14,7 @@ import { faEye } from '@fortawesome/free-regular-svg-icons';
 import FormSubmissionListPageComponent from './form_submission_list';
 import RuleTemplateListPageComponent from './rule_template_list';
 import RuleTemplateCollector from '../../rule_template_collector';
+import { USER_PERM_DOCUMENT_MANAGE, USER_PERM_EDIT_DOCUMENT, USER_PERM_EDIT_FORM, USER_PERM_FORM_MANAGE } from '../../user_permission';
 
 export default class TreeVersionEditPageComponent extends BasePageComponent {
 
@@ -376,16 +377,22 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (this.state.root.type != TREE_FORM) {
             viewBtn = this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye);
         }
+
+        let canManage = this.hasPermission(
+            this.state.root.type == TREE_FORM ? USER_PERM_FORM_MANAGE : USER_PERM_DOCUMENT_MANAGE
+        );
+
+
         return <div className='page tree-version-edit'>
             <h1 className='title'>{this.state.root.label}</h1>
             <TreeVersionInfoComponent treeversion={this.state.object} />
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
-                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
-                {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk, this.state.object.state == 'published')}
-                {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy)}
+                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash, !canManage)}
+                {this.renderCallbackButton(BTN_PUBLISH, this.onClickPublish, faFloppyDisk, !canManage && this.state.object.state == 'published')}
+                {this.renderCallbackButton(BTN_COPY, this.onClickCopy, faCopy, !canManage)}
                 {this.renderCallbackButton(BTN_EXPORT, this.onClickExport, faFileExport)}
-                {this.renderCallbackButton(BTN_IMPORT, this.onClickImport, faFileImport)}
+                {this.renderCallbackButton(BTN_IMPORT, this.onClickImport, faFileImport, !canManage)}
                 {viewBtn}
                 {this.renderCallbackButton(BTN_RULE_TEMPLATE, this.onClickRuleTemplates, faGears)}
             </div>

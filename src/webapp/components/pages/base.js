@@ -4,7 +4,8 @@ import { faCircleExclamation, faCog } from '@fortawesome/free-solid-svg-icons';
 import Events from '../../events';
 import md5 from 'blueimp-md5';
 import { message as msgPopup } from 'react-message-popup';
-import { APP_TITLE, MSG_DISPLAY_TIME } from '../../config';
+import { APP_TITLE, MSG_DISPLAY_TIME, MSG_INVALID_PERMISSION } from '../../config';
+import UserPermission from '../../user_permission';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
@@ -189,6 +190,48 @@ export default class BasePageComponent extends React.Component {
             if (this.handleErrorResponse(res.data[i])) { return true; }
         }
         return false;
+    }
+
+    /**
+     * Return true if user has given permission.
+     * @param {String} perm 
+     * @returns {Boolean}
+     */
+    hasPermission(perm) {
+        if (!this.state.user) { return false; }
+        return UserPermission.userCan(this.state.user, perm);
+    }
+
+    /**
+     * Check if user has any of given permission.
+     * @param  {...String} perms 
+     * @returns {Boolean}
+     */
+    checkAnyPermission(...perms) {
+        if (!this.state.user) { return false; }
+        for (let i in perms) {
+            if (UserPermission.userCan(this.state.user, perms[i])) {
+                return true;
+            }
+        }
+        this.setState({error: MSG_INVALID_PERMISSION});
+        return false;
+    }
+
+    /**
+     * Check if user has all of given permissions.
+     * @param  {...String} perms 
+     * @returns {Boolean}
+     */
+    checkAllPermission(...perms) {
+        if (!this.state.user) { return false; }
+        for (let i in perms) {
+            if (!UserPermission.userCan(this.state.user, perms[i])) {
+                this.setState({error: MSG_INVALID_PERMISSION});
+                return false;
+            }
+        }
+        return true;
     }
     
     /**

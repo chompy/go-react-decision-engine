@@ -16,7 +16,7 @@ func TestTreeRoot(t *testing.T) {
 	testUser := User{
 		ID:         GenerateDatabaseId(),
 		Team:       GenerateDatabaseId(),
-		Permission: PermAdmin,
+		Permission: UserPermission{PermAdmin},
 	}
 	testTreeRoot := TreeRoot{
 		Type:   TreeForm,
@@ -50,7 +50,7 @@ func TestTreeRootPermissions(t *testing.T) {
 	testUser := User{
 		ID:         GenerateDatabaseId(),
 		Team:       GenerateDatabaseId(),
-		Permission: PermNone,
+		Permission: UserPermission{},
 	}
 	testTreeRoot := TreeRoot{
 		Type:   TreeForm,
@@ -62,12 +62,12 @@ func TestTreeRootPermissions(t *testing.T) {
 		t.Errorf("expected permission error")
 		return
 	}
-	testUser.Permission = testUser.Permission.Add(PermCreateForm)
+	testUser.Permission = testUser.Permission.Add(PermManageForm)
 	if err := testTreeRoot.Store(&testUser); err != nil {
 		t.Error(err)
 		return
 	}
-	err = testTreeRoot.Store(&User{ID: GenerateDatabaseId(), Team: testUser.Team, Permission: PermCreateDocument})
+	err = testTreeRoot.Store(&User{ID: GenerateDatabaseId(), Team: testUser.Team, Permission: UserPermission{PermManageDocument}})
 	if err == nil || !errors.Is(err, ErrInvalidPermission) {
 		t.Errorf("expected permission error")
 		return

@@ -7,7 +7,7 @@ import (
 )
 
 type MockResponseWriter struct {
-	StatusCode int
+	StatusCode *int
 	Body       *bytes.Reader
 	Response   *HTTPMessage
 	header     http.Header
@@ -37,5 +37,5 @@ func (w MockResponseWriter) Write(data []byte) (int, error) {
 }
 
 func (w MockResponseWriter) WriteHeader(statusCode int) {
-	w.StatusCode = statusCode
+	*w.StatusCode = statusCode
 }

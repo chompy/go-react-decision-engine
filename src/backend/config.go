@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 
 	psh "github.com/platformsh/config-reader-go/v2"
 	mongoPsh "github.com/platformsh/config-reader-go/v2/mongo"
@@ -18,7 +18,7 @@ type Config struct {
 }
 
 func ConfigLoad() (Config, error) {
-	rawData, err := ioutil.ReadFile(configPath)
+	rawData, err := os.ReadFile(configPath)
 	if err != nil {
 		return Config{}, err
 	}

@@ -9,7 +9,8 @@ import AppHeaderComponent from '../header';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-css';
 import 'ace-builds/src-noconflict/theme-github';
-import PreviewPageComponent from './preview';
+import ShadowContainerComponent from '../shadow_container';
+import CustomizePreviewComponent from '../customize_preview';
 
 export default class TeamCustomizePageComponent extends BasePageComponent {
 
@@ -24,7 +25,8 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
     constructor(props) {
         super(props);
         this.state.loading = true;
-        this.state.styles = '';
+        this.state.style = '';
+        this.state.generatedStyle = '';
         for (let k in TeamCustomizePageComponent.colorOpts) {
             this.state[k] = TeamCustomizePageComponent.colorOpts[k][1];
         }
@@ -47,12 +49,14 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
 
     onColorChange(e) {
         this.setState({[e.target.id]: e.target.value}, function() {
-            this.updatePreviewStyles();
+            this.setState({generatedStyle: this.generateStyle()});
         }.bind(this));
     }
 
     onStyleChange(value) {
-
+        this.setState({style: value}, function() {
+            this.setState({generatedStyle: this.generateStyle()});
+        }.bind(this))
     }
 
     renderColorOptions() {
@@ -73,32 +77,14 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         return out;
     }
 
-    generateStyles() {
-        let styles = '';
-        styles += '.decision-engine .header .app-name { color: ' + this.state.titleCol + '; }';
-        styles += '.decision-engine .header { background-color: ' + this.state.headerBgCol + '; color: ' + this.state.headerFgCol + '; }';
-        styles += '.decision-engine .header .user .options a { color: ' + this.state.headerFgCol + '; }';
-        styles += 'html, body { background-color: ' + this.state.pageBgCol + '; color: ' + this.state.pageFgCol + '; }' ;
-        return styles;
-    }
-
-    generatePreviewStyles() {
-        let styles = '';
-        styles += '.preview-area .header .app-name { color: ' + this.state.titleCol + '; }';
-        styles += '.preview-area .header { background-color: ' + this.state.headerBgCol + '; color: ' + this.state.headerFgCol + '; }';
-        styles += '.preview-area .header .user .options a { color: ' + this.state.headerFgCol + '; }';
-        styles += '.preview-area .preview-page { background-color: ' + this.state.pageBgCol + '; color: ' + this.state.pageFgCol + '; }' ;
-        return styles;
-    }
-
-    updatePreviewStyles() {
-        let element = document.getElementById('preview-styles');
-        if (!element) {
-            element = document.createElement('style');
-            element.id = 'preview-styles';
-            document.head.append(element);
-        }
-        element.innerHTML = this.generatePreviewStyles();
+    generateStyle() {
+        let style = '';
+        style += '.decision-engine .header .app-name { color: ' + this.state.titleCol + '; }';
+        style += '.decision-engine .header { background-color: ' + this.state.headerBgCol + '; color: ' + this.state.headerFgCol + '; }';
+        style += '.decision-engine .header .user .options a { color: ' + this.state.headerFgCol + '; }';
+        style += 'html, body, #root { background-color: ' + this.state.pageBgCol + '; color: ' + this.state.pageFgCol + '; }' ;
+        style += '\n\n' + this.state.style
+        return style;
     }
 
     /**
@@ -130,7 +116,7 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
                                 theme='github'
                                 name='style-edit'
                                 onChange={this.onStyleChange}
-                                value={this.state.styles}
+                                value={this.state.style}
                                 width='100%'
                                 setOptions={{
                                     useWorker: false
@@ -140,10 +126,9 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
                     </div>
                     <fieldset className='preview-area'>
                         <legend>Preview</legend>
-                        <div className='preview-page'>
-                            <AppHeaderComponent user={this.props.user} team={this.props.team} />
-                            <PreviewPageComponent user={this.props.user} team={this.props.team} path={this.props.path} referer='' />
-                        </div>
+                        <ShadowContainerComponent inheritStyles={true} style={this.state.generatedStyle}>
+                            <CustomizePreviewComponent user={this.props.user} team={this.props.team} path={this.props.path} />
+                        </ShadowContainerComponent>
                     </fieldset>
                 </form>
             </section>

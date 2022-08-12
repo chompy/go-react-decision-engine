@@ -75,12 +75,6 @@ func ListAllRuleTemplate(user *User) ([]*RuleTemplate, error) {
 	if err != nil {
 		return nil, err
 	}
-	// check permission
-	if len(res) > 0 {
-		if err := checkFetchPermission(res[0], user); err != nil {
-			return nil, err
-		}
-	}
 	// format output
 	out := make([]*RuleTemplate, 0)
 	for _, item := range res {

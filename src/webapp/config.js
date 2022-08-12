@@ -35,6 +35,7 @@ export const BTN_DASHBOARD = 'Dashboard';
 export const BTN_LOGOUT = 'Logout';
 export const BTN_EXPORT = 'Export';
 export const BTN_IMPORT = 'Import';
+export const BTN_CUSTOMIZE = 'Customize';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';
@@ -42,6 +43,8 @@ export const FIELD_EMAIL = 'E-Mail';
 export const FIELD_PASSWORD = 'Password';
 export const FIELD_PASSWORD_REPEAT = 'Password (Repeat)';
 export const FIELD_PERMISSION = 'Permissions';
+export const FIELD_CUSTOMIZE_BASIC = 'Basic Options';
+export const FIELD_CUSTOMIZE_ADV = 'Advanced Options';
 
 // page titles
 export const TITLE_DOC_LIST = 'Documents For "{label}'
@@ -49,6 +52,7 @@ export const TITLE_FORM_SUBMISSION_LIST = 'Submissions For "{label}"';
 export const TITLE_USER_LIST = 'Users'
 export const TITLE_USER_NEW = 'New User';
 export const TITLE_USER_EDIT = 'Edit User "{email}"';
+export const TITLE_CUSTOMIZE = 'Customize';
 
 // default names
 export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';

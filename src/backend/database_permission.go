@@ -5,7 +5,59 @@ import (
 )
 
 func checkFetchPermission(i interface{}, user *User) error {
-	// TODO check team
+	switch i := i.(type) {
+	case *TreeRoot:
+		{
+			team := i.Parent
+			if i.Type == TreeDocument {
+				treeForm, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.Parent}, nil)
+				if err != nil {
+					return err
+				}
+				team = treeForm.(*TreeRoot).Parent
+			}
+			if user.Team.String() != team.String() {
+				return ErrInvalidPermission
+			}
+		}
+	case *TreeVersion:
+		{
+			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.RootID}, nil)
+			if err != nil {
+				return err
+			}
+			if treeRoot.(*TreeRoot).Type == TreeDocument {
+				treeRoot, err = databaseFetch(TreeRoot{}, bson.M{"_id": treeRoot.(*TreeRoot).Parent}, nil)
+				if err != nil {
+					return err
+				}
+			}
+			if user.Team.String() != treeRoot.(*TreeRoot).Parent.String() {
+				return ErrInvalidPermission
+			}
+			break
+		}
+	case *User:
+		{
+			if user.Team.String() != i.Team.String() {
+				return ErrInvalidPermission
+			}
+			break
+		}
+	case *Team:
+		{
+			if user.Team.String() != i.ID.String() {
+				return ErrInvalidPermission
+			}
+			break
+		}
+	case *RuleTemplate:
+		{
+			if user.Team.String() != i.Team.String() {
+				return ErrInvalidPermission
+			}
+		}
+	}
 	return nil
 }
 
@@ -122,5 +174,5 @@ func checkStorePermission(i interface{}, user *User) error {
 }
 
 func checkDeletePermission(i interface{}, user *User) error {
-	return nil
+	return checkStorePermission(i, user)
 }

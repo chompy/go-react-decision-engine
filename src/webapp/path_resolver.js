@@ -14,6 +14,7 @@ import TreeVersionListPageComponent from "./components/pages/tree_version_list";
 import UserEditPageComponent from "./components/pages/user_edit";
 import UserListPageComponent from "./components/pages/user_list";
 import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
+import TeamCustomizePageComponent from "./components/pages/team_customize";
 
 // Determines pages and page parameters from current URL path.
 export default class PathResolver {
@@ -47,6 +48,9 @@ export default class PathResolver {
                 switch (path[1]) {
                     case 'login': {
                         return {component: LoginPageComponent, team: teamId};
+                    }
+                    case 'customize': {
+                        return {component: TeamCustomizePageComponent, team: teamId};
                     }
                     case 'form': {
                         if (path.length == 2) {
@@ -200,6 +204,7 @@ export default class PathResolver {
             '{team}/view/{submission}/{document}': DocumentViewComponent,
             // admin pages
             '{team}/admin': TeamDashboardPageComponent,
+            '{team}/customize': TeamCustomizePageComponent,
             '{team}/admin/user/list': UserListPageComponent,
             '{team}/admin/user/edit/{id}': UserEditPageComponent,
             '{team}/admin/user/edit': UserEditPageComponent,

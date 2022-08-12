@@ -377,12 +377,9 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         if (this.state.root.type != TREE_FORM) {
             viewBtn = this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye);
         }
-
         let canManage = this.hasPermission(
             this.state.root.type == TREE_FORM ? USER_PERM_FORM_MANAGE : USER_PERM_DOCUMENT_MANAGE
         );
-
-
         return <div className='page tree-version-edit'>
             <h1 className='title'>{this.state.root.label}</h1>
             <TreeVersionInfoComponent treeversion={this.state.object} />

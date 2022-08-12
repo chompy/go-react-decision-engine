@@ -18,9 +18,10 @@ type BatchResponseWriter struct {
 
 func NewBatchResponseWriter() BatchResponseWriter {
 	return BatchResponseWriter{
-		header:   make(http.Header),
-		Body:     &bytes.Reader{},
-		Response: &HTTPMessage{},
+		StatusCode: new(int),
+		header:     make(http.Header),
+		Body:       &bytes.Reader{},
+		Response:   &HTTPMessage{},
 	}
 }
 

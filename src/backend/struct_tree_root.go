@@ -72,6 +72,9 @@ func listRoot(filter bson.M, user *User, offset int) ([]*TreeRoot, int, error) {
 
 // List all tree root forms that user's team has access to.
 func ListFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
+	if user == nil {
+		return nil, 0, ErrNoUser
+	}
 	return listRoot(
 		bson.M{"type": string(TreeForm), "parent": user.Team},
 		user,

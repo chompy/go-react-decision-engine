@@ -7,12 +7,13 @@ import (
 )
 
 type Team struct {
-	ID       DatabaseID `bson:"_id" json:"id"`
-	Created  time.Time  `bson:"created,omitempty" json:"created"`
-	Modified time.Time  `bson:"modified,omitempty" json:"modified"`
-	Creator  DatabaseID `bson:"creator,omitempty" json:"creator"`
-	Modifier DatabaseID `bson:"modifier,omitempty" json:"modifier"`
-	Name     string     `bson:"name" json:"name"`
+	ID        DatabaseID        `bson:"_id" json:"id"`
+	Created   time.Time         `bson:"created,omitempty" json:"created"`
+	Modified  time.Time         `bson:"modified,omitempty" json:"modified"`
+	Creator   DatabaseID        `bson:"creator,omitempty" json:"creator"`
+	Modifier  DatabaseID        `bson:"modifier,omitempty" json:"modifier"`
+	Name      string            `bson:"name,omitempty" json:"name"`
+	Customize map[string]string `bson:"customize,omitempty" json:"customize"`
 }
 
 func FetchTeamByID(id string, user *User) (*Team, error) {

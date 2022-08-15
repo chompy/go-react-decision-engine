@@ -26,6 +26,7 @@ export default class ShadowContainerComponent extends React.Component {
                 element.append(newElement);
             }
         }
+        this.updateStyle();
     }
 
     /**
@@ -36,6 +37,10 @@ export default class ShadowContainerComponent extends React.Component {
     }
 
     componentDidUpdate() {
+        this.updateStyle();
+    }
+
+    updateStyle() {
         let previewStyle = this.shadowRef.current.shadowRoot.getElementById('preview-style');
         if (!previewStyle) {
             previewStyle = document.createElement('style');

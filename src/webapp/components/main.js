@@ -10,6 +10,7 @@ import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS,
 import { message as msgPopup } from 'react-message-popup';
 import UserTimeComponent from './helper/user_time';
 import TeamDashboardPageComponent from './pages/team_dashboard';
+import Helpers from '../helpers';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -31,6 +32,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         this.onGotoPage = this.onGotoPage.bind(this);
         this.onGotoReferer = this.onGotoReferer.bind(this);
         this.onSessionExpire = this.onSessionExpire.bind(this);
+        this.onUpdateTeam = this.onUpdateTeam.bind(this);
     }
 
     /**
@@ -52,6 +54,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.listen('goto_page', this.onGotoPage);
         Events.listen('goto_referer', this.onGotoReferer);
         Events.listen('session_expire', this.onSessionExpire);
+        Events.listen('team', this.onUpdateTeam);
     }
 
     /**
@@ -63,6 +66,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         Events.remove('goto_page', this.onGotoPage);
         Events.remove('goto_refer', this.onGotoReferer);
         Events.remove('session_expire', this.onSessionExpire);
+        Events.remove('team', this.onUpdateTeam);
     }
 
     /**
@@ -110,6 +114,23 @@ export default class DecisionEngineMainComponent extends React.Component {
         });
         Events.dispatch('team', teamResp.data);
         this.onUserMe(userResp);
+    }
+
+    /**
+     * @param {Event} 
+     */
+     onUpdateTeam(e) {
+        let team = e.detail;
+        if (team?.customize) {
+            let style = Helpers.generateCustomStyle(team.customize)
+            let element = document.getElementById('custom-style');
+            if (!element) {
+                element = document.createElement('style');
+                element.id = 'custom-style';
+                document.head.append(element);
+            }
+            element.innerHTML = style;
+        }
     }
 
     /**

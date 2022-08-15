@@ -6,8 +6,9 @@ import (
 )
 
 type HTTPTeamPayload struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID        string            `json:"id"`
+	Name      string            `json:"name,omitempty"`
+	Customize map[string]string `json:"customize,omitempty"`
 }
 
 func HTTPTeamFetch(w http.ResponseWriter, r *http.Request) {
@@ -49,8 +50,9 @@ func HTTPTeamStore(w http.ResponseWriter, r *http.Request) {
 	}
 	dbId := DatabaseIDFromString(payload.ID)
 	team := Team{
-		ID:   dbId,
-		Name: payload.Name,
+		ID:        dbId,
+		Name:      payload.Name,
+		Customize: payload.Customize,
 	}
 	// get user
 	s := HTTPGetSession(r)

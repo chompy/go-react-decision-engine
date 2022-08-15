@@ -1,16 +1,17 @@
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_BACK,FIELD_CUSTOMIZE_ADV, FIELD_CUSTOMIZE_BASIC } from '../../config';
+import { BTN_BACK,BTN_SAVE,FIELD_CUSTOMIZE_ADV, FIELD_CUSTOMIZE_BASIC, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING } from '../../config';
 import BasePageComponent from './base';
-import { faBackward } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
 import TeamDashboardPageComponent from './team_dashboard';
-import AppHeaderComponent from '../header';
-
+import { message as msgPopup } from 'react-message-popup';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-css';
 import 'ace-builds/src-noconflict/theme-github';
 import ShadowContainerComponent from '../shadow_container';
 import CustomizePreviewComponent from '../customize_preview';
+import Helpers from '../../helpers';
+import Events from '../../events';
 
 export default class TeamCustomizePageComponent extends BasePageComponent {
 
@@ -43,8 +44,53 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
      * {@inheritDoc}
      */
     onReady() {
-        this.setTitle('layout');
+        this.setTitle('Customize');
+        BackendAPI.get('team/fetch', {id: this.props.team.id}, this.onTeamResponse);
+    }
+
+    onTeamResponse(res) {
+        if (this.handleErrorResponse(res)) { return; }
+        if (res.data?.customize) {
+            let params = {
+                team: res.data,
+                style: res.data?.customize?.style ? res.data.customize.style : ''
+            };
+            for (let k in TeamCustomizePageComponent.colorOpts) {
+                params[k] = typeof res.data.customize[k] == 'undefined' ? TeamCustomizePageComponent.colorOpts[k][1] : res.data.customize[k];
+            }
+            this.setLoaded();
+            this.setState(params, function() {
+                this.setState({generatedStyle: this.generateStyle()});
+            }.bind(this));
+        }
         this.setLoaded();
+    }
+
+    onSave(e) {
+        e.preventDefault();
+        let params = {
+            style: this.state.style
+        };
+        for (let k in TeamCustomizePageComponent.colorOpts) {
+            params[k] = this.state[k];
+        }
+        this.msgLoadPromise = msgPopup.loading(MSG_SAVING, 10000);
+        BackendAPI.post(
+            'team/store',
+            {},
+            {
+                id: this.props.team.id,
+                customize: params
+            },
+            this.onSaveResponse
+        );
+    }
+
+    onSaveResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
+        if (this.handleErrorResponse(res)) { return; }
+        msgPopup.success(MSG_SAVED, MSG_DISPLAY_TIME);
+        Events.dispatch('team', res.data);
     }
 
     onColorChange(e) {
@@ -78,13 +124,7 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
     }
 
     generateStyle() {
-        let style = '';
-        style += '.decision-engine .header .app-name { color: ' + this.state.titleCol + '; }';
-        style += '.decision-engine .header { background-color: ' + this.state.headerBgCol + '; color: ' + this.state.headerFgCol + '; }';
-        style += '.decision-engine .header .user .options a { color: ' + this.state.headerFgCol + '; }';
-        style += 'html, body, #root { background-color: ' + this.state.pageBgCol + '; color: ' + this.state.pageFgCol + '; }' ;
-        style += '\n\n' + this.state.style
-        return style;
+        return Helpers.generateCustomStyle(this.state);
     }
 
     /**
@@ -100,6 +140,7 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
             <h1 className='title'>Customize Look</h1>
             <div className='options top'>
                 {this.renderPageButton(BTN_BACK, TeamDashboardPageComponent, {}, faBackward)}
+                {this.renderCallbackButton(BTN_SAVE, this.onSave, faFloppyDisk)}
             </div>
             <section>
                 <form className='pure-form pure-form-stacked' noValidate={true}>
@@ -127,7 +168,7 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
                     <fieldset className='preview-area'>
                         <legend>Preview</legend>
                         <ShadowContainerComponent inheritStyles={true} style={this.state.generatedStyle}>
-                            <CustomizePreviewComponent user={this.props.user} team={this.props.team} path={this.props.path} />
+                            <CustomizePreviewComponent user={this.props.user} team={this.state.team} path={this.props.path} />
                         </ShadowContainerComponent>
                     </fieldset>
                 </form>

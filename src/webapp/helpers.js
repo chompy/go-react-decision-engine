@@ -37,4 +37,19 @@ export default class Helpers {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
+    /**
+     * Generate custom CSS style.
+     * @param {Object} data 
+     * @returns {String}
+     */
+    static generateCustomStyle(data) {
+        let style = '';
+        style += '.decision-engine .header .app-name { color: ' + data.titleCol + '; }';
+        style += '.decision-engine .header { background-color: ' + data.headerBgCol + '; color: ' + data.headerFgCol + '; }';
+        style += '.decision-engine .header .user .options a { color: ' + data.headerFgCol + '; }';
+        style += 'html, body, #root { background-color: ' + data.pageBgCol + '; color: ' + data.pageFgCol + '; }' ;
+        style += '\n\n' + data.style
+        return style;
+    }
+
 }

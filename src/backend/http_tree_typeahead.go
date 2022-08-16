@@ -21,6 +21,14 @@ func HTTPTreeTypeaheadList(w http.ResponseWriter, r *http.Request) {
 	// get user
 	s := HTTPGetSession(r)
 	user := s.getUser()
+	if user == nil {
+		HTTPSendError(w, ErrHTTPInvalidSession)
+		return
+	}
+	if err := checkFetchPermission(&TreeRoot{Parent: user.Team}, user); err != nil {
+		HTTPSendError(w, err)
+		return
+	}
 	// fetch
 	typeaheadList, err := ListTreeTypeahead(id, maxVer, user)
 	if err != nil {

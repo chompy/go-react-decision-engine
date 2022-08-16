@@ -69,9 +69,16 @@ export default class RootNodeComponent extends BaseNodeComponent {
     /**
      * {@inheritdoc}
      */
+    onPostRuleEvaluation(e) {
+        super.onPostRuleEvaluation(e);
+        this.setState({hasRuleEval: true});
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     onRuleEvaluation(e) {
         super.onRuleEvaluation(e);
-        this.setState({hasRuleEval: true});
         // check for all invalid fields that have input and increment the
         // validation error counter
         let results = e.detail;

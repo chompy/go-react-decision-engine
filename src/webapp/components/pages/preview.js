@@ -1,10 +1,6 @@
 import React from 'react';
-import BackendAPI from '../../api';
-import { BTN_BACK,FIELD_CUSTOMIZE_ADV, FIELD_CUSTOMIZE_BASIC } from '../../config';
 import BasePageComponent from './base';
-import { message as msgPopup } from 'react-message-popup';
-import { faBackward, faCirclePlus } from '@fortawesome/free-solid-svg-icons';
-import TeamDashboardPageComponent from './team_dashboard';
+import { faCirclePlus } from '@fortawesome/free-solid-svg-icons';
 
 export default class PreviewPageComponent extends BasePageComponent {
 

@@ -1,10 +1,10 @@
 import React from 'react';
 import { faBackward, faFloppyDisk, faTrash } from '@fortawesome/free-solid-svg-icons'
-import BasePageComponent from './base';
-import { BTN_BACK, BTN_DELETE, BTN_SAVE, FIELD_BASIC_INFO, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, FIELD_PERMISSION, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_INVALID_BLANK, MSG_INVALID_EMAIL, MSG_INVALID_PASSWORD_MATCH, MSG_RULE_TEMPLATE_DELETED, MSG_SAVED, MSG_SAVING, MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS, MSG_UNSAVED_CHANGES, MSG_USER_DELETE, TITLE_USER_EDIT, TITLE_USER_NEW } from '../../config';
+import BasePageComponent, { FIELD_TYPE_CHECKBOXES } from './base';
+import { BTN_BACK, BTN_DELETE, BTN_SAVE, FIELD_BASIC_INFO, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, FIELD_PERMISSION, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_INVALID_BLANK, MSG_INVALID_EMAIL, MSG_INVALID_PASSWORD_MATCH, MSG_SAVED, MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS, MSG_UNSAVED_CHANGES, MSG_USER_DELETE, TITLE_USER_EDIT, TITLE_USER_NEW } from '../../config';
 import BackendAPI from '../../api';
 import { message as msgPopup } from 'react-message-popup';
-import UserPermission from '../../user_permission';
+import UserPermission, { USER_PERM_ADMIN } from '../../user_permission';
 import Helpers from '../../helpers';
 import Events from '../../events';
 export default class UserEditPageComponent extends BasePageComponent {
@@ -40,6 +40,9 @@ export default class UserEditPageComponent extends BasePageComponent {
     onReady() {
         this.setState({loading: true});
         let userId = this.props.path?.id;
+        if (!userId || userId != this.state.user.id) {
+            this.checkAllPermission(USER_PERM_ADMIN);
+        }
         if (!userId) {
             this.title = TITLE_USER_NEW;
             this.setTitle(this.title);
@@ -216,25 +219,18 @@ export default class UserEditPageComponent extends BasePageComponent {
      * @returns {Array}
      */
     renderPermissionCheckboxes() {
-        let out = [];
-        let hasAdmin = this.state.permission.indexOf('admin') != -1;
+        let params = {
+            id: 'permission',
+            type: FIELD_TYPE_CHECKBOXES,
+            value: this.state.permission,
+            callback: this.onChangePermission,
+            options: {},
+            disabled: this.isTeamCreator
+        };
         for (let id in UserPermission.userPermissionMap) {
-            let label = UserPermission.userPermissionMap[id];
-            let fieldId = 'perm-' + id;
-            out.push(
-                <label key={fieldId} htmlFor={fieldId} className='pure-checkbox'>
-                    <input
-                        type='checkbox'
-                        id={fieldId}
-                        checked={this.state.permission.indexOf(id) != -1}
-                        disabled={this.isTeamCreator || (hasAdmin && id != 'admin')}
-                        onChange={this.onChangePermission}
-                        value={id}
-                    /> {label}
-                </label>
-            );
+            params.options[id] = UserPermission.userPermissionMap[id];
         }
-        return out;
+        return this.renderFormField(params);
     }
 
     /**
@@ -261,7 +257,6 @@ export default class UserEditPageComponent extends BasePageComponent {
             return this.renderLoader();
         }
         let isValid = this.state.emailMessages.length == 0 && this.state.passwordMessages.length == 0;
-
         let teamCreatorAlert = null;
         if (this.isTeamCreator) {
             teamCreatorAlert = <div className='alert warn'>{MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS}</div>
@@ -277,32 +272,31 @@ export default class UserEditPageComponent extends BasePageComponent {
                 <form className='pure-form pure-form-stacked' noValidate={true}>
                     <fieldset>
                         <legend>{FIELD_BASIC_INFO}</legend>
-                        <label htmlFor='email'>{FIELD_EMAIL}</label>
-                        <input
-                            type='email'
-                            id='email'
-                            placeholder={FIELD_EMAIL}
-                            value={this.state.email}
-                            onChange={this.onChangeEmail}
-                            className={this.state.emailMessages.legend > 0 ? 'error' : ''}
-                        />
-                        {this.renderMessages(this.state.emailMessages)}
-                        <label htmlFor='password'>{FIELD_PASSWORD}</label>
-                        <input
-                            type='password'
-                            id='password'
-                            placeholder={FIELD_PASSWORD}
-                            value={this.state.password}
-                            onChange={this.onChangePassword}
-                        />
-                        <input
-                            type='password'
-                            id='password-repeat'
-                            placeholder={FIELD_PASSWORD_REPEAT}
-                            value={this.state.passwordRepeat}
-                            onChange={this.onChangePassword}
-                        />
-                        {this.renderMessages(this.state.passwordMessages)}
+                        {this.renderFormField({
+                            id: 'email',
+                            type: 'email',
+                            label: FIELD_EMAIL,
+                            placeholder: FIELD_EMAIL,
+                            value: this.state.email,
+                            callback: this.onChangeEmail,
+                            errors: this.state.emailMessages
+                        })}
+                        {this.renderFormField({
+                            id: 'password',
+                            type: 'password',
+                            label: FIELD_PASSWORD,
+                            placeholder: FIELD_PASSWORD,
+                            value: this.state.password,
+                            callback: this.onChangePassword
+                        })}
+                        {this.renderFormField({
+                            id: 'password-repeat',
+                            type: 'password',
+                            placeholder: FIELD_PASSWORD_REPEAT,
+                            value: this.state.passwordRepeat,
+                            callback: this.onChangePassword,
+                            errors: this.state.passwordMessages
+                        })}
                     </fieldset>
                     <fieldset>
                         <legend>{FIELD_PERMISSION}</legend>

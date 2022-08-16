@@ -27,6 +27,7 @@ export default class BaseNodeComponent extends React.Component {
         this.checkValidation = false;
         this.onUpdateCallback = this.onUpdateCallback.bind(this);
         this.onPreRuleEvaluation = this.onPreRuleEvaluation.bind(this);
+        this.onPostRuleEvaluation = this.onPostRuleEvaluation.bind(this);
         this.onRuleEvaluation = this.onRuleEvaluation.bind(this);
     }
 
@@ -35,6 +36,7 @@ export default class BaseNodeComponent extends React.Component {
      */
     componentDidMount() {
         Events.listen('pre-rule-evaluation', this.onPreRuleEvaluation);
+        Events.listen('post-rule-evaluation', this.onPostRuleEvaluation);
         Events.listen('rule-evaluation', this.onRuleEvaluation);
     }
 
@@ -43,6 +45,7 @@ export default class BaseNodeComponent extends React.Component {
      */
     componentWillUnmount() {
         Events.remove('pre-rule-evaluation', this.onPreRuleEvaluation);
+        Events.remove('post-rule-evaluation', this.onPostRuleEvaluation);
         Events.remove('rule-evaluation', this.onRuleEvaluation);
     }
 
@@ -62,6 +65,13 @@ export default class BaseNodeComponent extends React.Component {
             messages: [],
             visible: !this.userData.isHidden(this.node, null, this.matrix)
         });
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onPostRuleEvaluation(e) {
+        return;
     }
 
     /**
@@ -181,6 +191,7 @@ export default class BaseNodeComponent extends React.Component {
             Events.dispatch('rule-evaluation', res);
         }
         this.setState({visible: !this.userData.isHidden(this.node, this.root, this.matrix)});
+        Events.dispatch('post-rule-evaluation');
     }
 
     /**

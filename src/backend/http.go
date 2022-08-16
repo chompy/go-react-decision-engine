@@ -43,6 +43,7 @@ var httpEndpoints = []HTTPEndpoint{
 	{"/api/tree/list", HTTPTreeRootList, "GET"},
 	{"/api/tree/store", HTTPTreeRootStore, "POST"},
 	{"/api/tree/delete", HTTPTreeRootDelete, "POST"},
+	{"/api/tree/typeahead", HTTPTreeTypeaheadList, "GET"},
 	{"/api/tree/version/fetch", HTTPTreeVersionFetch, "GET"},
 	{"/api/tree/version/list", HTTPTreeVersionList, "GET"},
 	{"/api/tree/version/store", HTTPTreeVersionStore, "POST"},

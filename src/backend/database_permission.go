@@ -16,7 +16,7 @@ func checkFetchPermission(i interface{}, user *User) error {
 				}
 				team = treeForm.(*TreeRoot).Parent
 			}
-			if user.Team.String() != team.String() {
+			if user == nil || user.Team.String() != team.String() {
 				return ErrInvalidPermission
 			}
 		}
@@ -32,28 +32,28 @@ func checkFetchPermission(i interface{}, user *User) error {
 					return err
 				}
 			}
-			if user.Team.String() != treeRoot.(*TreeRoot).Parent.String() {
+			if user == nil || user.Team.String() != treeRoot.(*TreeRoot).Parent.String() {
 				return ErrInvalidPermission
 			}
 			break
 		}
 	case *User:
 		{
-			if user.Team.String() != i.Team.String() {
+			if user == nil || user.Team.String() != i.Team.String() {
 				return ErrInvalidPermission
 			}
 			break
 		}
 	case *Team:
 		{
-			if user.Team.String() != i.ID.String() {
+			if user == nil || user.Team.String() != i.ID.String() {
 				return ErrInvalidPermission
 			}
 			break
 		}
 	case *RuleTemplate:
 		{
-			if user.Team.String() != i.Team.String() {
+			if user == nil || user.Team.String() != i.Team.String() {
 				return ErrInvalidPermission
 			}
 		}

@@ -1,7 +1,7 @@
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_BACK,BTN_SAVE,FIELD_CUSTOMIZE_ADV, FIELD_CUSTOMIZE_BASIC, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING } from '../../config';
-import BasePageComponent from './base';
+import { BTN_BACK,BTN_SAVE,FIELD_CUSTOMIZE_ADV, FIELD_CUSTOMIZE_BASIC, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING, MSG_UNSAVED_CHANGES } from '../../config';
+import BasePageComponent, { FIELD_TYPE_COLOR } from './base';
 import { faBackward, faFloppyDisk } from '@fortawesome/free-solid-svg-icons';
 import TeamDashboardPageComponent from './team_dashboard';
 import { message as msgPopup } from 'react-message-popup';
@@ -28,6 +28,7 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         this.state.loading = true;
         this.state.style = '';
         this.state.generatedStyle = '';
+        this.state.hasChange = false;
         for (let k in TeamCustomizePageComponent.colorOpts) {
             this.state[k] = TeamCustomizePageComponent.colorOpts[k][1];
         }
@@ -48,6 +49,9 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         BackendAPI.get('team/fetch', {id: this.props.team.id}, this.onTeamResponse);
     }
 
+    /**
+     * @param {Object} res 
+     */
     onTeamResponse(res) {
         if (this.handleErrorResponse(res)) { return; }
         if (res.data?.customize) {
@@ -66,6 +70,20 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         this.setLoaded();
     }
 
+    /**
+     * @param {Event} e 
+     */
+    onClickBack(e) {
+        e.preventDefault();
+        if (this.state.hasChange && !confirm(MSG_UNSAVED_CHANGES)) {
+            return;
+        }        
+        this.gotoReferer();
+    }
+
+    /**
+     * @param {Event} e 
+     */
     onSave(e) {
         e.preventDefault();
         let params = {
@@ -86,43 +104,60 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         );
     }
 
+    /**
+     * @param {Object} res 
+     */
     onSaveResponse(res) {
         if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
         if (this.handleErrorResponse(res)) { return; }
         msgPopup.success(MSG_SAVED, MSG_DISPLAY_TIME);
+        res.data.name = this.state.team.name;
         Events.dispatch('team', res.data);
+        this.setState({hasChange: false});
     }
 
+    /**
+     * @param {Event} e 
+     */
     onColorChange(e) {
-        this.setState({[e.target.id]: e.target.value}, function() {
+        this.setState({hasChange: true, [e.target.id]: e.target.value}, function() {
             this.setState({generatedStyle: this.generateStyle()});
         }.bind(this));
     }
 
+    /**
+     * @param {String} value 
+     */
     onStyleChange(value) {
-        this.setState({style: value}, function() {
+        this.setState({hasChange: true, style: value}, function() {
             this.setState({generatedStyle: this.generateStyle()});
         }.bind(this))
     }
 
+    /**
+     * Render all color fields.
+     * @returns {Array}
+     */
     renderColorOptions() {
         let out = [];
         for (let k in TeamCustomizePageComponent.colorOpts) {
             out.push(
-                <div key={'color-opt-' + k} className='color-opt'>
-                    <label htmlFor={k}>{TeamCustomizePageComponent.colorOpts[k][0]}</label>
-                    <input
-                        type='color'
-                        id={k}
-                        defaultValue={this.state[k]}
-                        onChange={this.onColorChange}
-                    />                
-                </div>
+                this.renderFormField({
+                    id: k,
+                    type: FIELD_TYPE_COLOR,
+                    label: TeamCustomizePageComponent.colorOpts[k][0],
+                    value: this.state[k],
+                    callback: this.onColorChange
+                })
             );
         }
         return out;
     }
 
+    /**
+     * Generate stylesheet for customizations.
+     * @returns {String}
+     */
     generateStyle() {
         return Helpers.generateCustomStyle(this.state);
     }
@@ -139,8 +174,8 @@ export default class TeamCustomizePageComponent extends BasePageComponent {
         return <div className='page team-customize'>
             <h1 className='title'>Customize Look</h1>
             <div className='options top'>
-                {this.renderPageButton(BTN_BACK, TeamDashboardPageComponent, {}, faBackward)}
-                {this.renderCallbackButton(BTN_SAVE, this.onSave, faFloppyDisk)}
+                {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
+                {this.renderCallbackButton(BTN_SAVE, this.onSave, faFloppyDisk, !this.state.hasChange)}
             </div>
             <section>
                 <form className='pure-form pure-form-stacked' noValidate={true}>

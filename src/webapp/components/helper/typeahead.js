@@ -151,7 +151,7 @@ export default class TypeaheadComponent extends React.Component {
         if (this.state.value && this.state.value.length > 0) {
             for (let i in this.state.value) {
                 let name = this.uidToToken(this.state.value[i]);
-                values.push(name);
+                if (name) { values.push(name); }
             }
         }
         return <div className='helper typeahead'><Tokenizer

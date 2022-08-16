@@ -9,6 +9,8 @@ import UserPermission from '../../user_permission';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
+export const FIELD_TYPE_CHECKBOXES = 'checkboxes';
+export const FIELD_TYPE_COLOR = 'color';
 
 export default class BasePageComponent extends React.Component {
 
@@ -290,22 +292,63 @@ export default class BasePageComponent extends React.Component {
      * @param {Object} field
      */
     renderFormField(field) {
-        if (typeof field.id == 'undefined') { return null; }
-        let type = typeof field.type == 'undefined' ? FIELD_TYPE_TEXT : field.type;
-        let label = typeof field.label == 'undefined' ? field.id : field.label;
-        let value = typeof field.value == 'undefined' ? '' : field.value;
-        let callback = typeof field.label == 'undefined' ? null : field.callback;
-        let disabled = typeof field.disabled == 'undefined' ? false : field.disabled;
+        if (!field?.id) { return null; }
+        let type = field?.type ? field.type : FIELD_TYPE_TEXT;
+        let label = field?.label ? field.label : '';
+        let value = field?.value ? field.value : '';
+        let callback = field?.callback; typeof field.label == 'undefined' ? null : field.callback;
+        let disabled = field?.disabled;
+        let placeholder = field?.placeholder ? field.placeholder : '';
+        let errors = field?.errors ? field.errors : [];
         let fieldRender = null;
         switch (type) {
+            case FIELD_TYPE_CHECKBOXES: {
+                let options = field?.options ? field.options : [];
+                fieldRender = [];
+                for (let i in options) {
+                    let choiceId = field.id + '_' + i; 
+                    fieldRender.push(
+                        <label key={field.id + '_cb_' + i} htmlFor={choiceId} className='pure-checkbox'>
+                            <input
+                                type='checkbox'
+                                id={choiceId}
+                                onChange={callback}
+                                value={i}
+                                checked={value.indexOf(i) != -1} 
+                                disabled={disabled}
+                            />
+                            &nbsp;{options[i]}
+                        </label>
+                    )
+                }
+                break;
+            }
             default: {
-                fieldRender = <input type={type} id={field.id} onChange={callback} value={value} disabled={disabled} />;
+                fieldRender = <input
+                    type={type}
+                    id={field.id}
+                    onChange={callback}
+                    value={value}
+                    disabled={disabled}
+                    placeholder={placeholder}
+                />;
                 break;
             }
         }
-        return <div key={'ff-' + field.id} className='form-field'>
-                <label htmlFor={field.id}>{label}</label>
-                {fieldRender}
+        let errorMessageElements = [];
+        for (let i in errors) {
+            if (!errors[i]) { continue; }
+            errorMessageElements.push(
+                <li key={'ff-' + field.id + '-errmsg-' + errors[i]}>{errors[i]}</li>
+            );
+        }
+        let labelElement = null;
+        if (label) {
+            labelElement = <label htmlFor={field.id}>{label}</label>;
+        }
+        return <div key={'ff-' + field.id} className={'form-field' + (errorMessageElements.length > 0 ? ' error' : '')}>
+                {labelElement}{fieldRender}
+                <ul className='error-messages'>{errorMessageElements}</ul>
             </div>
         ;
     }

@@ -27,8 +27,8 @@ export default class PdfFormComponent extends React.Component {
         this.document = null;
         this.currentFile = null;
         this.formFields = null;
-        this.ruleTypeaheadNode = props?.ruleNode;
         this.node = props?.node ? props.node : new RootNode;
+        this.formNode = props?.formNode ? props.formNode : this.node;
         this.onPdfFile = this.onPdfFile.bind(this);
         this.onPdfFileLoad = this.onPdfFileLoad.bind(this);
         this.onPdfDocument = this.onPdfDocument.bind(this);
@@ -150,7 +150,7 @@ export default class PdfFormComponent extends React.Component {
             for (let c in this.node.children) {
                 let child = this.node.children[c];
                 if (child instanceof PdfFieldBaseNode && child.fieldName == field.name) {
-                    child.ruleNode = this.ruleTypeaheadNode;
+                    child.formNode = this.formNode;
                     child.setField(field);
                     hasNode = true;
                     break;
@@ -158,7 +158,7 @@ export default class PdfFormComponent extends React.Component {
             }
             if (!hasNode) {
                 let child = new PdfFieldNode(PdfFieldNode.generateUid());
-                child.ruleNode = this.ruleTypeaheadNode;
+                child.formNode = this.formNode;
                 child.setField(sFields[i]);
                 this.node.addChild(child);
             }
@@ -323,7 +323,7 @@ export default class PdfFormComponent extends React.Component {
                 key={'builder-' + this.currentFile.name}
                 type={TREE_DOCUMENT_PDF_FORM}
                 node={this.node}
-                ruleNode={this.ruleTypeaheadNode}
+                formNode={this.formNode}
                 onRootDelete={this.onRootDelete}
             />
         </div>;

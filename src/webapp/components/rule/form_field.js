@@ -10,7 +10,7 @@ export default class RuleEditorFormFieldComponent extends React.Component {
         super(props);
         this.id = 'rf-' + BaseNode.generateUid();
         this.field = new RuleFormField('unknown');
-        this.ruleNode = props?.ruleNode;
+        this.formNode = props?.formNode;
         if (props?.field instanceof RuleFormField) {
             this.field = props.field;
         }
@@ -49,7 +49,8 @@ export default class RuleEditorFormFieldComponent extends React.Component {
             case RULE_FIELD_NODE:
             case RULE_FIELD_ANSWER: {
                 return <TypeaheadComponent
-                    root={this.ruleNode}
+                    id={this.formNode ? this.formNode.uid : null}
+                    version={this.formNode ? this.formNode.version : 0}
                     value={this.state.value}
                     onChange={this.onChange}
                 />;

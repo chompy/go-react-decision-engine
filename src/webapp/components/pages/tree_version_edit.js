@@ -100,7 +100,6 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
             resTree.tree = [{
                 label: 'TOP',
                 type: 'root',
-                version: res.data.version,
                 created: new Date(),
                 modified: new Date()
             }];
@@ -108,10 +107,13 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         resTree.tree[0].uid = resRoot.id;
         resTree.tree[0].version = resTree.version;
         let jc = new JsonConverter;
+        let importTree = jc.import(resTree.tree);
+        importTree.version = resTree.version;
+        console.log(importTree);
         this.setState({
             object: resTree,
             root: resRoot,
-            tree: jc.import(resTree.tree)
+            tree: importTree
         });
         this.setTitle(resRoot.label + ' v' + resTree.version);
         if (resRoot.type == TREE_DOCUMENT || resRoot.type == TREE_DOCUMENT_PDF_FORM) {
@@ -362,15 +364,16 @@ export default class TreeVersionEditPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
+        console.log(this.state.tree);
         let builder = <BuilderComponent
             node={this.state.tree}
             type={this.state.root.type}
-            ruleNode={this.state.formTree ? this.state.formTree : this.state.tree}
+            formNode={this.state.formTree ? this.state.formTree : this.state.tree}
         />;
         if (this.state.root.type == TREE_DOCUMENT) {
             builder = <PdfFormComponent
                 node={this.state.tree}
-                ruleNode={this.state.formTree ? this.state.formTree : this.state.tree} 
+                formNode={this.state.formTree ? this.state.formTree : this.state.tree} 
             />;
         }
         let viewBtn = null;

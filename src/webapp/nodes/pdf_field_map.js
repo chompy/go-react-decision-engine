@@ -22,8 +22,8 @@ export default class PdfFieldMapNode extends PdfFieldBaseNode {
      * @inheritdoc
      */
     getName() {
-        if (this.ruleNode && this.value && this.value.length > 0) {
-            let firstValue = this.ruleNode.getChild(this.value[0]);
+        if (this.formNode && this.value && this.value.length > 0) {
+            let firstValue = this.formNode.getChild(this.value[0]);
             return '"' + firstValue.getName() + '"' + (this.value.length > 1 ? ' +' + (this.value.length-1) + ' more' : '');
         }
         return '(empty)';

@@ -4,7 +4,6 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import 'react-quill/dist/quill.bubble.css';
 import TypeaheadComponent from '../helper/typeahead';
-import RuleNode from '../../nodes/rule';
 import RuleEditorTemplateSelectComponent from '../rule/template_select';
 
 const UPDATE_TIMEOUT = 250; 
@@ -18,6 +17,7 @@ export const FIELD_TYPE_TYPEAHEAD = 'typeahead';
 export const FIELD_TYPE_RICHTEXT = 'richtext';
 export const FIELD_TYPE_CHOICE = 'choice';
 export const FIELD_TYPE_RULE_TEMPLATE = 'rule_template';
+
 export default class BuilderFormFieldComponent extends React.Component {
 
     constructor(props) {
@@ -25,7 +25,7 @@ export default class BuilderFormFieldComponent extends React.Component {
         this.node = props.node;
         this.root = props.root;
         this.field = props.field;
-        this.ruleNode = props?.ruleNode ? props.ruleNode : this.root;
+        this.formNode = props?.formNode ? props.formNode : this.root;
         this.state = {
             value: this.getValue()
         };
@@ -197,7 +197,7 @@ export default class BuilderFormFieldComponent extends React.Component {
                     <RuleEditorTemplateSelectComponent
                         value={this.getValue()}
                         onChange={this.onChange}
-                        ruleNode={this.ruleNode}
+                        formNode={this.formNode}
                     />
                 </div>;
             }
@@ -205,7 +205,8 @@ export default class BuilderFormFieldComponent extends React.Component {
                 return <div className={'build-field ' + this.getFieldType()}>
                     <label>{this.getLabel()}</label>
                     <TypeaheadComponent
-                        root={this.ruleNode}
+                        id={this.formNode.uid}
+                        version={this.formNode.version}
                         value={this.node[this.field[0]]}
                         onChange={this.onChange}
                     />

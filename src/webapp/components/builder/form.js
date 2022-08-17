@@ -8,7 +8,7 @@ export default class BuilderFormComponent extends React.Component {
         super(props);
         this.node = props?.node;
         this.root = props?.root;
-        this.ruleNode = props?.ruleNode ? props.ruleNode : this.node;
+        this.formNode = props?.formNode ? props.formNode : this.root;
         this.state = {
             active: false
         }
@@ -53,7 +53,7 @@ export default class BuilderFormComponent extends React.Component {
                     node={this.node}
                     root={this.root}
                     field={fieldDefs[i]}
-                    ruleNode={this.ruleNode}
+                    formNode={this.formNode}
                 />
             );
         }

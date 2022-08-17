@@ -12,7 +12,8 @@ export default class PdfFieldBaseNode extends BaseNode {
         this.field = null;
         this.fieldName = '';
         this.label = '';
-        this.ruleNode = null;
+        this.formNode = null;
+        this.typeahead
     }
 
     /**
@@ -32,7 +33,7 @@ export default class PdfFieldBaseNode extends BaseNode {
         for (let i in this.children) {
             let child = this.children[i];
             if (child instanceof PdfFieldBaseNode) {
-                child.ruleNode = this.ruleNode;
+                child.formNode = this.formNode;
                 child.setField(field);
             }
         }
@@ -43,7 +44,7 @@ export default class PdfFieldBaseNode extends BaseNode {
      */
     addChild(object) {
         if (object instanceof PdfFieldBaseNode && this.field) {
-            object.ruleNode = this.ruleNode;
+            object.formNode = this.formNode;
             object.setField(this.field);
         }
         super.addChild(object);

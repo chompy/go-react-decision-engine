@@ -16,7 +16,7 @@ export default class BuilderComponent extends React.Component {
             this.node.name = 'TOP';
         }
         this.node.type = props?.type ? props.type : TREE_DOCUMENT;
-        this.ruleNode = props?.ruleNode ? props.ruleNode : this.node;
+        this.formNode = props?.formNode ? props.formNode : this.node;
         this.setNodeCallback = this.setNodeCallback.bind(this);
         Events.dispatch('builder_set_node', {
             set: this.setNodeCallback
@@ -55,7 +55,7 @@ export default class BuilderComponent extends React.Component {
                 <BuilderNodeComponent
                     root={this.node}
                     node={this.node}
-                    ruleNode={this.ruleNode}
+                    formNode={this.formNode}
                     onRootDelete={this.props?.onRootDelete}
                 />
             </ul>

@@ -46,7 +46,7 @@ export default class BuilderNodeComponent extends React.Component {
         this.root = props?.root;
         this.parent = props?.parent;
         this.node = props?.node;
-        this.ruleNode = props?.ruleNode ? props.ruleNode : this.root;
+        this.formNode = props?.formNode ? props.formNode : this.root;
         this.currentDragNode = null;
         this.onAddButton = this.onAddButton.bind(this);
         this.onBulkAddButton = this.onBulkAddButton.bind(this);
@@ -173,7 +173,7 @@ export default class BuilderNodeComponent extends React.Component {
                 break;
             }
             case PdfFieldMapNode: {
-                child.ruleNode = this.ruleNode;
+                child.formNode = this.formNode;
                 break;
             }
         }
@@ -572,7 +572,7 @@ export default class BuilderNodeComponent extends React.Component {
                     root={this.root}
                     node={child}
                     parent={this.node}
-                    ruleNode={this.ruleNode}
+                    formNode={this.formNode}
                 />
             );
         }
@@ -626,7 +626,7 @@ export default class BuilderNodeComponent extends React.Component {
                     </div>
                 </div>
                 <BuilderNodeTitleComponent node={this.node} />
-                <BuilderFormComponent node={this.node} root={this.root} ruleNode={this.ruleNode} />
+                <BuilderFormComponent node={this.node} root={this.root} formNode={this.formNode} />
             </div>
             <ul>{children}</ul>
         </li>;

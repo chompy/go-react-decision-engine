@@ -36,6 +36,7 @@ export const BTN_LOGOUT = 'Logout';
 export const BTN_EXPORT = 'Export';
 export const BTN_IMPORT = 'Import';
 export const BTN_CUSTOMIZE = 'Customize';
+export const BTN_COPY_SYNC = 'Copy & Sync To Published';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';

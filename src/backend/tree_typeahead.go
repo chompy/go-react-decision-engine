@@ -10,6 +10,7 @@ type TypeaheadTreeNode struct {
 	Type    string `bson:"type" json:"type"`
 	Version int    `bson:"version" json:"version"`
 	Label   string `bson:"label" json:"label"`
+	Parent  string `bson:"parent" json:"parent"`
 }
 
 func ListTreeTypeahead(id string, maxVersion int, user *User) ([]TypeaheadTreeNode, error) {
@@ -29,6 +30,7 @@ func ListTreeTypeahead(id string, maxVersion int, user *User) ([]TypeaheadTreeNo
 			"version": bson.M{"$max": "$version"},
 			"type":    bson.M{"$max": "$tree.type"},
 			"label":   bson.M{"$max": "$tree.label"},
+			"parent":  bson.M{"$max": "$tree.parent"},
 		}}},
 	}
 	// perform aggregate query

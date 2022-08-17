@@ -14,7 +14,7 @@ export default class RuleEditorTemplateSelectComponent extends React.Component {
             templateId: props?.value ? props.value?.template : null,
             loading: true
         };
-        this.ruleNode = props?.ruleNode;
+        this.formNode = props?.formNode;
         this.templateList = {};
         this.templateFields = [];
         this.fieldValues = props?.value ? props.value?.fieldValues : {};
@@ -135,7 +135,7 @@ export default class RuleEditorTemplateSelectComponent extends React.Component {
                     key={'rule_field_' + this.state.templateId + '_' + i}
                     field={field}
                     value={field.name in this.fieldValues ? this.fieldValues[field.name] : null}
-                    ruleNode={this.ruleNode}
+                    formNode={this.formNode}
                     onChange={this.onFieldChange}
                 />
             );

@@ -1,7 +1,7 @@
-import { faBackward, faEye, faForward, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faClone, faEye, faForward, faTrash } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_BACK, BTN_DELETE, BTN_NEXT, BTN_VIEW, ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING, MSG_SUBMISSION_DELETED, TREE_FORM } from '../../config';
+import { BTN_BACK, BTN_COPY_SYNC, BTN_DELETE, BTN_NEXT, BTN_VIEW, ERR_NOT_FOUND, MSG_COPY_SUCCESS, MSG_DISPLAY_TIME, MSG_SAVED, MSG_SAVING, MSG_SUBMISSION_DELETED, TREE_FORM } from '../../config';
 import JsonConverter from '../../converters/json';
 import UserData from '../../user_data';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
@@ -21,6 +21,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         this.state.root = null;
         this.state.version = null;
         this.state.tree = null;
+        this.state.published = null;
         this.state.loading = true;
     }
 
@@ -45,8 +46,9 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         BackendAPI.batch(
             [
                 {path: 'submission/fetch', payload: {id: submissionId}},
-                {path: 'tree/version/fetch', payload: {id: "$1.form_id", version: "$1.form_version"}},
-                {path: 'tree/fetch', payload: {id: "$2.root_id"}}
+                {path: 'tree/version/fetch', payload: {id: '$1.form_id', version: '$1.form_version'}},
+                {path: 'tree/version/fetch', payload: {id: "$1.form_id"}},
+                {path: 'tree/fetch', payload: {id: '$2.root_id'}}
             ],
             this.onApiResponse
         );
@@ -69,7 +71,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             tree.type = TREE_FORM;
         }
         // root form
-        let root = res.data[2].data;
+        let root = res.data[3].data;
         // import rules
         let ruleTemplates = treeVersion?.rule_templates ? treeVersion.rule_templates : [];
         for (let i in ruleTemplates) { RuleTemplateCollector.add(ruleTemplates[i]); }
@@ -79,6 +81,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             version: treeVersion,
             tree: tree,
             root: root,
+            published: res.data[2].data
         });        
         this.setTitle(this.state.root.label + ' (v' + this.state.version.version + ')');
         this.setLoaded();
@@ -161,6 +164,34 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickCopySync(e) {
+        e.preventDefault();
+        this.msgLoadPromise = msgPopup.loading(MSG_SAVING, 10000);
+        BackendAPI.post(
+            'submission/store',
+            null,
+            {
+                form_id: this.state.version.root_id,
+                form_version: this.state.published.version,
+                answers: this.userData.answers,
+                valid: this.userData.valid
+            },
+            this.onCopySyncResponse
+        );
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onCopySyncResponse(res) {
+        if (this.msgLoadPromise) { this.msgLoadPromise.then(({destory}) => { destory(); } ); }
+        if (this.handleErrorResponse(res)) { return; }
+        msgPopup.success(MSG_COPY_SUCCESS.replace('{version}', this.state.version.version), MSG_DISPLAY_TIME);
+    }
+
+    /**
      * {@inheritDoc}
      */
     render() {
@@ -169,6 +200,10 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
         } else if (this.state.loading) {
             return this.renderLoader();
         }
+        let syncToPublish = null;
+        if (this.state.published && this.state.published.version != this.state.version.version) {
+            syncToPublish = this.renderCallbackButton(BTN_COPY_SYNC, this.onClickCopySync, faClone);
+        }
         return <div className='page submission-edit'>
             <h1 className='title'>{this.state.root.label + ' (v' + this.state.version.version + ')'}</h1>
             <em>Submission {this.userData.id}</em>
@@ -176,6 +211,7 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
                 {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash)}
+                {syncToPublish}
                 {this.renderCallbackButton(BTN_VIEW, this.onClickView, faEye)}
             </div>
             <section>

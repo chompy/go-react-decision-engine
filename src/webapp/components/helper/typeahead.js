@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tokenizer } from 'react-typeahead';
+import BackendAPI from '../../api';
 import { MSG_TYPEAHEAD_PLACEHOLDER } from '../../config';
 import AnswerNode from '../../nodes/answer';
 import QuestionNode from '../../nodes/question';
@@ -8,40 +9,89 @@ export default class TypeaheadComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.root = props?.root;
+        this.id = props?.id;
+        this.version = props?.version;
         this.state = {
+            loaded: false,
+            items: [],
             value: props?.value ? props.value : []
         }
         this.onChange = props?.onChange;
         this.onTokenAdd = this.onTokenAdd.bind(this);
         this.onTokenRemove = this.onTokenRemove.bind(this);
+        this.onTypeaheadResponse = this.onTypeaheadResponse.bind(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    componentDidMount() {
+        if (this.id) {
+            BackendAPI.get(
+                'tree/typeahead', {id: this.id, version: this.version},
+                this.onTypeaheadResponse
+            );
+            return;
+        }
+        this.setState({loaded: true});
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onTypeaheadResponse(res) {
+        if (!res.success) {
+            console.error('> ERROR: ' + res.message, res);    
+            return;
+        }
+        let items = this.generateTokens(res.data);
+        let value = [];
+        for (let i in this.state.value) {
+            if (this.state.value[i] in items) {
+                value.push(this.state.value[i]);
+            }
+        }
+        this.setState({loaded: true, items: items, value: value});
+    }
+
+    /**
+     * @param {Array} items 
+     * @returns {Object}
+     */
+    generateTokens(items) {
+        let out = {}
+        for (let i in items) {
+            let item = items[i];
+            if (item.type != QuestionNode.getTypeName() && item.type != AnswerNode.getTypeName()) {
+                continue;
+            }
+            let parents = [];
+            let currentParent = item.parent;
+            while (currentParent) {
+                for (let j in items) {
+                    let parentItem = items[j];
+                    if (parentItem.uid == currentParent) {
+                        parents.push(parentItem);
+                        currentParent = parentItem.parent;
+                        break;
+                    }
+                }
+            }
+            let label = (parents.length >= 2 ? parents[1].label + ' > ' : '') + 
+                (parents.length >= 1 ? parents[0].label + ' > ' : '') +
+                item.label
+            ;
+            out[item.uid] = '[v' + item.version + '] ' + label;
+        }
+        return out;
     }
 
     /**
      * @returns {Array}
      */
     getTokens() {
-        if (!this.root) {
-            return [];
-        }
-        let ittChildren = function (node, labels) {
-            let out = [];
-            for (let i in node.children) {
-                let child = node.children[i];
-                if (child instanceof AnswerNode || child instanceof QuestionNode) {
-                    let name = '';
-                    if (labels.length-2 >= 0) {
-                        name += labels[labels.length-2] + ' > ';
-                    }
-                    name += labels[labels.length-1] + ' > ' + child.getName();
-                    out.push(name);
-                }
-                out = out.concat(ittChildren(child, labels.concat(child.getName())));
-            }
-            return out;
-        };
-        let out = ittChildren(this.root, []);
-        return out;
+        if (!this.state.items) { return []; }
+        return Object.values(this.state.items);
     }
 
     /**
@@ -49,30 +99,12 @@ export default class TypeaheadComponent extends React.Component {
      * @return {string}
      */
     tokenToUid(name) {
-        if (!this.root) {
-            return null;
-        }
-        let ittChildren = function (node, labels, match) {
-            for (let i in node.children) {
-                let child = node.children[i];
-                if (child instanceof AnswerNode || child instanceof QuestionNode) {
-                    let name = '';
-                    if (labels.length-2 >= 0) {
-                        name += labels[labels.length-2] + ' > ';
-                    }
-                    name += labels[labels.length-1] + ' > ' + child.getName();
-                    if (name == match) {
-                        return child.uid;
-                    }
-                }
-                let res = ittChildren(child, labels.concat(child.getName()), match);
-                if (res) {
-                    return res;
-                }
+        if (!this.state.items) { return null; }
+        for (let k in this.state.items) {
+            if (this.state.items[k] == name) {
+                return k;
             }
-            return null;
-        };
-        return ittChildren(this.root, [], name);
+        }
     }
 
     /**
@@ -80,30 +112,8 @@ export default class TypeaheadComponent extends React.Component {
      * @return {string}
      */
     uidToToken(uid) {
-        if (!this.root) {
-            return null;
-        }
-        let ittChildren = function (node, labels, uid) {
-            for (let i in node.children) {
-                let child = node.children[i];
-                if (child instanceof AnswerNode || child instanceof QuestionNode) {
-                    if (uid == child.uid) {
-                        let name = '';
-                        if (labels.length-2 >= 0) {
-                            name += labels[labels.length-2] + ' > ';
-                        }
-                        name += labels[labels.length-1] + ' > ' + child.getName();
-                        return name;
-                    }
-                }
-                let res = ittChildren(child, labels.concat(child.getName()), uid);
-                if (res) {
-                    return res;
-                }
-            }
-            return null;
-        };
-        return ittChildren(this.root, [], uid);
+        if (!this.state.items) { return null; }
+        return typeof this.state.items[uid] == 'undefined' ? '' : this.state.items[uid];
     }
 
     /**
@@ -111,9 +121,7 @@ export default class TypeaheadComponent extends React.Component {
      */
     onTokenAdd(token) {
         let uid = this.tokenToUid(token);
-        if (!uid) {
-            return;
-        }
+        if (!uid) { return; }
         this.setState(function(state, props) {
             let newValue = [ ...state.value, uid];
             if (this.onChange) {
@@ -147,6 +155,7 @@ export default class TypeaheadComponent extends React.Component {
     }
 
     render() {
+        if (!this.state.loaded) { return null; }
         let values = [];
         if (this.state.value && this.state.value.length > 0) {
             for (let i in this.state.value) {

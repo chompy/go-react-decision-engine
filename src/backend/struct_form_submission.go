@@ -19,6 +19,7 @@ type FormSubmission struct {
 	SaveCount   int                 `bson:"save_count" json:"save_count"`
 }
 
+// FetchFormSubmission fetches a form submission of given id.
 func FetchFormSubmission(id string, user *User) (*FormSubmission, error) {
 	if user == nil {
 		return nil, ErrNoUser
@@ -37,14 +38,23 @@ func FetchFormSubmission(id string, user *User) (*FormSubmission, error) {
 	return submission, nil
 }
 
-// List all form submissions for given tree;
-func ListFormSubmission(formId string, user *User, offset int) ([]*FormSubmission, int, error) {
+// ListFormSubmission lists all form submission for given form and/or given creator.
+func ListFormSubmission(formId string, userId string, user *User, offset int) ([]*FormSubmission, int, error) {
 	if user == nil {
 		return nil, 0, ErrNoUser
 	}
+	if formId == "" && userId == "" {
+		return nil, 0, ErrObjMissingParam
+	}
 	// database fetch
-	formDbId := DatabaseIDFromString(formId)
-	res, count, err := databaseList(FormSubmission{}, bson.M{"form_id": formDbId}, bson.M{"created": -1}, nil, offset)
+	filterParams := bson.M{}
+	if formId != "" {
+		filterParams["form_id"] = DatabaseIDFromString(formId)
+	}
+	if userId != "" {
+		filterParams["creator"] = DatabaseIDFromString(userId)
+	}
+	res, count, err := databaseList(FormSubmission{}, filterParams, bson.M{"created": -1}, nil, offset)
 	if err != nil {
 		return nil, 0, err
 	}

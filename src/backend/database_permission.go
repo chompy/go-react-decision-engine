@@ -57,6 +57,22 @@ func checkFetchPermission(i interface{}, user *User) error {
 				return ErrInvalidPermission
 			}
 		}
+	case *FormSubmission:
+		{
+			if user == nil {
+				return ErrInvalidPermission
+			}
+			if user.ID.String() == i.Creator.String() {
+				return nil
+			}
+			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.FormID}, nil)
+			if err != nil {
+				return err
+			}
+			if user.Team.String() != treeRoot.(*TreeRoot).Parent.String() {
+				return ErrInvalidPermission
+			}
+		}
 	}
 	return nil
 }

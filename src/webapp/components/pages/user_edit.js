@@ -265,7 +265,7 @@ export default class UserEditPageComponent extends BasePageComponent {
             <h1 className='title'>{this.title}</h1>
             <div className='options top'>
                 {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
-                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash, this.isCurrentUser)}
+                {this.renderCallbackButton(BTN_DELETE, this.onClickDelete, faTrash, this.isTeamCreator || this.isCurrentUser || !this.state.userId)}
                 {this.renderCallbackButton(BTN_SAVE, this.onClickSave, faFloppyDisk, !this.state.hasChange || !isValid)}
             </div>
             <section>

@@ -54,6 +54,7 @@ export const TITLE_USER_LIST = 'Users'
 export const TITLE_USER_NEW = 'New User';
 export const TITLE_USER_EDIT = 'Edit User "{email}"';
 export const TITLE_CUSTOMIZE = 'Customize';
+export const TITLE_USER_DASH = 'My Dashboard';
 
 // default names
 export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';

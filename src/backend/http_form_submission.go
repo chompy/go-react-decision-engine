@@ -39,7 +39,8 @@ func HTTPFormSubmissionFetch(w http.ResponseWriter, r *http.Request) {
 func HTTPFormSubmissionList(w http.ResponseWriter, r *http.Request) {
 	// get params
 	formId := r.URL.Query().Get("form")
-	if formId == "" {
+	userId := r.URL.Query().Get("user")
+	if formId == "" && userId == "" {
 		HTTPSendError(w, ErrHTTPMissingParam)
 		return
 	}
@@ -52,7 +53,7 @@ func HTTPFormSubmissionList(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// fetch
-	res, count, err := ListFormSubmission(formId, user, offset)
+	res, count, err := ListFormSubmission(formId, userId, user, offset)
 	if err != nil {
 		HTTPSendError(w, err)
 		return

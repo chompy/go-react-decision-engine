@@ -15,6 +15,7 @@ import UserEditPageComponent from "./components/pages/user_edit";
 import UserListPageComponent from "./components/pages/user_list";
 import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 import TeamCustomizePageComponent from "./components/pages/team_customize";
+import UserDashboardPageComponent from "./components/pages/user_dashboard";
 
 // Determines pages and page parameters from current URL path.
 export default class PathResolver {
@@ -43,7 +44,7 @@ export default class PathResolver {
                     return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                 }
                 if (path.length == 1 || path[1] == '') {
-                    return {component: ErrorPageComponent, team: teamId, message: ERR_NOT_IMPLEMENTED};
+                    return {component: UserDashboardPageComponent, team: teamId};
                 }
                 switch (path[1]) {
                     case 'login': {
@@ -198,6 +199,7 @@ export default class PathResolver {
             // public pages
             '{team}/login': LoginPageComponent,
             // normal user pages
+            '{team}': UserDashboardPageComponent,
             '{team}/form/{id}': FormSubmissionEditPageComponent,
             '{team}/view/{id}': DocumentViewListComponent,
             '{team}/view/{submission}/{document}/v{version}': DocumentViewComponent,

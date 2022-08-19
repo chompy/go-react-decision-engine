@@ -2,6 +2,7 @@ import React from 'react';
 import { TITLE_USER_DASH } from '../../config';
 import ApiTableComponent from '../helper/api_table';
 import BasePageComponent from './base';
+import FormSubmissionEditPageComponent from './form_submission_edit';
 import FormSubmissionListPageComponent from './form_submission_list';
 
 export default class UserDashboardPageComponent extends BasePageComponent {
@@ -30,7 +31,7 @@ export default class UserDashboardPageComponent extends BasePageComponent {
      * @param {Object} data 
      */
     onSelectSubmission(data) {
-
+        this.gotoPage(FormSubmissionEditPageComponent, {id: data.id});
     }
 
     /**

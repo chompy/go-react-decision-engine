@@ -124,7 +124,7 @@ export default class BaseNodeComponent extends React.Component {
             }
             for (let i in node.children) {
                 let child = node.children[i];
-                if (child instanceof RuleNode) {
+                if (child instanceof RuleNode && child.templateData?.template) {
                     let ruleEngine = new RuleEngine;
                     ruleEngine.matrixId = matrixId;
                     ruleEngine.setUserData(this.userData);

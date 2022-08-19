@@ -83,6 +83,7 @@ export default class RootNodeComponent extends BaseNodeComponent {
         // validation error counter
         let results = e.detail;
         if (
+            results.rule &&
             results.rule.type == RULE_TYPE_VALIDATION &&
             !results.results &&
             this.userData.hasInput(results.parent, results.matrixId)

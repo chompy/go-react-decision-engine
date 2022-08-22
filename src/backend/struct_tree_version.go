@@ -60,7 +60,9 @@ func FetchTreeVersionLatest(rootId string, user *User) (*TreeVersion, error) {
 	if err := checkFetchPermission(res, user); err != nil {
 		return nil, err
 	}
-	return treeVersion, nil
+	// fetch rule templates
+	treeVersion.RuleTemplates, err = ListRuleTemplateByID(user, treeVersion.GetRuleTemplateIDs())
+	return treeVersion, err
 }
 
 func FetchTreeVersionLatestPublished(rootId string, user *User) (*TreeVersion, error) {
@@ -75,7 +77,9 @@ func FetchTreeVersionLatestPublished(rootId string, user *User) (*TreeVersion, e
 	if err := checkFetchPermission(res, user); err != nil {
 		return nil, err
 	}
-	return treeVersion, nil
+	// fetch rule templates
+	treeVersion.RuleTemplates, err = ListRuleTemplateByID(user, treeVersion.GetRuleTemplateIDs())
+	return treeVersion, err
 }
 
 func ListTreeVersion(rootId string, user *User, offset int) ([]*TreeVersion, int, error) {
@@ -215,7 +219,6 @@ func (t *TreeVersion) GetRuleTemplateIDs() []string {
 					out = append(out, templateId.(string))
 				}
 			}
-
 		}
 	}
 	return out

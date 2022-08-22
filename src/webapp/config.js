@@ -37,6 +37,8 @@ export const BTN_EXPORT = 'Export';
 export const BTN_IMPORT = 'Import';
 export const BTN_CUSTOMIZE = 'Customize';
 export const BTN_COPY_SYNC = 'Copy & Sync To Published';
+export const BTN_TEAM_DASHBOARD = 'Team Dashboard';
+export const BTN_USER_DASHBOARD = 'My Dashboard';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';
@@ -55,6 +57,16 @@ export const TITLE_USER_NEW = 'New User';
 export const TITLE_USER_EDIT = 'Edit User "{email}"';
 export const TITLE_CUSTOMIZE = 'Customize';
 export const TITLE_USER_DASH = 'My Dashboard';
+export const TITLE_FORM_LIST = 'Forms';
+export const TITLE_USER_SUBMISSION_LIST = 'My Submissions';
+export const TITLE_USER_SUBMISSION_LIST_FORM = 'My Submissions For "{form}"';
+
+// section labels
+export const LABEL_SUBMISSIONS = 'Submissions';
+export const LABEL_FORMS = 'Forms';
+export const LABEL_DOCUMENTS = 'Documents';
+export const LABEL_VERSIONS = 'Versions';
+export const LABEL_PUBLISHED = 'Published';
 
 // default names
 export const DEFAULT_RULE_TEMPLATE_TITLE = 'Untitled Rule Template';

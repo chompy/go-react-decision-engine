@@ -9,8 +9,8 @@ import ErrorPageComponent from './pages/error';
 import { ERR_NOT_FOUND, MSG_DISPLAY_TIME, MSG_LOGIN_SUCCESS, MSG_LOGOUT_SUCCESS, MSG_SESSION_EXPIRED } from '../config';
 import { message as msgPopup } from 'react-message-popup';
 import UserTimeComponent from './helper/user_time';
-import TeamDashboardPageComponent from './pages/team_dashboard';
 import Helpers from '../helpers';
+import UserDashboardPageComponent from './pages/user_dashboard';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -88,7 +88,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Fetched user "' + res.data.email + '" (' + res.data.id + ').');
         this.setState({user: res.data});
         if (this.state.path.component == LoginPageComponent || res.data.team != this.state.path.team) {
-            this.gotoPage(TeamDashboardPageComponent, {team: res.data.team}, true);
+            this.gotoPage(UserDashboardPageComponent, {team: res.data.team}, true);
         }
         UserTimeComponent.users[res.data.id] = res.data;
         Events.dispatch('user_me', res.data);
@@ -140,11 +140,11 @@ export default class DecisionEngineMainComponent extends React.Component {
         console.log('> Log in successful.');
         BackendAPI.get('user/me', null, this.onUserMe);
         msgPopup.success(MSG_LOGIN_SUCCESS, MSG_DISPLAY_TIME);
-        if (typeof this.state.path.referer != 'undefined') {
+        if (this.state.path?.referer) {
             this.gotoPage(this.state.path.referer.component, this.state.path.referer, true);
             return; 
         }
-        this.gotoPage(TeamDashboardPageComponent, {}, true);
+        this.gotoPage(UserDashboardPageComponent, {}, true);
     }
 
     /**
@@ -164,7 +164,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         e.preventDefault();
         let resolvedPage = PathResolver.resolveCurrentPath();
         if (resolvedPage.component == LoginPageComponent && this.state.user) {
-            this.gotoPage(TeamDashboardPageComponent, {team: this.state.user.team}, true);
+            this.gotoPage(UserDashboardPageComponent, {team: this.state.user.team}, true);
             return;
         }
         this.setState({path: resolvedPage});
@@ -210,7 +210,7 @@ export default class DecisionEngineMainComponent extends React.Component {
         let path = PathResolver.getPathFromComponent(component, params);        
         PathResolver.setPath(path);
         let resolvedPage = PathResolver.resolveCurrentPath();
-        if (component == LoginPageComponent && typeof params.referer != 'undefined') {
+        if (component == LoginPageComponent && params?.referer) {
             resolvedPage.referer = params.referer;
         }
         if (this.state.path && !noReferer) {
@@ -229,11 +229,11 @@ export default class DecisionEngineMainComponent extends React.Component {
      */
     gotoReferer() {
         if (!this.state.path) {
-            this.gotoPage(TeamDashboardPageComponent);
+            this.gotoPage(UserDashboardPageComponent);
         }
         let pathStr = window.localStorage.getItem('page-referer-' + this.state.path.component.getName());
         if (!pathStr) {
-            this.gotoPage(TeamDashboardPageComponent)
+            this.gotoPage(UserDashboardPageComponent)
         }
         let path = PathResolver.resolvePath(pathStr);
         this.gotoPage(path.component, path, true);

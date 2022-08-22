@@ -16,6 +16,8 @@ import UserListPageComponent from "./components/pages/user_list";
 import { ERR_NOT_FOUND, ERR_NOT_IMPLEMENTED } from "./config";
 import TeamCustomizePageComponent from "./components/pages/team_customize";
 import UserDashboardPageComponent from "./components/pages/user_dashboard";
+import UserSubmissionListPageComponent from "./components/pages/user_submission_list";
+import UserFormListPageComponent from "./components/pages/user_form_list";
 
 // Determines pages and page parameters from current URL path.
 export default class PathResolver {
@@ -50,9 +52,6 @@ export default class PathResolver {
                     case 'login': {
                         return {component: LoginPageComponent, team: teamId};
                     }
-                    case 'customize': {
-                        return {component: TeamCustomizePageComponent, team: teamId};
-                    }
                     case 'form': {
                         if (path.length == 2) {
                             return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
@@ -82,6 +81,20 @@ export default class PathResolver {
                         }
                         return {component: DocumentViewListComponent, team: teamId, id: submissionId};
                     }
+                    case 'submissions': {
+                        let formId = null;
+                        if (path.length >= 3) {
+                            formId = path[2].trim();
+                        }
+                        return {component: UserSubmissionListPageComponent, team: teamId, form: formId};
+                    }
+                    case 'forms': {
+                        let ref = null;
+                        if (path.length >= 3) {
+                            ref = path[2].substring(4).trim();
+                        }
+                        return {component: UserFormListPageComponent, team: teamId, ref: ref};
+                    }
                     case 'admin': {
                         if (path.length == 2) {
                             return {component: TeamDashboardPageComponent, team: teamId};
@@ -106,6 +119,9 @@ export default class PathResolver {
                                         return {component: ErrorPageComponent, message: ERR_NOT_FOUND};
                                     }
                                 }
+                            }
+                            case 'customize': {
+                                return {component: TeamCustomizePageComponent, team: teamId};
                             }
                             case 'forms': {
                                 return {component: TreeListPageComponent, team: teamId};
@@ -204,9 +220,13 @@ export default class PathResolver {
             '{team}/view/{id}': DocumentViewListComponent,
             '{team}/view/{submission}/{document}/v{version}': DocumentViewComponent,
             '{team}/view/{submission}/{document}': DocumentViewComponent,
+            '{team}/submissions/{form}': UserSubmissionListPageComponent,
+            '{team}/submissions': UserSubmissionListPageComponent,
+            '{team}/forms/ref-{ref}': UserFormListPageComponent,
+            '{team}/forms': UserFormListPageComponent,
             // admin pages
             '{team}/admin': TeamDashboardPageComponent,
-            '{team}/customize': TeamCustomizePageComponent,
+            '{team}/admin/customize': TeamCustomizePageComponent,
             '{team}/admin/user/list': UserListPageComponent,
             '{team}/admin/user/edit/{id}': UserEditPageComponent,
             '{team}/admin/user/edit': UserEditPageComponent,

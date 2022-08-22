@@ -5,8 +5,8 @@ export default class TreeVersionInfoComponent extends React.Component {
 
     constructor(props) {
         super(props);
-        this.object = typeof props.treeversion != 'undefined' ? props.treeversion : '';
-        this.showState = typeof props.showstate != 'undefined' ? props.showstate : true;
+        this.object = props?.treeversion ? props.treeversion : '';
+        this.showState = props?.showstate;
     }
 
     render() {

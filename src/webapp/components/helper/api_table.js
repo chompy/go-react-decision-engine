@@ -22,11 +22,11 @@ export default class ApiTableComponent extends React.Component {
             offset: 0,
             limit: -1
         };
-        this.columns = typeof props.columns != 'undefined' ? props.columns : {};
-        this.endpoint = typeof props.endpoint != 'undefined' ? props.endpoint : '';
-        this.params = typeof props.params != 'undefined' ? props.params : '';
-        this.callback = typeof props.callback != 'undefined' ? props.callback : null;
-        this.seeMore = typeof props.seeMore != 'undefined' ? props.seeMore : null;
+        this.columns = props?.columns ? props.columns : {};
+        this.endpoint = props?.endpoint ? props.endpoint : '';
+        this.params = props?.params ? props.params : '';
+        this.callback = props?.callback;
+        this.seeMore = props?.seeMore;
 
         this.key = md5(this.endpoint + JSON.stringify(this.columns) + JSON.stringify(this.params));
         this.onBackendResponse = this.onBackendResponse.bind(this);
@@ -57,7 +57,7 @@ export default class ApiTableComponent extends React.Component {
         console.log('> Fetched API table "' + this.endpoint + '."');
         this.setState({
             loading: false,
-            count: typeof res.count != 'undefined' ? res.count : 0, 
+            count: res?.count ? res.count : 0,
             data: res.data,
             limit: this.state.limit == -1 ? res.data.length : this.state.limit
         });

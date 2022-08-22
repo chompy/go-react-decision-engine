@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -106,6 +107,10 @@ func HTTPBatch(w http.ResponseWriter, r *http.Request) {
 							case string:
 								{
 									p[k] = replVal(v)
+									num, err := strconv.Atoi(p[k].(string))
+									if err == nil {
+										p[k] = num
+									}
 								}
 							}
 						}
@@ -127,6 +132,11 @@ func HTTPBatch(w http.ResponseWriter, r *http.Request) {
 							case string:
 								{
 									queryStr += fmt.Sprintf("&%s=%s", k, v)
+									break
+								}
+							case bool:
+								{
+									queryStr += fmt.Sprintf("&%s=%t", k, v)
 									break
 								}
 							}

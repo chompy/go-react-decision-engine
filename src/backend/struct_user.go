@@ -87,14 +87,14 @@ func (u *User) Store(editor *User) error {
 			u.Creator = editor.ID
 		}
 	}
-	if u.Creator.IsEmpty() {
+	/*if u.Creator.IsEmpty() {
 		prevUser, err := FetchUserByID(u.ID.String())
 		if err != nil {
 			return err
 		}
 		u.Creator = prevUser.Creator
 		u.Created = prevUser.Created
-	}
+	}*/
 	return databaseStoreOne(u)
 }
 

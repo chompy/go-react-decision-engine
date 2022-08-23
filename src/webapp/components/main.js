@@ -11,6 +11,7 @@ import { message as msgPopup } from 'react-message-popup';
 import UserTimeComponent from './helper/user_time';
 import Helpers from '../helpers';
 import UserDashboardPageComponent from './pages/user_dashboard';
+import UserNewPageComponent from './pages/user_new';
 
 export default class DecisionEngineMainComponent extends React.Component {
 
@@ -74,7 +75,7 @@ export default class DecisionEngineMainComponent extends React.Component {
      */
     onUserMe(res) {
         if (!res.success) { 
-            if (this.state.path.component == LoginPageComponent) {
+            if ([LoginPageComponent, UserNewPageComponent].indexOf(this.state.path.component) != -1) {
                 return;
             } else if (this.state.path.component != LoginPageComponent && this.state.path.team) {
                 this.gotoPage(

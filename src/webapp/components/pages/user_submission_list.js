@@ -6,6 +6,7 @@ import ApiTableComponent from '../helper/api_table';
 import FormSubmissionEditPageComponent from './form_submission_edit';
 import BackendAPI from '../../api';
 import TreeVersionInfoComponent from '../helper/tree_version_info';
+import UserFormListPageComponent from './user_form_list';
 
 export default class UserSubmissionListPageComponent extends BasePageComponent {
 
@@ -74,7 +75,9 @@ export default class UserSubmissionListPageComponent extends BasePageComponent {
      */
     onClickNewSubmission(e) {
         e.preventDefault();
-        if (!this.state.form) { return; }
+        if (!this.state.form) {
+            this.gotoPage(UserFormListPageComponent, {user: this.state.user, ref: 'new'}, true);
+        }
         BackendAPI.post(
             'submission/store', {},
             {

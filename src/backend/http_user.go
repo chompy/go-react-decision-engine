@@ -10,6 +10,7 @@ type HTTPUserLoginPayload struct {
 
 type HTTPUserPayload struct {
 	ID         string         `json:"id"`
+	Team       string         `json:"team,omitempty"`
 	Email      string         `json:"email"`
 	Password   string         `json:"password"`
 	Permission UserPermission `json:"permission"`
@@ -95,12 +96,14 @@ func HTTPUserStore(w http.ResponseWriter, r *http.Request) {
 	s := HTTPGetSession(r)
 	user := s.getUser()
 	// build + validate
-	dbId := DatabaseIDFromString(payload.ID)
 	userEdit := User{
-		ID:         dbId,
+		ID:         DatabaseIDFromString(payload.ID),
 		Email:      payload.Email,
 		Permission: payload.Permission,
 		Creator:    DatabaseID{0, 0, 0, 0, 0},
+	}
+	if payload.Team != "" {
+		userEdit.Team = DatabaseIDFromString(payload.Team)
 	}
 	// password
 	if payload.Password != "" {

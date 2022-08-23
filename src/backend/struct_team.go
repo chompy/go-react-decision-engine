@@ -6,6 +6,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const TeamOptionAllowNewUser = "allow_new_user"
+
 type Team struct {
 	ID        DatabaseID        `bson:"_id" json:"id"`
 	Created   time.Time         `bson:"created,omitempty" json:"created"`
@@ -14,6 +16,7 @@ type Team struct {
 	Modifier  DatabaseID        `bson:"modifier,omitempty" json:"modifier"`
 	Name      string            `bson:"name,omitempty" json:"name"`
 	Customize map[string]string `bson:"customize,omitempty" json:"customize"`
+	Options   map[string]string `bson:"options,omitempty" json:"options"`
 }
 
 func FetchTeamByID(id string, user *User) (*Team, error) {

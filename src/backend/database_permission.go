@@ -137,6 +137,9 @@ func checkStorePermission(i interface{}, user *User) error {
 	case *FormSubmission:
 		{
 			new = i.ID.IsEmpty()
+			if new {
+				return nil
+			}
 			creator = i.Creator
 			perm = PermManageSubmission
 			treeRoot, err := databaseFetch(TreeRoot{}, bson.M{"_id": i.FormID}, nil)
@@ -144,6 +147,7 @@ func checkStorePermission(i interface{}, user *User) error {
 				return err
 			}
 			team = treeRoot.(*TreeRoot).Parent
+
 			break
 		}
 	case *User:
@@ -154,6 +158,17 @@ func checkStorePermission(i interface{}, user *User) error {
 			// same user can edit their profile
 			if !new && user != nil && i.ID == user.ID {
 				return nil
+			}
+			// allow self creation
+			if new && user == nil && !team.IsEmpty() {
+				/*team, err := FetchTeamByID(team.String(), nil)
+				if err != nil {
+					return err
+				}*/
+
+				i.Permission = UserPermission{}
+				return nil
+				//}
 			}
 			break
 		}

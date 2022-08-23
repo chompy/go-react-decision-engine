@@ -18,6 +18,7 @@ import TeamCustomizePageComponent from "./components/pages/team_customize";
 import UserDashboardPageComponent from "./components/pages/user_dashboard";
 import UserSubmissionListPageComponent from "./components/pages/user_submission_list";
 import UserFormListPageComponent from "./components/pages/user_form_list";
+import UserNewPageComponent from "./components/pages/user_new";
 
 // Determines pages and page parameters from current URL path.
 export default class PathResolver {
@@ -51,6 +52,9 @@ export default class PathResolver {
                 switch (path[1]) {
                     case 'login': {
                         return {component: LoginPageComponent, team: teamId};
+                    }
+                    case 'new-user': {
+                        return {component: UserNewPageComponent, team: teamId};
                     }
                     case 'form': {
                         if (path.length == 2) {
@@ -214,6 +218,7 @@ export default class PathResolver {
         let componentList = {
             // public pages
             '{team}/login': LoginPageComponent,
+            '{team}/new-user': UserNewPageComponent,
             // normal user pages
             '{team}': UserDashboardPageComponent,
             '{team}/form/{id}': FormSubmissionEditPageComponent,

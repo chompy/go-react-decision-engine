@@ -1,11 +1,11 @@
 import React from 'react';
 
-import { faForward } from '@fortawesome/free-solid-svg-icons'
+import { faForward, faUser } from '@fortawesome/free-solid-svg-icons'
 import BasePageComponent, { FIELD_TYPE_PASSWORD } from './base';
 import BackendAPI from '../../api';
 import Events from '../../events';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ERR_UNKNOWN } from '../../config';
+import { BTN_GO, BTN_NEW_USER, ERR_UNKNOWN } from '../../config';
+import UserNewPageComponent from './user_new';
 
 export default class LoginPageComponent extends BasePageComponent {
 
@@ -104,6 +104,14 @@ export default class LoginPageComponent extends BasePageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickNewUser(e) {
+        e.preventDefault();
+        this.gotoPage(UserNewPageComponent);
+    }
+
+    /**
      * {@inheritdoc}
      */
     render() {
@@ -137,7 +145,8 @@ export default class LoginPageComponent extends BasePageComponent {
                     }
                     <div className={'alert error' + (this.state.message ? '' : ' hidden') }>{this.state.message}</div>
                     <div className='options pure-button-group' role='group'>
-                        <button className='pure-button' type='submit' title='Submit'>Go <FontAwesomeIcon icon={faForward} /></button>
+                        {this.renderCallbackButton(BTN_GO, this.onSubmit, faForward)}
+                        {this.renderCallbackButton(BTN_NEW_USER, this.onClickNewUser, faUser)}
                     </div>
                 </form>
             </section>

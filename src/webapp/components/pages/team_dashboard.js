@@ -1,13 +1,13 @@
 import React from 'react';
 import BackendAPI from '../../api';
-import { BTN_CUSTOMIZE, BTN_NEW, BTN_USER_DASHBOARD, DEFAULT_FORM_TITLE, MSG_LOADING, TREE_FORM } from '../../config';
+import { BTN_CONFIG, BTN_CUSTOMIZE, BTN_NEW, BTN_USER_DASHBOARD, DEFAULT_FORM_TITLE, MSG_LOADING, TREE_FORM } from '../../config';
 import Events from '../../events';
 import ApiTableComponent from '../helper/api_table';
 import EditTitleComponent from '../helper/edit_title';
 import BasePageComponent from './base';
 import FormDashboardPageComponent from './form_dashboard';
 import { message as msgPopup } from 'react-message-popup';
-import { faCirclePlus, faUser, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faCirclePlus, faPaintBrush, faUser, faWrench } from '@fortawesome/free-solid-svg-icons';
 import TreeListPageComponent from './tree_list';
 import UserListPageComponent from './user_list';
 import UserEditPageComponent from './user_edit';
@@ -119,7 +119,8 @@ export default class TeamDashboardPageComponent extends BasePageComponent {
             <EditTitleComponent title={this.state.team?.name} callback={this.onNameChange} />
             <div className='options top'>
                 {this.renderPageButton(BTN_USER_DASHBOARD, UserDashboardPageComponent, {}, faUser)}
-                {this.renderPageButton(BTN_CUSTOMIZE, TeamCustomizePageComponent, {}, faWrench)}
+                {this.renderPageButton(BTN_CONFIG, TeamCustomizePageComponent, {}, faWrench)}
+                {this.renderPageButton(BTN_CUSTOMIZE, TeamCustomizePageComponent, {}, faPaintBrush)}
             </div>
             <section>
                 <div className='list forms'>

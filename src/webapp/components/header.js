@@ -103,6 +103,7 @@ export default class AppHeaderComponent extends React.Component {
      * {@inheritdoc}
      */
     render() {
+        if (!this.props.team) { return null; }
         return <div className='header'>
             <div className='app-name'>{this.state.teamName ? this.state.teamName : APP_TITLE}</div>
             {this.renderUser()}

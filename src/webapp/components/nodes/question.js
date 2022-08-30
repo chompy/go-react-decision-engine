@@ -48,7 +48,6 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
      * @param {Event} e 
      */
     onChange(e) {
-        console.log("TESTss");
         switch (this.node.type) {
             case FIELD_TEXT: {
                 this.userData.resetAnswers(this.node, this.matrix);

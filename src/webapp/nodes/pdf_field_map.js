@@ -58,8 +58,10 @@ export default class PdfFieldMapNode extends PdfFieldBaseNode {
             if (!value) { continue; }
             let formNode = formRoot.getChild(value);
             if (!formNode) { continue; }
+            console.log(formNode, value);
             if (formNode instanceof AnswerNode) {
-                out[field.fieldName].push(formNode.value);
+                out.push(formNode.value);
+                //out[field.fieldName].push(formNode.value);
             } else if (formNode instanceof QuestionNode) {
                 let qAnswers = userData.getQuestionAnswers(formNode);
                 switch (formNode.type) {

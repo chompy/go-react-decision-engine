@@ -4,7 +4,7 @@ import React from 'react';
 import BackendAPI from '../api';
 import { APP_TITLE, BTN_DASHBOARD, BTN_LOGOUT } from '../config';
 import Events from '../events';
-import TeamDashboardPageComponent from './pages/team_dashboard';
+import UserDashboardPageComponent from './pages/user_dashboard';
 
 export default class AppHeaderComponent extends React.Component {
 
@@ -69,7 +69,7 @@ export default class AppHeaderComponent extends React.Component {
      */
     onClickDashboard(e) {
         e.preventDefault();
-        Events.dispatch('goto_page', {component: TeamDashboardPageComponent});
+        Events.dispatch('goto_page', {component: UserDashboardPageComponent});
     }
 
     /**

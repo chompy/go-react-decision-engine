@@ -151,6 +151,9 @@ func listPublishedRoot(filter bson.M, user *User, offset int) ([]*TreeRoot, int,
 
 // List all form that contain published version.
 func ListPublishedFormRoot(user *User, offset int) ([]*TreeRoot, int, error) {
+	if user == nil {
+		return nil, 0, ErrNoUser
+	}
 	return listPublishedRoot(
 		bson.M{"type": string(TreeForm), "parent": user.Team},
 		user,

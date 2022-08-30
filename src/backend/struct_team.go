@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-const TeamOptionAllowNewUser = "allow_new_user"
+const TeamOptionAllowSignUp = "allowSignUp"
 
 type Team struct {
 	ID        DatabaseID        `bson:"_id" json:"id"`

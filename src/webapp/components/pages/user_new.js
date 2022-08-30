@@ -1,10 +1,8 @@
 import React from 'react';
-import { faBackward, faFloppyDisk, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { BTN_BACK, BTN_DELETE, BTN_SAVE, FIELD_BASIC_INFO, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, FIELD_PERMISSION, MSG_DELETE_SUCCESS, MSG_DISPLAY_TIME, MSG_INVALID_BLANK, MSG_INVALID_EMAIL, MSG_INVALID_PASSWORD_MATCH, MSG_RULE_TEMPLATE_DELETED, MSG_SAVED, MSG_SAVING, MSG_TEAM_CREATOR_CANNOT_CHANGE_PERMS, MSG_UNSAVED_CHANGES, MSG_USER_DELETE, TITLE_USER_EDIT, TITLE_USER_NEW } from '../../config';
+import { faBackward, faForward, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { BTN_BACK, BTN_SUBMIT, FIELD_EMAIL, FIELD_PASSWORD, FIELD_PASSWORD_REPEAT, MSG_DISPLAY_TIME, MSG_SAVED, TITLE_SIGN_UP } from '../../config';
 import BackendAPI from '../../api';
 import { message as msgPopup } from 'react-message-popup';
-import UserPermission from '../../user_permission';
-import Helpers from '../../helpers';
 import UserEditPageComponent from './user_edit';
 import LoginPageComponent from './login';
 
@@ -62,6 +60,14 @@ export default class UserNewPageComponent extends UserEditPageComponent {
     }
 
     /**
+     * @param {Event} e 
+     */
+    onClickBack(e) {
+        e.preventDefault();
+        this.gotoReferer();
+    }
+
+    /**
      * {@inheritDoc}
      */
     renderPermissionCheckboxes() {
@@ -78,13 +84,9 @@ export default class UserNewPageComponent extends UserEditPageComponent {
             return this.renderLoader();
         }
         let isValid = this.state.emailMessages.length == 0 && this.state.passwordMessages.length == 0;
-        return <div className='page user-edit'>
-            <h1 className='title'>{TITLE_USER_NEW}</h1>
-            <div className='options top'>
-                {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
-                {this.renderCallbackButton(BTN_SAVE, this.onClickSave, faFloppyDisk, !this.state.hasChange || !isValid)}
-            </div>
+        return <div className='page user-new'>
             <section>
+                <h2 className='section-name'>{TITLE_SIGN_UP}</h2>
                 <form className='pure-form pure-form-stacked' noValidate={true}>
 
                     {this.renderFormField({
@@ -112,6 +114,12 @@ export default class UserNewPageComponent extends UserEditPageComponent {
                         callback: this.onChangePassword,
                         errors: this.state.passwordMessages
                     })}
+
+                    <div className='options pure-button-group' role='group'>
+                        {this.renderCallbackButton(BTN_BACK, this.onClickBack, faBackward)}
+                        {this.renderCallbackButton(BTN_SUBMIT, this.onClickSave, faForward, !this.state.hasChange || !isValid)}
+                    </div>
+
                 </form>
             </section>
         </div>;

@@ -2,9 +2,6 @@
 table {
     width: 100%;
 }
-.pure-form {
-    input[type=text], input[type=password] { min-width: 300px; }
-}
 button svg {
     pointer-events: none;
 }
@@ -25,4 +22,5 @@ button svg {
 @import 'tree_nodes';
 @import 'pdf_form';
 @import 'pdf_viewer';
+@import 'form';
 @import 'customize';

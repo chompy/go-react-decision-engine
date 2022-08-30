@@ -9,6 +9,7 @@ import UserPermission from '../../user_permission';
 
 export const FIELD_TYPE_TEXT = 'text';
 export const FIELD_TYPE_PASSWORD = 'password';
+export const FIELD_TYPE_CHECKBOX = 'checkbox';
 export const FIELD_TYPE_CHECKBOXES = 'checkboxes';
 export const FIELD_TYPE_COLOR = 'color';
 
@@ -323,6 +324,20 @@ export default class BasePageComponent extends React.Component {
                 }
                 break;
             }
+            case FIELD_TYPE_CHECKBOX: {
+                fieldRender = <label key={field.id}>
+                    <input
+                        type='checkbox'
+                        id={field.id}
+                        onChange={callback}
+                        value='1'
+                        checked={!!value} 
+                        disabled={disabled}
+                    />
+                    &nbsp;{label}
+                </label>
+                break;
+            }
             default: {
                 fieldRender = <input
                     type={type}
@@ -343,7 +358,7 @@ export default class BasePageComponent extends React.Component {
             );
         }
         let labelElement = null;
-        if (label) {
+        if (label && type != FIELD_TYPE_CHECKBOX) {
             labelElement = <label htmlFor={field.id}>{label}</label>;
         }
         return <div key={'ff-' + field.id} className={'form-field' + (errorMessageElements.length > 0 ? ' error' : '')}>

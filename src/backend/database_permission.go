@@ -147,7 +147,6 @@ func checkStorePermission(i interface{}, user *User) error {
 				return err
 			}
 			team = treeRoot.(*TreeRoot).Parent
-
 			break
 		}
 	case *User:
@@ -161,6 +160,7 @@ func checkStorePermission(i interface{}, user *User) error {
 			}
 			// allow self creation
 			if new && user == nil && !team.IsEmpty() {
+				// TeamOptionAllowSignUp
 				/*team, err := FetchTeamByID(team.String(), nil)
 				if err != nil {
 					return err

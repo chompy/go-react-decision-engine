@@ -1,0 +1,13 @@
+.pure-form {
+    input[type=text], input[type=password], input[type=email] { min-width: 300px; }
+}
+
+ul.error-messages {
+    list-style-type: none;
+    background-color: $alert-err-bg;
+    color: $alert-err-fg;
+    padding: 0;
+    li {
+        padding: 10px;
+    }
+}

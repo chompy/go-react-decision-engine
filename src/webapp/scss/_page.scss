@@ -23,7 +23,7 @@
             margin-bottom: 5px;
         }
     }
-    &.login section {
+    &.login section, &.user-new section {
         max-width: 300px;
         margin: auto;
     }

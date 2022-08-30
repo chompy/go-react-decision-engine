@@ -62,6 +62,7 @@ export default class RuleNode extends BaseNode {
      * {@inheritDoc}
      */
     importData(data) {
+        this.type = data?.type;
         this.templateData = {
             template: data?.template,
             fieldValues: data?.fieldValues ? data.fieldValues : {}  

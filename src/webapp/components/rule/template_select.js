@@ -94,7 +94,10 @@ export default class RuleEditorTemplateSelectComponent extends React.Component {
             this.setState({loading: false});
             return;
         }
-        this.fetchFields(res.data[0].data.id);
+        let templateId = res?.data[0]?.data?.id;
+        if (templateId) {
+            this.fetchFields(templateId);
+        }
         this.setState({loading: false});
         this.updateValue();
     }
@@ -117,8 +120,8 @@ export default class RuleEditorTemplateSelectComponent extends React.Component {
             template: templateId,
             fieldValues: this.fieldValues
         };
-        re.setRuleNode(rule);
         try {
+            re.setRuleNode(rule);
             re.evaluate();
         } catch (e) {
             console.error('> ERROR: Lua script threw exception.', e);

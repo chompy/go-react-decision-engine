@@ -123,7 +123,12 @@ export default class RuleEngine {
                     };
                 }
                 lua.lua_setglobal(this.L, '_rule_func');
-                this.evaluate();
+                try {
+                    this.evaluate();
+                } catch (e) {
+                    console.warn('RULE ENGINE: Rule "' + this.rule.uid + '" threw an error.', e);
+                    
+                }
             }
         }
     }

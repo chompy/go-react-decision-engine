@@ -33,8 +33,10 @@ export default class RuleTesterComponent extends React.Component {
         let rule = new RuleNode;
         rule.uid = TEST_RULE_UID;
         rule.type = RULE_TYPE_VISIBILITY;
-        rule.template = '_test';
-        rule.fieldValues = {};
+        rule.templateData = {
+            template: '_test',
+            fieldValues: {}
+        };
         question.addChild(rule);
         return root;
     }

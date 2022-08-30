@@ -15,6 +15,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         this.state.messages = this.userData.getValidationMessages(this.node, this.matrix);
         this.state.showValidation = this.userData.hasInput(this.node, this.matrix);
         this.onChange = this.onChange.bind(this);
+        this.onChangeRadio = this.onChangeRadio.bind(this);
         this.onFileDelete = this.onFileDelete.bind(this);
     }
 
@@ -47,6 +48,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
      * @param {Event} e 
      */
     onChange(e) {
+        console.log("TESTss");
         switch (this.node.type) {
             case FIELD_TEXT: {
                 this.userData.resetAnswers(this.node, this.matrix);
@@ -114,6 +116,19 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
         }
         this.userData.setUserInput(this.node, true, this.matrix);
         if (this.updateCallback) { this.updateCallback(this.node, this.matrix); }
+    }
+
+    /**
+     * @param {Event} e 
+     */
+    onChangeRadio(e) {
+        if (this.node.type != FIELD_CHOICE || this.node.multiple) { return; }
+        this.userData.resetAnswers(this.node, this.matrix);   
+        this.userData.addAnswer(this.node, e.target.value, this.matrix);
+        this.setState({
+            answers: this.userData.getQuestionAnswers(this.node, this.matrix),
+            showValidation: true
+        });
     }
 
     /**
@@ -200,6 +215,7 @@ export default class QuestionNodeComponent extends BaseNodeComponent {
                     value={value}
                     checked={checked}
                     onChange={this.onChange}
+                    onClick={this.onChangeRadio}
                 />
                 &nbsp;{label}
             </label>

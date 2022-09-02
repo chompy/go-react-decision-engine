@@ -17,7 +17,11 @@ export default class DecisionEngineMainComponent extends React.Component {
 
     constructor(props) {
         super(props);
+        this.mode = props?.mode ? props.mode : 'default';
         let pathResolve = PathResolver.resolveCurrentPath();
+        if (this.mode == 'embed') {
+            pathResolve = {component: LoginPageComponent, team: props?.team};
+        }
         console.log('> Path resolved to "' + pathResolve.component.getName() + '."');
         this.state = {
             path: pathResolve,
@@ -25,6 +29,7 @@ export default class DecisionEngineMainComponent extends React.Component {
             team: null,
             referer: null
         };
+
         this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
         this.onUserTeam = this.onUserTeam.bind(this);
@@ -128,7 +133,17 @@ export default class DecisionEngineMainComponent extends React.Component {
             if (!element) {
                 element = document.createElement('style');
                 element.id = 'custom-style';
-                document.head.append(element);
+                switch (this.mode) {
+                    case 'embed': {
+                        document.getElementById('cc-logic-engine').shadowRoot.prepend(element);
+                        break;
+                    }
+                    default: {
+                        document.head.append(element);
+                        break;
+                    }
+                }
+                
             }
             element.innerHTML = style;
         }
@@ -208,9 +223,19 @@ export default class DecisionEngineMainComponent extends React.Component {
             team: this.state.team ? this.state.team.id : '',
             user: this.state.user ? this.state.user.id : ''
         }, params ? params : {});
-        let path = PathResolver.getPathFromComponent(component, params);        
-        PathResolver.setPath(path);
-        let resolvedPage = PathResolver.resolveCurrentPath();
+        let path = PathResolver.getPathFromComponent(component, params);
+        let resolvedPage = null;
+        switch (this.mode) {
+            case 'embed': {
+                resolvedPage = Object.assign({}, {component: component}, params);
+                break;
+            }
+            default: {
+                PathResolver.setPath(path);
+                resolvedPage = PathResolver.resolveCurrentPath();
+                break;
+            }
+        }
         if (component == LoginPageComponent && params?.referer) {
             resolvedPage.referer = params.referer;
         }

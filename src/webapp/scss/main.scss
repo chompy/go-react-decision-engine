@@ -9,6 +9,10 @@ button svg {
     display: none;
 }
 
+#root {
+    font-family: sans-serif;
+}
+
 @import 'colors';
 @import 'builder';
 @import 'alerts';

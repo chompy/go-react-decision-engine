@@ -28,7 +28,7 @@ export default class TypeaheadComponent extends React.Component {
     componentDidMount() {
         if (this.id) {
             BackendAPI.get(
-                'tree/typeahead', {id: this.id, version: this.version},
+                'tree/node_list', {id: this.id, version: this.version ? this.version : -1},
                 this.onTypeaheadResponse
             );
             return;

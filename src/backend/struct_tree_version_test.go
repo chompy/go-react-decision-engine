@@ -211,7 +211,7 @@ func TestTreeTypeahead(t *testing.T) {
 		return
 	}
 
-	nodes, err := ListTreeTypeahead(testTreeRoot.ID.String(), 2, &testUser)
+	nodes, err := ListNodeVersion(testTreeRoot.ID.String(), 2, &testUser)
 	if err != nil {
 		t.Error(err)
 		return

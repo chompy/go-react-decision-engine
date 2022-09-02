@@ -1,4 +1,5 @@
 import md5 from 'blueimp-md5';
+import ProxyNode from './proxy';
 
 export const KEY_UID = 'uid';
 export const KEY_PARENT = 'parent';
@@ -41,6 +42,7 @@ export default class BaseNode {
     /**
      * Search children for object of given UID.
      * @param {string} uid 
+     * @return {BaseNode}
      */
     getChild(uid) {
         if (uid == this.uid) {
@@ -211,6 +213,20 @@ export default class BaseNode {
      */
     builderCanDelete() {
         return true;
+    }
+
+    /**
+     * @returns {ProxyNode}
+     */
+    toProxy() {
+        new ProxyNode({
+            uid: this.uid,
+            type: this.constructor.getTypeName(),
+            version: this.version,
+            label: this.getName(),
+            value: this.data?.value,
+            parent: this.parent
+        });
     }
 
 }

@@ -11,6 +11,7 @@ import { message as msgPopup } from 'react-message-popup';
 import DocumentViewListComponent from './document_view_list';
 import RuleTemplateCollector from '../../rule_template_collector';
 import DocumentViewComponent from './document_view';
+import RootNode from '../../nodes/root';
 
 export default class FormSubmissionEditPageComponent extends BasePageComponent {
 
@@ -88,8 +89,19 @@ export default class FormSubmissionEditPageComponent extends BasePageComponent {
             published: res.data[2].data,
             publishedDocCount: res.data[4]?.count ? res.data[4]?.count : 0,
             publishedDocId: res.data[4]?.count && res.data[4]?.count > 0 ? res.data[4]?.data[0].id : ''
-        });        
+        });
         this.setTitle(this.state.root.label + ' (v' + this.state.version.version + ')');
+        if (tree instanceof RootNode) {
+            tree.fetchProxyNodes(this.onFetchProxyNodes);
+            return;
+        }
+        this.setLoaded();
+    }
+
+    /**
+     * @param {Object} res 
+     */
+    onFetchProxyNodes(res) {
         this.setLoaded();
     }
 

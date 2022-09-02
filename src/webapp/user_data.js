@@ -1,6 +1,8 @@
 import BaseNode from './nodes/base.js';
 import QuestionNode from './nodes/question.js';
 import AnswerNode from './nodes/answer.js';
+import ProxyNode from './nodes/proxy.js';
+import RootNode from './nodes/root.js';
 
 const FLAG_HIDDEN = 'hidden';
 const FLAG_USER_INPUT = 'user_input';
@@ -54,7 +56,7 @@ export default class UserData {
      * @param {string} matrixId
      */
     addAnswer(question, answer, matrixId) {
-        if (!question || !(question instanceof QuestionNode)) {
+        if (!question || (!(question instanceof QuestionNode) && !(question instanceof ProxyNode))) {
             return;
         }
         let uid = question.uid;
@@ -96,7 +98,7 @@ export default class UserData {
         if (!answer) {
             return;
         }
-        let uid = (question instanceof QuestionNode) ? question.uid : question;
+        let uid = (question instanceof QuestionNode || question instanceof ProxyNode) ? question.uid : question;
         if (matrixId) {
             uid = uid + '_' + matrixId;
         }
@@ -117,7 +119,7 @@ export default class UserData {
      * @param {string} matrixId
      */
     resetAnswers(question, matrixId) {
-        if (!(question instanceof QuestionNode)) {
+        if (!(question instanceof QuestionNode) && !(question instanceof ProxyNode)) {
             return;
         }
         let uid = question.uid;
@@ -152,7 +154,7 @@ export default class UserData {
      * @return {object}
      */
     getQuestionAnswers(question, matrixId) {
-        if (question instanceof QuestionNode) {
+        if (question instanceof QuestionNode || question instanceof ProxyNode) {
             question = question.uid;
         }
         if (matrixId) {
@@ -170,7 +172,7 @@ export default class UserData {
      * @return boolean
      */
     hasAnswer(answer, matrix) {
-        if (answer instanceof AnswerNode) {
+        if (answer instanceof AnswerNode || answer instanceof ProxyNode) {
             answer = answer.uid;
         }
         for (let i in this.answers) {
@@ -188,7 +190,7 @@ export default class UserData {
      * @returns {Array}
      */
     findMatrixIds(obj) {
-        if (obj instanceof QuestionNode) {
+        if (obj instanceof QuestionNode || obj instanceof ProxyNode) {
             let values = this.getQuestionAnswers(obj);
             if (values.length > 0) {
                 return values;
@@ -211,7 +213,7 @@ export default class UserData {
      * @param {Boolean} state 
      */
     setFlag(name, id, state) {
-        if (id instanceof BaseNode) { id = id.uid; }
+        if (id instanceof BaseNode || id instanceof ProxyNode) { id = id.uid; }
         if (!(name in this.flags)) { this.flags[name] = []; }
         if (state) {
             if (this.flags[name].indexOf(id) == -1) {
@@ -232,7 +234,7 @@ export default class UserData {
      * @returns {Boolean}
      */
     hasFlag(name, id) {
-        if (id instanceof BaseNode) { id = id.uid; }
+        if (id instanceof BaseNode || id instanceof ProxyNode) { id = id.uid; }
         if (!(name in this.flags)) { this.flags[name] = []; }  
         if (this.flags[name].indexOf(id) != -1) {
             return true;
@@ -245,7 +247,7 @@ export default class UserData {
      * @param {boolean} state 
      */
     setHidden(node, state, matrixId) {
-        if (!(node instanceof BaseNode)) { return; }
+        if (!(node instanceof BaseNode) && !(node instanceof ProxyNode)) { return; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
         this.setFlag(FLAG_HIDDEN, key, state);
     }
@@ -258,17 +260,28 @@ export default class UserData {
      * @returns {boolean}
      */
     isHidden(node, root, matrixId) {
-        if (!(node instanceof BaseNode)) { return false; }
-        let key = node.uid + '_' + (matrixId ? matrixId : '');
+        let key = (node ? node?.uid : '') + '_' + (matrixId ? matrixId : '');
         if (this.hasFlag(FLAG_HIDDEN, key)) { return true; }
-        if (root && root instanceof BaseNode) {
-            let parent = node;
-            while (parent = parent.getParent(root)) {
-                if (
-                    this.hasFlag(FLAG_HIDDEN, parent.uid + '_' + (matrixId ? matrixId : '')) ||
-                    this.hasFlag(FLAG_HIDDEN, parent.uid + '_')
-                ) {
-                    return true;
+        if (root && root instanceof RootNode) {
+            if (node instanceof BaseNode) {
+                let parent = node;
+                while (parent = parent.getParent(root)) {
+                    if (
+                        this.hasFlag(FLAG_HIDDEN, parent.uid + '_' + (matrixId ? matrixId : '')) ||
+                        this.hasFlag(FLAG_HIDDEN, parent.uid + '_')
+                    ) {
+                        return true;
+                    }
+                }
+            } else if (node instanceof ProxyNode) {
+                let parent = node;
+                while (parent = root.findProxyNode(parent?.parent)) {
+                    if (
+                        this.hasFlag(FLAG_HIDDEN, parent.uid + '_' + (matrixId ? matrixId : '')) ||
+                        this.hasFlag(FLAG_HIDDEN, parent.uid + '_')
+                    ) {
+                        return true;
+                    }
                 }
             }
         }
@@ -282,7 +295,7 @@ export default class UserData {
      * @returns 
      */
     setUserInput(node, state, matrixId) {
-        if (!(node instanceof QuestionNode)) { return; }
+        if (!(node instanceof QuestionNode) && !(node instanceof ProxyNode)) { return; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
         this.setFlag(FLAG_USER_INPUT, key, state);
     }
@@ -301,7 +314,7 @@ export default class UserData {
      * @returns {boolean}
      */
     hasInput(node, matrixId) {
-        if (!(node instanceof QuestionNode)) { return false; }
+        if (!(node instanceof QuestionNode) && !(node instanceof ProxyNode)) { return false; }
         let key = node.uid + '_' + (matrixId ? matrixId : '');
         if (this.hasFlag(FLAG_USER_INPUT, key)) { return true; }
         if (this.hasFlag(FLAG_USER_INPUT, FLAG_USER_INPUT_ALL)) { return true; }
@@ -313,7 +326,7 @@ export default class UserData {
      * @param {string} matrixId
      */
     resetValidationState(question, matrixId) {
-        if (!(question instanceof QuestionNode)) {
+        if (!(question instanceof QuestionNode) && !(question instanceof ProxyNode)) {
             return;
         }
         this.questionValidationMessages[question.uid + '_' + (matrixId ? matrixId : '')] = [];
@@ -325,7 +338,7 @@ export default class UserData {
      * @param {string} matrixId
      */
     addValidationMessage(question, message, matrixId) {
-        if (!(question instanceof QuestionNode) || !message.trim()) {
+        if ((!(question instanceof QuestionNode) && !(question instanceof ProxyNode)) || !message.trim()) {
             return;
         }
         let key = question.uid + '_' + (matrixId ? matrixId : '');
@@ -341,7 +354,7 @@ export default class UserData {
      * @returns {Array}
      */
     getValidationMessages(question, matrixId) {
-        if (!(question instanceof QuestionNode)) {
+        if (!(question instanceof QuestionNode) && !(question instanceof QuestionNode)) {
             return;
         }
         let key = question.uid + '_' + (matrixId ? matrixId : '');

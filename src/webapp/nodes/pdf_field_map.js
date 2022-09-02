@@ -3,6 +3,7 @@ import UserData from '../user_data';
 import AnswerNode from './answer';
 import PdfFieldBaseNode from './pdf_field_base';
 import QuestionNode, { FIELD_CHOICE, FIELD_DROPDOWN, FIELD_TEXT } from './question';
+import RootNode from './root';
 
 export default class PdfFieldMapNode extends PdfFieldBaseNode {
 
@@ -24,7 +25,12 @@ export default class PdfFieldMapNode extends PdfFieldBaseNode {
     getName() {
         if (this.formNode && this.value && this.value.length > 0) {
             let firstValue = this.formNode.getChild(this.value[0]);
-            return '"' + firstValue.getName() + '"' + (this.value.length > 1 ? ' +' + (this.value.length-1) + ' more' : '');
+            if (!firstValue && this.formNode instanceof RootNode) {
+                firstValue = this.formNode.findProxyNode(this.value[0]);
+            }
+            if (firstValue) {
+                return '"' + firstValue.getName() + '"' + (this.value.length > 1 ? ' +' + (this.value.length-1) + ' more' : '');
+            }
         }
         return '(empty)';
     }

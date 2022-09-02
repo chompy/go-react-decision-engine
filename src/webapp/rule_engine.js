@@ -6,6 +6,7 @@ import BaseNode from './nodes/base';
 import RuleNode from './nodes/rule';
 import UserData from './user_data';
 import RuleTemplateCollector from './rule_template_collector';
+import ProxyNode from './nodes/proxy';
 
 const LUA_METATABLE = 'DecisionNodeMT';
 
@@ -28,7 +29,6 @@ const LUA_METATABLE = 'DecisionNodeMT';
  *  uid         - Function, returns decision node uid.
  *  parent      - Function, returns DecisionNodeMT representing parent node.
  *  children    - Function, returns Lua table containing multiple DecisionNodeMT representing child nodes.
- *  getChild    - Function, given uid of a child return DecisionNodeMT representing the child node.
  *  name        - Function, returns name of decision node.
  *  value       - Function, returns the value of an answer node.
  *  type        - Function, returns the type name of the decision node.
@@ -41,7 +41,6 @@ export default class RuleEngine {
 
     constructor() {
         this.root = null;
-        this.nodes = [];
         this.rule = null;
         this.parent = null;
         this.matrixId = '';
@@ -184,6 +183,20 @@ export default class RuleEngine {
     }
 
     /**
+     * Find proxy node given uid. 
+     * @param {String} uid 
+     * @returns {ProxyNode}
+     */
+    findProxyNode(uid) {
+        if (!this.root) { return null; }
+        let node = this.root.getChild(uid);
+        if (node) {
+            return node.toProxy();
+        }
+        return this.root.findProxyNode(uid);
+    }
+
+    /**
      * @param {*} L 
      * @returns {string}
      */
@@ -191,7 +204,7 @@ export default class RuleEngine {
         let uid = '';
         if (lua.lua_isuserdata(L, 1)) {
             let data = lua.lua_touserdata(L, 1);
-            uid = data.node.uid;
+            uid = data?.node?.uid;
         } else if (lua.lua_iscfunction(L, 1)) {
             let func = lua.lua_tocfunction(L, 1); 
             lua.lua_getglobal(L, 'this');
@@ -224,15 +237,8 @@ export default class RuleEngine {
             return 0;
         }
         // check if answer/question is hidden, if so then it should not have answer
-        let hidden = false;
-        if (this.nodes.length > 0) {
-            for (let i in this.nodes) {
-                let node = this.nodes[i].getChild(uid);
-                if (node) {
-                    hidden = this.userData.isHidden(node, this.nodes[i]);
-                }
-            }
-        }
+        let node = this.findProxyNode(uid);
+        let hidden = this.userData.isHidden(node, this.root, this.matrixId);
         lua.lua_pushboolean(
             L, !hidden && (this.userData.hasAnswer(uid) || this.userData.getQuestionAnswers(uid).length > 0)
         );
@@ -280,8 +286,8 @@ export default class RuleEngine {
             console.warn('RULE ENGINE: Lua \'value\' uid not provided.');
             return 0;
         }
-        let node = this.root.getChild(uid);
-        if (!node || !(node instanceof AnswerNode)) {
+        let node = this.findProxyNode(uid);
+        if (!node) {
             return 0;
         }
         lua.lua_pushstring(L, to_luastring(node.value));
@@ -418,11 +424,9 @@ export default class RuleEngine {
      * @returns {int}
      */
     luaRoot(L) {
-        if (!this.root) {
-            return 0;
-        }
+        if (!this.root) { return 0; }
         let data = lua.lua_newuserdata(L);
-        data.node = this.root;
+        data.node = this.root.toProxy();
         lauxlib.luaL_setmetatable(L, LUA_METATABLE);
         return 1;
     }
@@ -436,7 +440,7 @@ export default class RuleEngine {
             return 0;
         }
         let data = lua.lua_newuserdata(L);
-        data.node = this.rule;
+        data.node = this.rule.toProxy();
         lauxlib.luaL_setmetatable(L, LUA_METATABLE);
         return 1;
     }
@@ -445,12 +449,12 @@ export default class RuleEngine {
      * @param {*} L 
      * @returns {int}
      */
-     luaParent(L) {
-        if (!this.parent) {
+    luaParent(L) {
+        if (!this.rule || !this.root) {
             return 0;
         }
         let data = lua.lua_newuserdata(L);
-        data.node = this.parent;
+        data.node = this.findProxyNode(this.rule.parent);
         lauxlib.luaL_setmetatable(L, LUA_METATABLE);
         return 1;
     }
@@ -459,21 +463,12 @@ export default class RuleEngine {
      * @param {*} L 
      * @returns {int}
      */
-     luaFind(L) {
+    luaFind(L) {
         let uid = this.luaFindUid(L);
         if (!uid || !this.root) {
             return 0;
         }
-        let node = null;
-        node = this.root.getChild(uid);
-        if (!node) {
-            for (let i in this.nodes) {
-                let node = this.nodes[i].getChild(uid);
-                if (node) {
-                    break;
-                }
-            }
-        }
+        let node = this.findProxyNode(uid);
         if (node) {
             let data = lua.lua_newuserdata(L);
             data.node = node;
@@ -537,9 +532,6 @@ export default class RuleEngine {
         // children
         lua.lua_pushjsfunction(this.L, this.luaNodeChildren);
         lua.lua_setfield(this.L, -2, 'children');
-        // getChild
-        lua.lua_pushjsfunction(this.L, this.luaNodeGetChild);
-        lua.lua_setfield(this.L, -2, 'getChild');
         // name
         lua.lua_pushjsfunction(this.L, this.luaNodeName);
         lua.lua_setfield(this.L, -2, 'name');
@@ -573,6 +565,7 @@ export default class RuleEngine {
      */
     luaNodeUid(L) {
         let data = lua.lua_touserdata(L, 1);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
         lua.lua_pushstring(L, to_luastring(data.node.uid));
         return 1;
     }
@@ -584,6 +577,7 @@ export default class RuleEngine {
      */
     luaNodeName(L) {
         let data = lua.lua_touserdata(L, 1);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
         lua.lua_pushstring(L, to_luastring(data.node.getName()));
         return 1;
     }
@@ -595,13 +589,14 @@ export default class RuleEngine {
      */
     luaNodeValue(L) {
         let data = lua.lua_touserdata(L, 1);
-        if (data.node instanceof DecisionAnswer) {
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        if (data.node.type == DecisionAnswer.getTypeName()) {
             lua.lua_pushstring(L, to_luastring(data.node.value));
             return 1;
         }
         console.warn(
             'RULE ENGINE: Lua \'DecisionNodeMT:value\' expected node of type ' + DecisionAnswer.getTypeName() +
-            ' but got ' + data.node.constructor.getTypeName() + ' (uid=' + data.node.uid + ').'
+            ' but got ' + data.node.type + ' (uid=' + data.node.uid + ').'
         );
         return 0;
     }
@@ -613,7 +608,20 @@ export default class RuleEngine {
      */
     luaNodeType(L) {
         let data = lua.lua_touserdata(L, 1);
-        lua.lua_pushstring(L, to_luastring(data.node.constructor.getTypeName()));
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        lua.lua_pushstring(L, to_luastring(data.node.type));
+        return 1;
+    }
+
+    /**
+     * Lua function 'DecisionNodeMT:version.'
+     * @param {*} L 
+     * @returns {int}
+     */
+     luaNodeVersion(L) {
+        let data = lua.lua_touserdata(L, 1);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        lua.lua_pushinteger(L, data.node.version);
         return 1;
     }
 
@@ -624,6 +632,7 @@ export default class RuleEngine {
      */
      luaNodeParam(L) {
         let data = lua.lua_touserdata(L, 1);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
         let name = lua.lua_tojsstring(L, 2);
         let value = null;
         if (typeof data.node[name] != 'undefined') {
@@ -648,7 +657,8 @@ export default class RuleEngine {
      */
      luaNodeAnswers(L) {
         let data = lua.lua_touserdata(L, 1);
-        if (data.node instanceof QuestionNode) {
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        if (data.node.type == QuestionNode.getTypeName()) {
             let matrixId = lua.lua_tojsstring(L, 2);
             if (!matrixId && (data.node.uid == this.rule.uid || (this.parent && data.node.uid == this.parent.uid))) {
                matrixId = this.matrixId;
@@ -657,7 +667,7 @@ export default class RuleEngine {
             lua.lua_createtable(L, 0, answers.length);
             for (let i in answers) {
                 lua.lua_pushinteger(L, parseInt(i)+1);
-                let answerNode = this.root.getChild(answers[i]);
+                let answerNode = this.root.findProxyNode(answers[i]);
                 if (answerNode) {
                     let answerData = lua.lua_newuserdata(L);
                     answerData.node = answerNode;
@@ -672,7 +682,7 @@ export default class RuleEngine {
         }
         console.warn(
             'RULE ENGINE: Lua \'DecisionNodeMT:answers\' expected node of type ' + QuestionNode.getTypeName() +
-            ' but got ' + data.node.constructor.getTypeName() + ' (uid=' + data.node.uid + ').'
+            ' but got ' + data.node.type + ' (uid=' + data.node.uid + ').'
         );
         return 0;
     }
@@ -684,7 +694,8 @@ export default class RuleEngine {
      */
      luaNodeAnswerValues(L) {
         let data = lua.lua_touserdata(L, 1);
-        if (data.node instanceof QuestionNode) {
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        if (data.node.type == QuestionNode.getTypeName()) {
             let matrixId = lua.lua_tojsstring(L, 2);
             if (!matrixId && (data.node.uid == this.rule.uid || (this.parent && data.node.uid == this.parent.uid))) {
                matrixId = this.matrixId;
@@ -706,7 +717,7 @@ export default class RuleEngine {
         }
         console.warn(
             'RULE ENGINE: Lua \'DecisionNodeMT:answerValues\' expected node of type ' + QuestionNode.getTypeName() +
-            ' but got ' + data.node.constructor.getTypeName() + ' (uid=' + data.node.uid + ').'
+            ' but got ' + data.node.type + ' (uid=' + data.node.uid + ').'
         );
         return 0;
     }
@@ -718,26 +729,25 @@ export default class RuleEngine {
      */    
     luaNodeHasAnswer(L) {
         let data = lua.lua_touserdata(L, 1);
-        for (let i in this.node) {
-            if (this.userData.isHidden(data.node, this.nodes[i])) {
-                lua.lua_pushboolean(L, this.userData.hasAnswer(data.node));    
-                return 1;
-            }
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        let matrixId = lua.lua_tojsstring(L, 2);
+        if (!matrixId && (data.node.uid == this.rule.uid || (this.parent && data.node.uid == this.parent.uid))) {
+            matrixId = this.matrixId;
         }
-        if (data.node instanceof AnswerNode) {
-            lua.lua_pushboolean(L, this.userData.hasAnswer(data.node));
+        if (this.userData.isHidden(data.node, this.root, matrixId)) {
+            lua.lua_pushboolean(L, false);    
             return 1;
-        } else if (data.node instanceof QuestionNode) {
-            let matrixId = lua.lua_tojsstring(L, 2);
-            if (!matrixId && (data.node.uid == this.rule.uid || (this.parent && data.node.uid == this.parent.uid))) {
-               matrixId = this.matrixId;
-            }
+        }
+        if (data.node.type == AnswerNode.getTypeName()) {
+            lua.lua_pushboolean(L, this.userData.hasAnswer(data.node, matrixId));
+            return 1;
+        } else if (data.node.type == QuestionNode.getTypeName()) {
             lua.lua_pushboolean(L, this.userData.getQuestionAnswers(data.node, matrixId).length > 0);
             return 1;
         }
         console.warn(
             'RULE ENGINE: Lua \'DecisionNodeMT:value\' expected node of type ' + AnswerNode.getTypeName() +
-            ' or ' + QuestionNode.getTypeName() + ' but got ' + data.node.constructor.getTypeName() + ' (uid=' + data.node.uid + ').'
+            ' or ' + QuestionNode.getTypeName() + ' but got ' + data.node.type + ' (uid=' + data.node.uid + ').'
         );
         return 0;
     }
@@ -749,7 +759,8 @@ export default class RuleEngine {
      */
     luaNodeParent(L) {
         let data = lua.lua_touserdata(L, 1);
-        let parent = data.node.getParent(this.root);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        let parent = this.root.findProxyNode(data.node.parent);
         if (!parent) {
             lua.lua_pushnil(L);
             return 1;
@@ -767,36 +778,16 @@ export default class RuleEngine {
      */
     luaNodeChildren(L) {
         let data = lua.lua_touserdata(L, 1);
-        lua.lua_createtable(L, 0, data.node.children.length);
-        for (let i in data.node.children) {
-            let child = data.node.children[i];
-            lua.lua_pushinteger(L, parseInt(i)+1);
+        if (!(data?.node instanceof ProxyNode)) { return 0; }
+        let children = this.root.fetchedNodeVersionList.filter(n => n?.parent == data.node.uid);
+        lua.lua_createtable(L, 0, children.length);
+        for (let i in children) {
+            lua.lua_pushinteger(L, parseInt(i) + 1);
             let childData = lua.lua_newuserdata(L);
-            childData.node = child;
+            childData.node = children[i];
             lauxlib.luaL_setmetatable(L, LUA_METATABLE);
             lua.lua_settable(L, -3);
         }
-        return 1;
-    }
-
-    /**
-     * Lua function 'DecisionNodeMT:getChild.'
-     * @param {*} L 
-     * @returns {int}
-     */
-     luaNodeGetChild(L) {
-        let data = lua.lua_touserdata(L, 1);
-        let uid = lua.lua_tojsstring(L, 2);
-        if (uid == '') {
-            return 0;
-        }
-        let child = data.node.getChild(uid);
-        if (!child) {
-            return 0;
-        }
-        let childData = lua.lua_newuserdata(L);
-        childData.node = child;
-        lauxlib.luaL_setmetatable(L, LUA_METATABLE);
         return 1;
     }
 

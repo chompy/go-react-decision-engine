@@ -29,7 +29,6 @@ export default class DecisionEngineMainComponent extends React.Component {
             team: null,
             referer: null
         };
-
         this.onPopState = this.onPopState.bind(this);
         this.onUserMe = this.onUserMe.bind(this);
         this.onUserTeam = this.onUserTeam.bind(this);
@@ -279,10 +278,20 @@ export default class DecisionEngineMainComponent extends React.Component {
      * {@inheritdoc}
      */
     render() {
+        let header = null;
+        if (this.mode != 'embed') {
+            header = <AppHeaderComponent user={this.state.user} team={this.state.team} />;
+        }
         let PageComponent = this.state.path.component;
         return <div className='decision-engine'>
-            <AppHeaderComponent user={this.state.user} team={this.state.team} />
-            <PageComponent user={this.state.user} team={this.state.team} path={this.state.path} referer={this.state.referer} />
+            {header}
+            <PageComponent
+                user={this.state.user}
+                team={this.state.team}
+                path={this.state.path}
+                referer={this.state.referer} 
+                mode={this.mode}
+            />
         </div>;
     }
 

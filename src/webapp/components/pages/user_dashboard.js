@@ -63,7 +63,7 @@ export default class UserDashboardPageComponent extends BasePageComponent {
         }
 
         let adminBtn = null;
-        if (this.state.user.permission.length > 0) {
+        if (this.mode != 'embed' && this.state.user.permission.length > 0) {
             adminBtn = this.renderPageButton(BTN_TEAM_DASHBOARD, TeamDashboardPageComponent, {}, faUserGroup);
         }
 

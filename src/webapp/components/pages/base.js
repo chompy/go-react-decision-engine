@@ -22,6 +22,7 @@ export default class BasePageComponent extends React.Component {
             team: props?.team,
             user: props?.user
         };
+        this.mode = props?.mode;
         this.state.loading = !(this.state.team && this.state.user);
         this.onPageButton = this.onPageButton.bind(this);
         this.onTeam = this.onTeam.bind(this);

@@ -8,6 +8,7 @@ import RuleEngine from '../../rule_engine';
 import RuleNode from '../../nodes/rule';
 import MatrixNode from '../../nodes/matrix';
 import Events from '../../events';
+import BaseShortcode from '../../shortcode/base';
 
 export default class BaseNodeComponent extends React.Component {
 
@@ -234,6 +235,8 @@ export default class BaseNodeComponent extends React.Component {
         if (!content) {
             return '';
         }
+        BaseShortcode.root = this.root;
+        BaseShortcode.userData = this.userData;
         return shortcode.parse(content);
     }
 

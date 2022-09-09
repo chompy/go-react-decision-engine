@@ -1,6 +1,7 @@
 import React from 'react';
 import GroupNode from '../../nodes/group';
 import BaseNodeComponent from './base';
+import MatrixNodeComponent from './matrix';
 import QuestionNodeComponent from './question';
 
 export default class GroupNodeComponent extends BaseNodeComponent {
@@ -24,7 +25,8 @@ export default class GroupNodeComponent extends BaseNodeComponent {
     availableChildTypes() {
         return [
             GroupNodeComponent,
-            QuestionNodeComponent
+            QuestionNodeComponent,
+            MatrixNodeComponent
         ];
     }
 

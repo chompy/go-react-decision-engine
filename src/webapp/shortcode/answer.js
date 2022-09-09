@@ -54,7 +54,7 @@ export default class AnswersShortcode extends BaseShortcode {
                     out.push(<QuestionFileComponent key={key} object={object} data={answers[i]} isPdf={true} uri={uri} />);
                 }
                 return out;
-            }M
+            }
             default: {
                 let answerText = [];
                 console.log(answers);

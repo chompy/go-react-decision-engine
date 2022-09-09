@@ -73,6 +73,14 @@
             }
         }
     }
+    .tree-matrix {
+        margin-bottom: 10px;
+        .matrix-item {
+            margin-bottom: 15px;
+            background: #d3d3d3;
+            padding: 10px;
+        }
+    }
     .options {
         border-top: 1px solid $page-section-divide;
         padding-top: 15px;

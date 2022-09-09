@@ -41,6 +41,8 @@ export const BTN_CUSTOMIZE = 'Customize';
 export const BTN_COPY_SYNC = 'Copy & Sync To Published';
 export const BTN_TEAM_DASHBOARD = 'Team Dashboard';
 export const BTN_USER_DASHBOARD = 'My Dashboard';
+export const BTN_ADD = 'Add';
+export const BTN_REMOVE = 'Remove';
 
 // field text
 export const FIELD_BASIC_INFO = 'Basic Information';

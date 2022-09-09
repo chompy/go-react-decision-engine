@@ -208,7 +208,7 @@ export default class BaseNodeComponent extends React.Component {
      * @return string
      */
     getId() {
-        return (this.getTypeName() + '-' + this.node.uid + (this.matrix ? ('-' + this.matrix) : '')).replace('_', '-');
+        return (this.constructor.getTypeName() + '-' + this.node.uid + (this.matrix ? ('-' + this.matrix) : '')).replace('_', '-');
     }
 
     /**
